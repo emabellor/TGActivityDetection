@@ -1,0 +1,412 @@
+03:24:03 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../AutoResetEvent.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"AutoResetEvent.d" -MT"AutoResetEvent.o" -o "AutoResetEvent.o" "../AutoResetEvent.cpp"
+Finished building: ../AutoResetEvent.cpp
+ 
+Building file: ../ClassCamCalib.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassCamCalib.d" -MT"ClassCamCalib.o" -o "ClassCamCalib.o" "../ClassCamCalib.cpp"
+Finished building: ../ClassCamCalib.cpp
+ 
+Building file: ../ClassMJPEGReader.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMJPEGReader.d" -MT"ClassMJPEGReader.o" -o "ClassMJPEGReader.o" "../ClassMJPEGReader.cpp"
+Finished building: ../ClassMJPEGReader.cpp
+ 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building file: ../ClassOpenPose.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassOpenPose.d" -MT"ClassOpenPose.o" -o "ClassOpenPose.o" "../ClassOpenPose.cpp"
+Finished building: ../ClassOpenPose.cpp
+ 
+Building file: ../ClassPoseResults.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassPoseResults.d" -MT"ClassPoseResults.o" -o "ClassPoseResults.o" "../ClassPoseResults.cpp"
+Finished building: ../ClassPoseResults.cpp
+ 
+Building file: ../ClassWrapper.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassWrapper.d" -MT"ClassWrapper.o" -o "ClassWrapper.o" "../ClassWrapper.cpp"
+Finished building: ../ClassWrapper.cpp
+ 
+Building file: ../FileHandler.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"FileHandler.d" -MT"FileHandler.o" -o "FileHandler.o" "../FileHandler.cpp"
+Finished building: ../FileHandler.cpp
+ 
+Building file: ../FrameInfo.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"FrameInfo.d" -MT"FrameInfo.o" -o "FrameInfo.o" "../FrameInfo.cpp"
+Finished building: ../FrameInfo.cpp
+ 
+Building file: ../ImageProcess.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ImageProcess.d" -MT"ImageProcess.o" -o "ImageProcess.o" "../ImageProcess.cpp"
+Finished building: ../ImageProcess.cpp
+ 
+Building file: ../VideoCapInfo.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"VideoCapInfo.d" -MT"VideoCapInfo.o" -o "VideoCapInfo.o" "../VideoCapInfo.cpp"
+Finished building: ../VideoCapInfo.cpp
+ 
+Building file: ../main.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"main.d" -MT"main.o" -o "main.o" "../main.cpp"
+Finished building: ../main.cpp
+ 
+Building target: libActionDetection.so
+Invoking: GCC C++ Linker
+g++ -shared -o "libActionDetection.so"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection.so
+ 
+07:41:32 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../AutoResetEvent.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"AutoResetEvent.d" -MT"AutoResetEvent.o" -o "AutoResetEvent.o" "../AutoResetEvent.cpp"
+Finished building: ../AutoResetEvent.cpp
+ 
+Building file: ../ClassCamCalib.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassCamCalib.d" -MT"ClassCamCalib.o" -o "ClassCamCalib.o" "../ClassCamCalib.cpp"
+Finished building: ../ClassCamCalib.cpp
+ 
+Building file: ../ClassMJPEGReader.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMJPEGReader.d" -MT"ClassMJPEGReader.o" -o "ClassMJPEGReader.o" "../ClassMJPEGReader.cpp"
+Finished building: ../ClassMJPEGReader.cpp
+ 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building file: ../ClassOpenPose.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassOpenPose.d" -MT"ClassOpenPose.o" -o "ClassOpenPose.o" "../ClassOpenPose.cpp"
+Finished building: ../ClassOpenPose.cpp
+ 
+Building file: ../ClassPoseResults.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassPoseResults.d" -MT"ClassPoseResults.o" -o "ClassPoseResults.o" "../ClassPoseResults.cpp"
+Finished building: ../ClassPoseResults.cpp
+ 
+Building file: ../ClassWrapper.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassWrapper.d" -MT"ClassWrapper.o" -o "ClassWrapper.o" "../ClassWrapper.cpp"
+Finished building: ../ClassWrapper.cpp
+ 
+Building file: ../FileHandler.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"FileHandler.d" -MT"FileHandler.o" -o "FileHandler.o" "../FileHandler.cpp"
+Finished building: ../FileHandler.cpp
+ 
+Building file: ../FrameInfo.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"FrameInfo.d" -MT"FrameInfo.o" -o "FrameInfo.o" "../FrameInfo.cpp"
+Finished building: ../FrameInfo.cpp
+ 
+Building file: ../ImageProcess.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ImageProcess.d" -MT"ImageProcess.o" -o "ImageProcess.o" "../ImageProcess.cpp"
+Finished building: ../ImageProcess.cpp
+ 
+Building file: ../VideoCapInfo.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"VideoCapInfo.d" -MT"VideoCapInfo.o" -o "VideoCapInfo.o" "../VideoCapInfo.cpp"
+Finished building: ../VideoCapInfo.cpp
+ 
+Building file: ../main.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"main.d" -MT"main.o" -o "main.o" "../main.cpp"
+Finished building: ../main.cpp
+ 
+Building target: libActionDetection.so
+Invoking: GCC C++ Linker
+g++ -shared -o "libActionDetection.so"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection.so
+ 
+07:43:21 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:45:01 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:46:03 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:46:37 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:48:17 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:49:33 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:57:35 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+../ClassMain.cpp: In member function ‘void ClassMain::TestChessBoardCorners(int, char**)’:
+../ClassMain.cpp:1240:32: error: ‘centers’ was not declared in this scope
+  cout << "Centers length: " << centers.size() << endl;
+                                ^
+../ClassMain.cpp:1249:21: error: unable to find numeric literal operator ‘operator""f’
+  float squareSize = 1f;
+                     ^
+../ClassMain.cpp:1249:21: note: use -std=gnu++11 or -fext-numeric-literals to enable more built-in suffixes
+subdir.mk:51: recipe for target 'ClassMain.o' failed
+make: *** [ClassMain.o] Error 1
+07:57:58 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building file: ../ClassWrapper.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassWrapper.d" -MT"ClassWrapper.o" -o "ClassWrapper.o" "../ClassWrapper.cpp"
+Finished building: ../ClassWrapper.cpp
+ 
+Building file: ../main.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"main.d" -MT"main.o" -o "main.o" "../main.cpp"
+Finished building: ../main.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+07:59:00 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:00:07 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+../ClassMain.cpp: In member function ‘void ClassMain::TestChessBoardCorners(int, char**)’:
+../ClassMain.cpp:1244:45: error: ‘centers’ was not declared in this scope
+   drawChessboardCorners(image, cornersSize, centers, true);
+                                             ^
+subdir.mk:51: recipe for target 'ClassMain.o' failed
+make: *** [ClassMain.o] Error 1
+08:00:25 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:06:03 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:06:36 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:14:00 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+../ClassMain.cpp: In member function ‘void ClassMain::TestChessBoardCorners(int, char**)’:
+../ClassMain.cpp:1244:101: error: could not convert ‘3’ from ‘int’ to ‘cv::TermCriteria’
+   cornerSubPix(imageGray, imagePoints, cornersSize, Size(-1, -1), CV_TERMCRIT_EPS | CV_TERMCRIT_ITER);
+                                                                                                     ^
+subdir.mk:51: recipe for target 'ClassMain.o' failed
+make: *** [ClassMain.o] Error 1
+08:15:16 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:15:33 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:16:33 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:16:53 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:18:35 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:21:19 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:22:22 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:22:54 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building target: libActionDetection
+Invoking: GCC C++ Linker
+g++  -o "libActionDetection"  ./AutoResetEvent.o ./ClassCamCalib.o ./ClassMJPEGReader.o ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./FileHandler.o ./FrameInfo.o ./ImageProcess.o ./VideoCapInfo.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lgflags -lopencv_core -lboost_system -lboost_filesystem -luuid
+Finished building target: libActionDetection
+ 
+08:23:25 **** Incremental Build of configuration Debug for project OpenPoseProject ****
+make all 
+make: Nothing to be done for 'all'.

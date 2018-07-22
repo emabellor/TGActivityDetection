@@ -1,0 +1,20 @@
+/*
+ * ClassCamCalib.h
+ *
+ *  Created on: Apr 9, 2018
+ *      Author: mauricio
+ */
+
+#ifndef CLASSCAMCALIB_H_
+#define CLASSCAMCALIB_H_
+
+// OpenCV Includes
+#include <opencv2/opencv.hpp>
+
+class ClassCamCalib {
+public:
+	ClassCamCalib();
+	virtual ~ClassCamCalib();
+};
+
+#endif /* CLASSCAMCALIB_H_ */

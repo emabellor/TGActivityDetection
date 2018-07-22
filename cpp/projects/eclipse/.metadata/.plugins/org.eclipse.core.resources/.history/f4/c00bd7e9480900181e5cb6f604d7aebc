@@ -1,0 +1,43 @@
+#ifndef IMAGEPROCESS_H
+#define IMAGEPROCESS_H
+
+#include <QObject>
+#include <QDebug>
+#include <QPixmap>
+#include <vector>
+
+//OpenCV includes
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/bgsegm.hpp>
+
+using namespace cv;
+
+
+class ImageProcess {
+
+public:
+    void ImageProcess();
+
+    //Static functions
+    static Mat LoadFrame(QByteArray imageBin);
+    static Mat Erode(Mat image, int shape = MORPH_RECT); //Shapes: MORPH_RECT, MORPH_CROSS, MORPH_ELLIPSE
+    static Mat Dilate(Mat image, int shape = MORPH_RECT); //Shapes: MORPH_RECT, MORPH_CROSS, MORPH_ELLIPSE
+    static Mat Threshold(Mat image, double threshValue, int type = THRESH_BINARY); //Types: THRESH_BINARY, THRESH_BINARY_INV, THRESH_TRUNC, THRESH_TOZERO, THRESH_TOZERO_INV
+    static Mat Grayscale(Mat image);
+    static Mat DrawBlobs(Mat image); //Thresholded Image
+    static Mat Blur(Mat image);
+    static Mat BlurGaussian(Mat image);
+    static Mat HistEqualization(Mat image);
+    static void ShowSingleImage(Mat image);
+    static std::vector<KeyPoint> DetectBlobs(Mat image);
+    static void ShowAndWait(Mat mat);
+    static double GetMean (Mat mat);
+
+private:
+    static const int EROSION_SIZE;
+    static const int DILATION_SIZE;
+
+};
+
+#endif // IMAGEPROCESS_H

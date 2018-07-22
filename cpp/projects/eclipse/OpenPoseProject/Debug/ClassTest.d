@@ -1,0 +1,1 @@
+ClassTest.o: ../ClassTest.cpp

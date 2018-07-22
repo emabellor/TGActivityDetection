@@ -1,0 +1,38 @@
+/*
+ * ClassPoseResults.h
+ *
+ *  Created on: Feb 4, 2018
+ *      Author: mauricio
+ */
+
+#ifndef CLASSPOSERESULTS_H_
+#define CLASSPOSERESULTS_H_
+
+#include <vector>
+
+typedef struct {
+	int person;
+	int bodyPart;
+	int x;
+	int y;
+	double score;
+} StructPoints;
+
+
+
+
+class ClassPoseResults {
+public:
+	ClassPoseResults();
+	virtual ~ClassPoseResults();
+
+	void AddResult(int person, int pose, double score);
+	void ClearResults();
+
+
+private:
+	std::vector<StructPoints> results;
+
+};
+
+#endif /* CLASSPOSERESULTS_H_ */

@@ -1,0 +1,56 @@
+/*
+ * ClassWrapper.cpp
+ *
+ *  Created on: Feb 11, 2018
+ *      Author: mauricio
+ */
+
+#include "ClassWrapper.h"
+
+// Must have local includes for compatibility
+#include "ClassOpenPose.h"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include "ImageProcess.h"
+#include <iostream>
+
+// Globals
+ClassOpenPose openPose;
+
+// Custom Functions
+
+// Defined Functions
+JNIEXPORT void JNICALL Java_activitybesa_ClassWrapper_InitOpenPose(JNIEnv * env, jobject obj) {
+	openPose.InitOpenPose();
+	openPose.jniFlag = true;
+	std::cout << "OpenPose Initialized" << std::endl;
+}
+
+
+JNIEXPORT jobject JNICALL Java_activitybesa_ClassWrapper_ProcessImage(JNIEnv * env, jobject obj, jbyteArray imageBin) {
+	// Conversion to unsigned char *
+    int len = env->GetArrayLength(imageBin);
+    unsigned char* buf = new unsigned char[len];
+    env->GetByteArrayRegion (imageBin, 0, len, reinterpret_cast<jbyte*>(buf));
+
+    // Image Processing
+    cv::Mat image = ImageProcess::GetFromCharBuffer(buf, len);
+
+    // Process
+    auto results = openPose.ExtractKeyPoints(image);
+    auto resultPeople = results.GetAllPoints();
+
+    // Returning Function - C++ variants
+    jclass cls = env->FindClass("activitybesa/ClassResults");
+    jmethodID constructor = env->GetMethodID(cls, "<init>", "()V");
+
+    // Set up the arguments
+    jvalue args[5];
+    args[0].i = 1; // Person
+    args[1].i = 2; // BodyPart
+    args[2].d = 0.1; // x
+    args[3].d = 0.2; // y
+    args[4].d = 0.5; // score
+
+    return env->NewObjectA(cls, constructor, args);
+}

@@ -1,0 +1,26 @@
+/*
+ * FileHandler.cpp
+ *
+ *  Created on: Feb 17, 2018
+ *      Author: mauricio
+ */
+
+#include "FileHandler.h"
+
+FileHandler::FileHandler() {
+	// TODO Auto-generated constructor stub
+
+}
+
+FileHandler::~FileHandler() {
+	// TODO Auto-generated destructor stub
+}
+
+bool FileHandler::DirectoryExists(std::string filePath) {
+
+}
+
+void FileHandler::CreateDirectory(std::string filePath) {
+
+}
+

@@ -1,0 +1,35 @@
+/*
+ * ClassCamCalib.h
+ *
+ *  Created on: Apr 9, 2018
+ *      Author: mauricio
+ */
+
+#ifndef CLASSCAMCALIB_H_
+#define CLASSCAMCALIB_H_
+
+// Standard Includes
+#include <iostream>
+
+// OpenCV Includes
+#include <opencv2/opencv.hpp>
+
+typedef struct _CalibResults {
+	cv::Mat cameraMatrix;
+	cv::Mat distortion;
+	cv::Mat rvec;
+	cv::Mat tvec;
+} CalibResults;
+
+class ClassCamCalib {
+public:
+	ClassCamCalib();
+	virtual ~ClassCamCalib();
+
+	cv::Point2f Project3DTo2D(cv::Point3f point, cv::Mat cameraMatrix, cv::Mat rvec, cv::Mat tvec, cv::Mat distorsion);
+	cv::Point3f Project2DTo3D(cv::Point2f point, cv::Mat cameraMatrix, cv::Mat rvec, cv::Mat tvec, cv::Mat distorsion);
+	CalibResults CalibrateCamera(std::vector<Point2f> )
+
+};
+
+#endif /* CLASSCAMCALIB_H_ */

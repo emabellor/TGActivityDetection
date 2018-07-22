@@ -1,0 +1,15 @@
+18:48:14 **** Incremental Build of configuration Debug for project HelloJNI ****
+make all 
+Building file: ../Print.cpp
+Invoking: GCC C++ Compiler
+g++ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"Print.d" -MT"Print.o" -o "Print.o" "../Print.cpp"
+Finished building: ../Print.cpp
+ 
+Building target: libHelloJNI.so
+Invoking: GCC C++ Linker
+g++ -shared -o "libHelloJNI.so"  ./Print.o   
+Finished building target: libHelloJNI.so
+ 
+
+18:48:14 Build Finished (took 573ms)
+

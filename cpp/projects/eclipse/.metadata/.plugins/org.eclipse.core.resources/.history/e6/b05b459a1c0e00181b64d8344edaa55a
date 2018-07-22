@@ -1,0 +1,6 @@
+#include <jni.h>
+#include "PrintHello.h"
+
+JNIEXPORT void JNICALL Java_Hello_sayHello(JNIEnv *env, jobject obj) {
+	SayHello();
+}

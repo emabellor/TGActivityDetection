@@ -1,0 +1,13 @@
+#include "ClassOpenPose.h"
+#include <iostream>
+
+using namespace std;
+
+int main() {
+	cout << "Inicio de la aplicacion" << endl;
+	cout << "Creando instancias" << endl;
+
+	ClassOpenPose poseDetector;
+
+
+}

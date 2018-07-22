@@ -1,0 +1,89 @@
+/*
+ * ClassVideoSaver.cpp
+ *
+ *  Created on: Feb 20, 2018
+ *      Author: mauricio
+ */
+
+#include "ClassMJPEGReader.h"
+
+using namespace std;
+
+ClassMJPEGReader::ClassMJPEGReader() {
+	// TODO Auto-generated constructor stub
+
+}
+
+ClassMJPEGReader::~ClassMJPEGReader() {
+	// TODO Auto-generated destructor stub
+}
+
+vector<FrameInfo> ClassMJPEGReader::ProcessVideo(string filePath) {
+	cout << "Initializing process video " << filePath << endl;
+
+	// Initialize elements
+	vector<FrameInfo> listFrames;
+
+	// Loading video
+	ifstream file (filePath, ios::in|ios::binary);
+
+	if (file.is_open() == false) {
+		cerr << "Error opening file" << endl;
+		exit(1);
+	} else {
+		int counter = 0;
+		while(!file.eof()) {
+			// Reading file size
+			char fileSizeBin [4];
+			file.read(fileSizeBin, 4);
+			int bytes = file.gcount();
+
+			if (bytes != 4) {
+				cerr << "Error reading file size" << endl;
+				exit(1);
+			}
+
+			int fileSize = ByteArrayToInt(fileSizeBin);
+
+
+			// Reading dateTime
+			char dateTimeBin[8];
+			file.read(dateTimeBin, 8);
+			bytes = file.gcount();
+
+			if (bytes != 8) {
+				cerr << "Error reading Date Time" << endl;
+				exit(1);
+			}
+
+			// Reading image
+			char imageBin[fileSize];
+			file.read(imageBin, fileSize);
+			bytes = file.gcount();
+
+			if (bytes != fileSize) {
+				cerr << "Error reading Image" << endl;
+				exit(1);
+			}
+
+			// Add to vector
+			FrameInfo frame;
+			frame.isEmpty = false;
+			frame.len = fileSize;
+			frame.CopyBuffer(imageBin, fileSize);
+
+			listFrames.push_back(frame);
+
+			cout << "Counter: " << counter << endl;
+			counter++;
+		}
+	}
+
+	return listFrames;
+}
+
+int ClassMJPEGReader::ByteArrayToInt(char * b) {
+	int i = ((unsigned char)b[3] << 24) | ((unsigned char)b[2] << 16) | ((unsigned char)b[1] << 8) | ((unsigned char)b[0]);
+	return i;
+}
+

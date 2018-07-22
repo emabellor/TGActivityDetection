@@ -1,0 +1,19 @@
+/*
+ * FrameInfo.h
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#ifndef FRAMEINFO_H_
+#define FRAMEINFO_H_
+
+
+class FrameInfo {
+public:
+	FrameInfo();
+	virtual ~FrameInfo();
+};
+
+
+#endif /* FRAMEINFO_H_ */

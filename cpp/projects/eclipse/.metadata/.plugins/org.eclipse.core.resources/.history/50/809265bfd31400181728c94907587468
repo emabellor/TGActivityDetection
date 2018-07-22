@@ -1,0 +1,36 @@
+/*
+ * FrameInfo.h
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#ifndef FRAMEINFO_H_
+#define FRAMEINFO_H_
+
+#include <vector>
+#include <opencv2/core/core.hpp> // Types uchar
+
+class FrameInfo {
+public:
+	static const int MAX_SIZE = 1 * 1024 * 1024; // Fixed Length - Avoid realocating memory continuously
+
+	unsigned char image [MAX_SIZE];
+	int len;
+	bool isEmpty;
+
+	FrameInfo();
+
+	void LoadFromVector(std::vector<uchar> buff) {
+		if (buff.size() > MAX_SIZE) {
+			std::cerr << "Image size exceeded max size " << MAX_SIZE << ". Aborting" << std::endl;
+			exit(1);
+		}
+
+		std::copy(buff.begin(), buff.end(), image);
+		len = buff.size();
+	}
+};
+
+
+#endif /* FRAMEINFO_H_ */

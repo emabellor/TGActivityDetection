@@ -1,0 +1,18 @@
+/*
+ * VideoCapInfo.cpp
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#include "VideoCapInfo.h"
+
+VideoCapInfo::VideoCapInfo(std::string videoCap) {
+	cap = NULL;
+
+}
+
+VideoCapInfo::~VideoCapInfo() {
+	// TODO Auto-generated destructor stub
+}
+

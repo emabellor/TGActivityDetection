@@ -1,0 +1,19 @@
+/*
+ * FrameInfo.cpp
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#include "FrameInfo.h"
+
+
+FrameInfo::FrameInfo() {
+	// TODO Auto-generated constructor stub
+
+}
+
+FrameInfo::~FrameInfo() {
+	// TODO Auto-generated destructor stub
+}
+

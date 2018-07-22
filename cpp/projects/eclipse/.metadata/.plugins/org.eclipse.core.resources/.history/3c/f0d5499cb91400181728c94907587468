@@ -1,0 +1,19 @@
+/*
+ * VideoCapInfo.cpp
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#include "VideoCapInfo.h"
+
+VideoCapInfo::VideoCapInfo(std::string fileName) {
+	cap = new cv::VideoCapture(fileName);
+	guid = 0;
+}
+
+
+VideoCapInfo::~VideoCapInfo() {
+	// TODO Auto-generated destructor stub
+}
+

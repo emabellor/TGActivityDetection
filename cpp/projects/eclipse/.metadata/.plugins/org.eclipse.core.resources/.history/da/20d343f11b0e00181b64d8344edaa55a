@@ -1,0 +1,24 @@
+/*
+ * PrintHello.cpp
+ *
+ *  Created on: Feb 9, 2018
+ *      Author: mauricio
+ */
+
+#include "PrintHello.h"
+
+PrintHello::PrintHello() {
+	// TODO Auto-generated constructor stub
+
+}
+
+PrintHello::~PrintHello() {
+	// TODO Auto-generated destructor stub
+}
+
+
+void PrintHello::PrintHelloTest() {
+	std::cout << "Print Hello Message" << std::endl;
+	std::cout << "This is a library" << std::endl;
+}
+

@@ -1,0 +1,18 @@
+/*
+ * ClassCamCalib.cpp
+ *
+ *  Created on: Apr 9, 2018
+ *      Author: mauricio
+ */
+
+#include "ClassCamCalib.h"
+
+ClassCamCalib::ClassCamCalib() {
+	// TODO Auto-generated constructor stub
+
+}
+
+ClassCamCalib::~ClassCamCalib() {
+	// TODO Auto-generated destructor stub
+}
+

@@ -1,0 +1,40 @@
+18:19:21 **** Incremental Build of configuration Debug for project OpenPose project ****
+make all 
+Building file: ../ClassMain.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassMain.d" -MT"ClassMain.o" -o "ClassMain.o" "../ClassMain.cpp"
+Finished building: ../ClassMain.cpp
+ 
+Building file: ../ClassOpenPose.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassOpenPose.d" -MT"ClassOpenPose.o" -o "ClassOpenPose.o" "../ClassOpenPose.cpp"
+Finished building: ../ClassOpenPose.cpp
+ 
+Building file: ../ClassPoseResults.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassPoseResults.d" -MT"ClassPoseResults.o" -o "ClassPoseResults.o" "../ClassPoseResults.cpp"
+Finished building: ../ClassPoseResults.cpp
+ 
+Building file: ../ClassWrapper.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ClassWrapper.d" -MT"ClassWrapper.o" -o "ClassWrapper.o" "../ClassWrapper.cpp"
+Finished building: ../ClassWrapper.cpp
+ 
+Building file: ../ImageProcess.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"ImageProcess.d" -MT"ImageProcess.o" -o "ImageProcess.o" "../ImageProcess.cpp"
+Finished building: ../ImageProcess.cpp
+ 
+Building file: ../main.cpp
+Invoking: GCC C++ Compiler
+g++ -std=c++0x -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ -I/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/linux -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"main.d" -MT"main.o" -o "main.o" "../main.cpp"
+Finished building: ../main.cpp
+ 
+Building target: libActionDetection.so
+Invoking: GCC C++ Linker
+g++ -shared -o "libActionDetection.so"  ./ClassMain.o ./ClassOpenPose.o ./ClassPoseResults.o ./ClassWrapper.o ./ImageProcess.o ./main.o   -lopenpose -lpthread -lopencv_imgproc -lopencv_highgui -lgflags -lopencv_core
+Finished building target: libActionDetection.so
+ 
+
+18:19:32 Build Finished (took 10s.658ms)
+

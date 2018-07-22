@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1517686794 source:/home/mauricio/Projects/cpp/projects/openposedemo/OpenPoseDemo/main.cpp
+	<gflags/gflags.h>
+	<openpose/core/headers.hpp>
+	<openpose/filestream/headers.hpp>
+	<openpose/gui/headers.hpp>
+	<openpose/pose/headers.hpp>
+	<openpose/utilities/headers.hpp>
+	<iostream>
+

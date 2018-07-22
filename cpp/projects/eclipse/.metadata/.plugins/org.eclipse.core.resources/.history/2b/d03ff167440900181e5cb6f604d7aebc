@@ -1,0 +1,21 @@
+/*
+ * ClassOpenPose.h
+ *
+ *  Created on: Feb 3, 2018
+ *      Author: mauricio
+ */
+
+#ifndef CLASSOPENPOSE_H_
+#define CLASSOPENPOSE_H_
+
+class ClassOpenPose {
+public:
+	ClassOpenPose();
+	virtual ~ClassOpenPose();
+
+	//Functions
+	void InitOpenPose();
+
+};
+
+#endif /* CLASSOPENPOSE_H_ */

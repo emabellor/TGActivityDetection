@@ -1,0 +1,81 @@
+/*
+ * ClassCamCalib.cpp
+ *
+ *  Created on: Apr 9, 2018
+ *      Author: mauricio
+ */
+
+#include "ClassCamCalib.h"
+using namespace cv;
+
+ClassCamCalib::ClassCamCalib() {
+	// TODO Auto-generated constructor stub
+
+}
+
+ClassCamCalib::~ClassCamCalib() {
+	// TODO Auto-generated destructor stub
+}
+
+
+
+cv::Point2f ClassMain::Project3DTo2D(cv::Point3f point, cv::Mat cameraMatrix, cv::Mat rvec, cv::Mat tvec, cv::Mat distorsion) {
+	cv::Mat cameraRotation;
+	Rodrigues(rvec, cameraRotation);
+
+	cv::Mat pointMat(4, 1, CV_64F);
+	pointMat.at<double>(0, 0) = point.x;
+	pointMat.at<double>(1, 0) = point.y;
+	pointMat.at<double>(2, 0) = point.z;
+	pointMat.at<double>(3, 0) = 1;
+
+	cv::Mat PMatrix(3, 4, cameraRotation.type()); // T is 3x4
+	PMatrix(cv::Range(0,3), cv::Range(0,3)) = cameraRotation * 1; // copies R into T
+	PMatrix(cv::Range(0,3), cv::Range(3,4)) = tvec * 1; // copies tvec into T
+
+	cv::Mat resultPoint = cameraMatrix * PMatrix * pointMat;
+
+	auto xValue = resultPoint.at<double>(0) / resultPoint.at<double>(2);
+	auto yValue = resultPoint.at<double>(1) / resultPoint.at<double>(2);
+	cout << "x" << xValue << endl;
+	cout << "y" << yValue << endl;
+
+	return Point2f(xValue, yValue);
+}
+
+cv::Point3f ClassMain::Project2DTo3D(cv::Point2f point, cv::Mat cameraMatrix, cv::Mat rvec, cv::Mat tvec, cv::Mat distorsion) {
+	// Stack overflow references
+	// https://stackoverflow.com/questions/48038817/opencv-get-3d-coordinates-from-2d-pixel
+
+	// Como realizar el despeje de las ecuaciones
+	// https://stackoverflow.com/questions/12299870/computing-x-y-coordinate-3d-from-image-point
+
+	// Obtencion de parametros intrinsecos de la camara
+	// http://answers.opencv.org/question/17076/conversion-focal-distance-from-mm-to-pixels/
+
+	cv::Mat cameraRotation;
+	Rodrigues(rvec, cameraRotation);
+
+	cv::Mat pointMat(3, 1, CV_64F);
+	pointMat.at<double>(0, 0) = point.x;
+	pointMat.at<double>(1, 0) = point.y;
+	pointMat.at<double>(2, 0) = 1;
+
+	cv::Mat PMatrix(3, 3, cameraRotation.type()); // T is 3x4
+	setIdentity(PMatrix);
+
+	PMatrix(cv::Range(0,3), cv::Range(0, 2)) = cameraRotation(cv::Range(0,3), cv::Range(0,2)) * 1;
+
+	PMatrix.at<double>(0, 2) = tvec.at<double>(0, 0);
+	PMatrix.at<double>(1, 2) = tvec.at<double>(1, 0);
+	PMatrix.at<double>(2, 2) = tvec.at<double>(2, 0);
+
+	cv::Mat pointResult = PMatrix.inv() * cameraMatrix.inv() * pointMat;
+
+	auto xValue = pointResult.at<double>(0) / pointResult.at<double>(2);
+	auto yValue = pointResult.at<double>(1) / pointResult.at<double>(2);
+	cout << "x" << xValue << endl;
+	cout << "y" << yValue << endl;
+
+	return Point3f(xValue, yValue, 0);
+}

@@ -1,0 +1,17 @@
+/*
+ * PrintHello.h
+ *
+ *  Created on: Feb 9, 2018
+ *      Author: mauricio
+ */
+
+#ifndef PRINTHELLO_H_
+#define PRINTHELLO_H_
+
+class PrintHello {
+public:
+	PrintHello();
+	virtual ~PrintHello();
+};
+
+#endif /* PRINTHELLO_H_ */

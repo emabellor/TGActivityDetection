@@ -1,0 +1,36 @@
+/*
+ * VideoCapInfo.h
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#ifndef VIDEOCAPINFO_H_
+#define VIDEOCAPINFO_H_
+
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+
+class FrameInfo {
+public:
+	unsigned char image [1 * 1024 * 1024];	// Fixed Length - Avoid realocating memory continuosly
+	int len;
+	bool isEmpty;
+};
+
+
+class VideoCapInfo {
+public:
+	VideoCapInfo();
+	virtual ~VideoCapInfo();
+
+	int GetGUID();
+	FrameInfo GetNextImage();
+	bool isOpened();
+
+private:
+	int guid;
+	cv::VideoCapture* cap;
+};
+
+#endif /* VIDEOCAPINFO_H_ */

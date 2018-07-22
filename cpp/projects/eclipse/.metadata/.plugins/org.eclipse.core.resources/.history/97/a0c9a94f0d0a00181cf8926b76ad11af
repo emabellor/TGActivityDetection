@@ -1,0 +1,17 @@
+/*
+ * ClassPoseResults.h
+ *
+ *  Created on: Feb 4, 2018
+ *      Author: mauricio
+ */
+
+#ifndef CLASSPOSERESULTS_H_
+#define CLASSPOSERESULTS_H_
+
+class ClassPoseResults {
+public:
+	ClassPoseResults();
+	virtual ~ClassPoseResults();
+};
+
+#endif /* CLASSPOSERESULTS_H_ */

@@ -1,0 +1,17 @@
+/*
+ * FileHandler.h
+ *
+ *  Created on: Feb 17, 2018
+ *      Author: mauricio
+ */
+
+#ifndef FILEHANDLER_H_
+#define FILEHANDLER_H_
+
+class FileHandler {
+public:
+	FileHandler();
+	virtual ~FileHandler();
+};
+
+#endif /* FILEHANDLER_H_ */

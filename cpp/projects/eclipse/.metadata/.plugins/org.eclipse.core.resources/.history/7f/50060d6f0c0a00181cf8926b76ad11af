@@ -1,0 +1,36 @@
+/*
+ * ClassMain.h
+ *
+ *  Created on: Feb 4, 2018
+ *      Author: mauricio
+ */
+
+#ifndef CLASSMAIN_H_
+#define CLASSMAIN_H_
+
+#include <iostream>
+#include <string>
+
+#include "ClassOpenPose.h"
+#include "ImageProcess.h"
+
+class ClassMain {
+public:
+	ClassMain();
+	virtual ~ClassMain();
+
+	// Functions
+	void InitProcess(int argc, char** argv);
+
+private:
+	// Constants
+	const std::string defaultImage = "/home/mauricio/Pictures/test4.png";
+
+	// Functions
+	void ProcessKeyPoints(int argc, char** argv);
+	void ShowKeyPoints(int argc, char** argv);
+	void PersonReidentification(int argc, char** argv);
+
+};
+
+#endif /* CLASSMAIN_H_ */

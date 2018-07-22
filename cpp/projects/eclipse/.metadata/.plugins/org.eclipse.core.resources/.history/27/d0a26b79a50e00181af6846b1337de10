@@ -1,0 +1,116 @@
+/*
+ * ClassPoseResults.cpp
+ *
+ *  Created on: Feb 4, 2018
+ *      Author: mauricio
+ */
+
+#include "ClassPoseResults.h"
+
+ClassPoseResults::ClassPoseResults() {
+	// TODO Auto-generated constructor stub
+}
+
+ClassPoseResults::~ClassPoseResults() {
+	// TODO Auto-generated destructor stub
+}
+
+void ClassPoseResults::AddResult(int person, int bodyPart, int x, int y, double score) {
+	StructPoints point;
+	point.person = person;
+	point.bodyPart = bodyPart;
+	point.x = x;
+	point.y = y;
+	point.score = score;
+
+	results.push_back(point);
+}
+
+void ClassPoseResults::AddResult(StructPoints point) {
+	AddResult(point.person, point.bodyPart, point.x, point.y, point.score);
+}
+
+
+void ClassPoseResults::ClearResults() {
+	results.clear();
+}
+
+uint ClassPoseResults::GetPeopleAmount() {
+	uint peopleAmount = 0;
+
+	if (results.size() == 0) {
+		// Empty
+	} else {
+		std::vector<int> peopleList;
+
+		for (uint i = 0; i < results.size(); i++) {
+			auto item = results[i];
+
+			// Enhance the algorithm hardiness
+			if (std::find(peopleList.begin(), peopleList.end(), item.person) == peopleList.end()) { //false
+				peopleList.push_back(item.person);
+				peopleAmount++;
+			}
+		}
+
+		peopleAmount += 1;
+	}
+
+	return peopleAmount;
+}
+
+StructPoints ClassPoseResults::GetPose(int person, int bodyPart) {
+	StructPoints point;
+	point.person = 0;
+	point.bodyPart = 0;
+
+	bool found = false;
+	for (uint i = 0; i < results.size(); i++) {
+		auto item = results[i];
+
+		if (item.person == person && item.bodyPart == bodyPart) {
+			point.x = item.x;
+			point.y = item.y;
+			point.score = item.score;
+			found = true;
+			break;
+		}
+	}
+
+	if (found == false) {
+		std::cerr << "Cannot find person " << person << " and bodyPart " << bodyPart << std::endl;
+		exit(1);
+	}
+
+	return point;
+}
+
+std::vector<StructPoints> ClassPoseResults::GetAllPoints() {
+	return results;
+}
+
+bool ClassPoseResults::SortListCase(StructPoints first, StructPoints second) {
+	if (first.person != second.person) {
+		return first.person < second.person;
+	} else {
+		return first.bodyPart < second.bodyPart;
+	}
+}
+
+
+std::vector<StructPoints> ClassPoseResults::GetAllPointsByPerson(int person) {
+	std::vector<StructPoints> list;
+
+	for (uint i = 0; i < results.size(); i++) {
+		auto item = results.at(i);
+
+		if (item.person == person) {
+			list.push_back(item);
+		}
+	}
+
+	std::sort(list.begin(), list.end(), SortListCase);
+	return list;
+}
+
+

@@ -1,0 +1,18 @@
+/*
+ * ClassPoseResults.cpp
+ *
+ *  Created on: Feb 4, 2018
+ *      Author: mauricio
+ */
+
+#include "ClassPoseResults.h"
+
+ClassPoseResults::ClassPoseResults() {
+	// TODO Auto-generated constructor stub
+
+}
+
+ClassPoseResults::~ClassPoseResults() {
+	// TODO Auto-generated destructor stub
+}
+

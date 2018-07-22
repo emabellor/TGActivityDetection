@@ -1,0 +1,21 @@
+/*
+ * VideoCapInfo.h
+ *
+ *  Created on: Feb 18, 2018
+ *      Author: mauricio
+ */
+
+#ifndef VIDEOCAPINFO_H_
+#define VIDEOCAPINFO_H_
+
+
+
+class VideoCapInfo {
+public:
+
+
+	VideoCapInfo();
+	virtual ~VideoCapInfo();
+};
+
+#endif /* VIDEOCAPINFO_H_ */

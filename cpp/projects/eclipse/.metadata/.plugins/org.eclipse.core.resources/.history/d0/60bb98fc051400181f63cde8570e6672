@@ -1,0 +1,25 @@
+/*
+ * FileHandler.h
+ *
+ *  Created on: Feb 17, 2018
+ *      Author: mauricio
+ */
+
+#ifndef FILEHANDLER_H_
+#define FILEHANDLER_H_
+
+#include <string>
+#include <sys/stat.h>
+#include <boost/filesystem.hpp>
+
+class FileHandler {
+public:
+	FileHandler();
+	virtual ~FileHandler();
+
+	static bool DirectoryExists(std::string filePath);
+	static void CreateDirectory(std::string filePath);
+	static std::string JoinPath(std::string path1, std::string path2);
+};
+
+#endif /* FILEHANDLER_H_ */
