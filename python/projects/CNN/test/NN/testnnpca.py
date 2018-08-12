@@ -23,13 +23,14 @@ def main():
     pca = PCA(n_components=n_features, svd_solver='randomized').fit(train_data)
     train_pca = pca.transform(train_data)
     n_classes = 10
+    hidden_neurons = 100
     eval_pca = pca.transform(eval_data)
 
     print('Printing shapes')
     print(train_data.shape)
     print(train_pca.shape)
     model_dir = '/tmp/model_example_pca'
-    classifier = ClassNN(model_dir, n_classes)
+    classifier = ClassNN(model_dir, n_classes, hidden_neurons)
 
     var = input('Set 1 to train, 2 to predict. Otherwise to eval ')
 

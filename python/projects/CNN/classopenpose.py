@@ -12,7 +12,9 @@ class ClassOpenPose:
         params['logging_level'] = 3
         params['output_resolution'] = "-1x-1"
         params['net_resolution'] = "-1x240"
-        params['model_pose'] = "COCO"
+        # params['model_pose'] = "COCO"
+        # params['model_pose'] = "MPI"
+        params['model_pose'] = "BODY_25"
         params['alpha_pose'] = 0.6
         params['scale_gap'] = 0.3
         params['scale_number'] = 1
@@ -32,3 +34,8 @@ class ClassOpenPose:
         print('Recognizing image')
         arr, output_image = self.open_pose.forward(image, True)
         return output_image
+
+    def recognize_image_tuple(self, image: np.ndarray):
+        print('Recognizing image')
+        arr, output_image = self.open_pose.forward(image, True)
+        return arr, output_image

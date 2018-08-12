@@ -9,7 +9,6 @@ from classutils import ClassUtils
 
 
 class ClassMjpegConverter:
-    min_percent = 0.1
 
     # Method must have extension .mjpeg
     @staticmethod
@@ -116,28 +115,6 @@ class ClassMjpegConverter:
             # Naming new
             os.rename(output_video, file_path)
 
-
-    @staticmethod
-    def _check_vector_integrity(vector):
-        """
-        Checking vector integrity
-        Vector 1, 8, 11 must exists -> Torse
-        Vector 10, 13, must be one -> Legs
-        Score is in the position 2
-        """
-
-        print('Checking vector integrity')
-        if vector[1][2] < ClassMjpegConverter.min_percent:
-            return False
-        elif vector[8][2] < ClassMjpegConverter.min_percent:
-            return False
-        elif vector[11][2] < ClassMjpegConverter.min_percent:
-            return False
-        elif vector[10][2] < ClassMjpegConverter.min_percent and vector[13][2] < ClassMjpegConverter.min_percent:
-            return False
-        else:
-            return True
-
     @staticmethod
     def _process_positions(vectors, homo_mat):
         """
@@ -148,7 +125,7 @@ class ClassMjpegConverter:
 
         for vector in vectors:
 
-            result = ClassMjpegConverter._check_vector_integrity(vector)
+            result = ClassUtils.check_vector_integrity(vector)
             score = 0
             pos_x = 0
             pos_y = 0

@@ -13,6 +13,7 @@ import os
 width_mnist = 28
 height_mnist = 28
 
+
 class ClassImageDataSet:
     def __init__(self, positive_dir, negative_dir, width_resize, height_resize):
         self.positive_dir = positive_dir

@@ -8,25 +8,55 @@ from __future__ import division
 
 import tensorflow as tf
 import numpy as np
+import os
+import shutil
+import json
 
 
 class ClassNN:
 
-    def __init__(self, model_dir, classes):
+    def __init__(self, model_dir, classes, hidden_number, label_names=list(), learning_rate=0.001):
         self.model_dir = model_dir
+        self.classes = classes
+        self.hidden_number = hidden_number
+        self.label_names = label_names
         self.classifier = tf.estimator.Estimator(
-            model_fn=lambda features, labels, mode: ClassNN.nn_model_fn(features, labels, mode, classes),
+            model_fn=lambda features, labels, mode: ClassNN.nn_model_fn(features, labels,
+                                                                        mode, classes, hidden_number, learning_rate),
             model_dir=model_dir)
         tf.logging.set_verbosity(tf.logging.INFO)
 
-    def train_model(self, train_data, train_labels):
-        print('Training model')
+    @classmethod
+    def load_from_params(cls, model_dir):
+        path_params = os.path.join(model_dir, 'params.json')
 
-        print('Set up logging for predictions')
+        if not os.path.isfile(path_params):
+            raise Exception('Params file does not exist: {0}'.format(path_params))
+
+        with open(path_params, 'r') as file_text:
+            params_str = file_text.read()
+
+        params = json.loads(params_str)
+        classes = params['classes']
+        hidden_number = params['hidden_number']
+        label_names = params['label_names']
+
+        return cls(model_dir, classes, hidden_number, label_names)
+
+    def train_model(self, train_data, train_labels, remove_train_folder=True, label_names=list(),
+                    steps=20000):
+        print('Init training the model')
+
+        # Remove training folder if exists
+        if os.path.exists(self.model_dir) and remove_train_folder:
+            print('Removing folder {0}'.format(self.model_dir))
+            shutil.rmtree(self.model_dir)
+
+        # Set up logging for predictions
         tensors_to_log = {"probabilities": "softmax_tensor"}
         logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
 
-        print('Train the model')
+        # Train the model
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": train_data},
             y=train_labels,
@@ -36,8 +66,24 @@ class ClassNN:
 
         self.classifier.train(
             input_fn=train_input_fn,
-            steps=20000,
-            hooks=[logging_hook])
+            steps=steps)
+
+        # Saving training parameters
+        training_params = {
+            'classes': self.classes,
+            'hidden_number': self.hidden_number
+        }
+
+        if len(label_names) != 0:
+            training_params['label_names'] = label_names
+
+        # Write training configuration into file
+        training_params_str = json.dumps(training_params)
+        training_params_path = os.path.join(self.model_dir, 'params.json')
+        with open(training_params_path, 'w') as text_file:
+            text_file.write(training_params_str)
+
+        # Done!
 
     def eval_model(self, eval_data, eval_labels):
         print('Evaluate the model and print results')
@@ -57,10 +103,8 @@ class ClassNN:
             print('Dimension of array is not one. ndim: ' + str(predict_data.ndim))
             return -1
         else:
-            print('Initializing prediction')
+            # Initializing prediction
             array = np.expand_dims(predict_data, axis=0)
-            print(array.shape)
-
             predict_input_fn = tf.estimator.inputs.numpy_input_fn(
                 x={'x': array},  # The dimensionality is preserved ->Checking
                 num_epochs=1,
@@ -78,13 +122,36 @@ class ClassNN:
             # Returned result
             return result
 
+    def predict_model_array(self, predict_data: np.ndarray):
+        if predict_data.ndim != 2:
+            print('Dimension of array is not two. ndim: ' + str(predict_data.ndim))
+            return list()
+        else:
+            # Initializing prediction
+            predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+                x={'x': predict_data},  # The dimensionality is preserved ->Checking
+                num_epochs=1,
+                shuffle=False
+            )
+
+            predict_results = self.classifier.predict(input_fn=predict_input_fn)
+
+            # Returns a generator
+            print('Reading predictions')
+            list_predictions = []
+            for prediction in predict_results:
+                list_predictions.append(prediction)
+
+            # Returned result
+            return list_predictions
+
     @staticmethod
-    def nn_model_fn(features, labels, mode, classes):
+    def nn_model_fn(features, labels, mode, classes, hidden_number, learning_rate):
         # Defining input layer
         input_layer = features['x']
 
         # Defining hidden layer
-        hidden_neurons = 100
+        hidden_neurons = hidden_number
         hidden_layer = tf.layers.dense(inputs=input_layer, units=hidden_neurons)
 
         # Defining output layer
@@ -102,7 +169,6 @@ class ClassNN:
         loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=output_layer)
 
         if mode == tf.estimator.ModeKeys.TRAIN:
-            learning_rate = 0.001
             optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
             train_op = optimizer.minimize(
                 loss=loss,
