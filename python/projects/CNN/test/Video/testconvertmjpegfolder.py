@@ -5,18 +5,28 @@ from tkinter import filedialog
 import glob
 import os
 from classmjpegconverter import ClassMjpegConverter
+from classutils import ClassUtils
 
 
 def main():
     print('Initializing main function')
+    selection = input('Select 1 to convert remaining videos from mjpeg to mjpegx, Select 2 to reprocess all videos: ')
+
+    if selection == '1':
+        reprocess = False
+        process_videos(reprocess)
+    elif selection == '2':
+        reprocess = True
+        process_videos(reprocess)
+    else:
+        print('Selection not recognized: {0}'.format(selection))
+
+
+def process_videos(reprocess):
+    print('Initializing main function')
     print('Warning! This routine will overwrite the selected files')
 
-    camera_number = input('Insert the camera number: ')
-
-    init_dir = '/home/mauricio/Videos/Oviedo/2018-02-24/' + camera_number
-    if not os.path.isdir(init_dir):
-        init_dir = '/home/mauricio/Videos/Oviedo/'
-
+    init_dir = '/home/mauricio/Videos/Oviedo/'
     options = {'initialdir': init_dir}
 
     folder = filedialog.askdirectory(**options)
@@ -27,14 +37,20 @@ def main():
         print(folder)
         print('Extracting all mjpeg files')
 
-        os.chdir(folder)
-        files = glob.glob("*.mjpeg")
+        for root, _, files in os.walk(folder):
+            for file in files:
+                full_path = os.path.join(root, file)
+                extension = ClassUtils.get_filename_extension(full_path)
 
-        for file in files:
-            full_path = os.path.join(folder,file)
-            print(files)
-            print('Converting ' + full_path)
-            ClassMjpegConverter.convert_video_mjpeg(full_path)
+                if extension == '.mjpeg':
+                    if not reprocess:
+                        mjpegx_path = full_path.replace(".mjpeg", ".mjpegx")
+                        if os.path.exists(mjpegx_path):
+                            print('Ignoring already converted file {0}'.format(mjpegx_path))
+                            continue
+
+                    print('Converting ' + full_path)
+                    ClassMjpegConverter.convert_video_mjpeg(full_path)
 
         print('Done!')
 

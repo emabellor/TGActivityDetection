@@ -22,8 +22,20 @@ class ClassUtils:
 
         return np.asanyarray([new_x, new_y], dtype=np.float)
 
+    @classmethod
+    def project_points_angle(cls, homo_matrix: np.ndarray, point2d: np.ndarray,
+                             point_center: np.ndarray, angle_degrees: int):
+        local_projected_point = cls.project_points(homo_matrix, point2d)
+        transformed_point = cls.transform_angle_point(local_projected_point, point_center, angle_degrees)
+        return transformed_point
+
+    @classmethod
+    def load_homo_mat(cls, camera_number: str):
+        dict_config = cls.load_cam_calib_params(camera_number)
+        homo_mat = np.asarray(dict_config['homographyMat'], dtype='float')
+
     @staticmethod
-    def load_homo_mat(camera_number: str):
+    def load_cam_calib_params(camera_number: str):
         base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + camera_number + '/calibration.json'
 
         if not os.path.exists(base_dir):
@@ -33,9 +45,12 @@ class ClassUtils:
                 config = content_file.read()
 
             dict_config = json.loads(config)
-            homo_mat = np.asarray(dict_config['homographyMat'], dtype='float')
+            return dict_config
 
-            return homo_mat
+    @staticmethod
+    def cam_calib_exists(camera_number: str):
+        base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + camera_number + '/calibration.json'
+        return os.path.exists(base_dir)
 
     @staticmethod
     def ticks_to_datetime(ticks):
@@ -432,3 +447,50 @@ class ClassUtils:
         else:
             return -1
 
+    @classmethod
+    def transform_angle_point(cls, point, center, angle_degrees):
+        if type(point) is dict:
+            raise Exception('Type point not supported: {0}'.format(type(point)))
+        if type(center) is dict:
+            raise Exception('Type center not supported: {0}'.format(type(center)))
+
+        # 1 -> Transform in polar coordinates
+        r = cls.get_euclidean_distance(point[0], point[1], 0, 0)
+
+        # Avoid zero division and control theta quadrant
+        if point[0] != 0:
+            theta = math.atan(point[1] / point[0])
+        else:
+            theta = math.pi / 2
+
+        if point[0] < 0:
+            theta += math.pi
+
+        angle = angle_degrees * math.pi / 180
+        new_theta = theta + angle
+
+        if new_theta >= 2 * math.pi:
+            new_theta -= 2 * math.pi
+
+        # 2 -> Transform in cartesian coordinates
+        new_point = list()
+        new_point.append(r * math.cos(new_theta))  # x
+        new_point.append(r * math.sin(new_theta))  # y
+        new_point.append(1)  # confidence
+
+        # 3 -> Perform center adjustment
+        new_point[0] += center[0]
+        new_point[1] += center[1]
+
+        # 4 -> Perform round to avoid decimal
+        new_point[0] = round(new_point[0], 5)
+        new_point[1] = round(new_point[1], 5)
+
+        # 4 -> Return point
+        return new_point
+
+    @staticmethod
+    def get_cam_number_from_path(file_path: str):
+        # Getting cam number
+        elems = file_path.split('/')
+        return elems[-2]

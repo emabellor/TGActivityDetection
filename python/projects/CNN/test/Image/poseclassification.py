@@ -131,8 +131,10 @@ def classify_images(list_folder_data):
     eval_files = list()
 
     model_dir = '/home/mauricio/models/nn_classifier'
-    csv_dir = '/home/mauricio/Documents/data.csv'
-    csv_dir_files = '/home/mauricio/Documents/files.csv'
+    csv_dir = '/home/mauricio/Pictures/PosesNew/data.csv'
+    csv_train = '/home/mauricio/Pictures/PosesNew/training.csv'
+    csv_eval = '/home/mauricio/Pictures/PosesNew/eval.csv'
+    csv_dir_files = '/home/mauricio/Pictures/PosesNew/files.csv'
 
     classes_number = len(list_folder_data)
     hidden_number = 40
@@ -252,8 +254,17 @@ def classify_images(list_folder_data):
         total_np = np.concatenate((total_data, total_labels), axis=1)
 
         print('Saving data to CSV in file {0}'.format(csv_dir))
-        np.savetxt(csv_dir, total_np, delimiter=',')
+        np.savetxt(csv_dir, total_np, delimiter=',', fmt='%10.10f')
         np.savetxt(csv_dir_files, total_files, delimiter=',', fmt='%s')
+
+        print('Saving training data')
+        # Concatenate with new axis
+        total_np_train = np.concatenate((training_data_np, training_labels_np[:, np.newaxis]), axis=1)
+        total_np_eval = np.concatenate((eval_data_np, eval_labels_np[:, np.newaxis]), axis=1)
+
+        # Saving
+        np.savetxt(csv_train, total_np_train, delimiter=',', fmt='%10.10f')
+        np.savetxt(csv_eval, total_np_eval, delimiter=',', fmt='%10.10f')
 
         print('Done writing file in CSV')
     elif selection == '5':

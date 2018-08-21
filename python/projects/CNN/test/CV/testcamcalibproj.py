@@ -1,5 +1,6 @@
 """
 Script to test calibrate camera
+This code is deprecated!!!
 """
 
 from tkinter import Tk
@@ -18,6 +19,7 @@ def main():
     global config
 
     print('Initializing main function')
+    print('Attention! This code is deprecated')
     text = input('Insert camera number: ')
 
     base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + text + '/calibration.json'

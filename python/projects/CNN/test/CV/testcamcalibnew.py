@@ -1,10 +1,8 @@
 """
 Script to calibrate camera
-Old Version
-
-------------------------------------------------------------
-Deprecated
-------------------------------------------------------------
+The points are saved in default positions
+When calibrated, the user must be set the position and the rotation angle of the camera
+The rotation angle must be clockwise - degrees
 """
 
 import cv2
@@ -16,54 +14,49 @@ import json
 import os
 
 image = None  # type:np.ndarray
-image_points = []
-object_points = []
+image_points = list()
+object_points = list()
 do_homo = False
+center = []
+ok_params = False
+angle_deg = 0
+
+# Default positions
+# Change if model of cells changes
+default_positions = [
+    [-125, 750],
+    [125, 750],
+    [-125, 250],
+    [125, 250]
+]
 
 
 def mouse_callback(event, x_image, y_image, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
-        master = Tk()
-        tk.Label(master, text="X").grid(row=0)
-        tk.Label(master, text="Y").grid(row=1)
+        global do_homo
+        global image
+        global default_positions
 
-        e1 = tk.Entry(master)
-        e2 = tk.Entry(master)
+        image_points.append([x_image, y_image])
 
-        e1.grid(row=0, column=1)
-        e2.grid(row=1, column=1)
+        # Draw point
+        print('Drawing point')
+        radius = 5
+        red = (0, 0, 255)
+        cv2.rectangle(image, (x_image - radius, y_image - radius), (x_image + radius, y_image + radius),
+                      red, cv2.FILLED)
+        cv2.imshow('image', image)
 
-        def add_points():
-            global do_homo
-            global image
+        # Add object point
+        index = len(image_points) - 1
+        x_object = default_positions[index][0]
+        y_object = default_positions[index][1]
+        object_point = [x_object, y_object]
+        object_points.append(object_point)
+        print('Object point loaded: {0}'.format(object_point))
 
-            image_points.append({'x': x_image, 'y': y_image})
-
-            # Draw point
-            print('Drawing point')
-            radius = 5
-            red = (0, 0, 255)
-            cv2.rectangle(image, (x_image - radius, y_image - radius), (x_image + radius, y_image + radius),
-                          red, cv2.FILLED)
-            cv2.imshow('image', image)
-
-            print('Adding points')
-            x_object = int(e1.get())
-            y_object = int(e2.get())
-            object_points.append({'x': x_object, 'y': y_object})
-
-            if len(object_points) == 4:
-                do_homo = True
-
-            master.quit()
-
-        tk.Button(master, text='Quit', command=master.quit).grid(row=3, column=0, pady=4)
-        tk.Button(master, text='OK', command=add_points).grid(row=3, column=1, pady=4)
-
-        master.mainloop()
-
-        # Destroying window
-        master.destroy()
+        if len(object_points) == 4:
+            do_homo = True
 
 
 def main():
@@ -72,7 +65,6 @@ def main():
     global image_points
     global object_points
 
-    print('Attention! This module is deprecated. Use testcamcalibnew instead')
     print('OpenCV calibration')
 
     Tk().withdraw()
@@ -134,29 +126,72 @@ def loading_image(cam_number: str):
         if not do_homo:
             print('Canceled')
         else:
-            calc_homo(cam_number)
+            ask_position_angle(cam_number)
+
+
+def ask_position_angle(cam_number: str):
+    master = Tk()
+    tk.Label(master, text="x center").grid(row=0)
+    tk.Label(master, text="y center").grid(row=1)
+    tk.Label(master, text="angle deg").grid(row=2)
+
+    e1 = tk.Entry(master)
+    e2 = tk.Entry(master)
+    e3 = tk.Entry(master)
+
+    e1.grid(row=0, column=1)
+    e2.grid(row=1, column=1)
+    e3.grid(row=2, column=1)
+
+    def read_params():
+        global ok_params
+        global center
+        global angle_deg
+
+        x_object = int(e1.get())
+        y_object = int(e2.get())
+        center = [x_object, y_object]
+
+        angle_deg = int(e3.get())
+        ok_params = True
+        master.quit()
+
+    tk.Button(master, text='Quit', command=master.quit).grid(row=3, column=0, pady=4)
+    tk.Button(master, text='OK', command=read_params).grid(row=3, column=1, pady=4)
+
+    master.mainloop()
+
+    # Destroying window
+    master.destroy()
+
+    if ok_params:
+        calc_homo(cam_number)
+    else:
+        print('Quitting')
 
 
 def calc_homo(cam_number: str):
     global image_points
     global object_points
+    global center
+    global angle_deg
 
     print('Training')
     print(image_points)
     print(object_points)
-    image_points_list = []
-    for point in image_points:
-        image_points_list.append([point['x'], point['y']])
-
-    object_points_list = []
-    for point in object_points:
-        object_points_list.append([point['x'], point['y']])
 
     print('Getting homography')
-    matrix, mask = cv2.findHomography(np.array(image_points_list), np.array(object_points_list))
+    matrix, mask = cv2.findHomography(np.array(image_points), np.array(object_points))
 
     print('Concatenating into array')
-    elem = {'homographyMat': matrix.tolist(), 'imagePoints': image_points, 'objectPoints': object_points}
+    elem = {
+                'camNumber': cam_number,
+                'homographyMat': matrix.tolist(),
+                'imagePoints': image_points,
+                'objectPoints': object_points,
+                'centerPoints': center,
+                'angleDegrees': angle_deg
+            }
 
     elem_str = json.dumps(elem)
     print(elem_str)

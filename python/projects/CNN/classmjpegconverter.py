@@ -21,12 +21,15 @@ class ClassMjpegConverter:
             output_video = file_path.replace('.mjpeg', '.mjpegx')
             print('output_video: ' + output_video)
 
+            # Converting first with _1 to avoid confusions
+            file_path_temp = output_video + '_1'
+
             print('Initializing instance')
             open_pose = ClassOpenPose()
 
             images = ClassMjpegReader.process_video(file_path)
             print('Len images: ' + str(len(images)))
-            with open(output_video, 'wb') as newFile:
+            with open(file_path_temp, 'wb') as newFile:
                 counter = 0
                 for elem in images:
                     image = elem[0]
@@ -43,13 +46,25 @@ class ClassMjpegConverter:
                     if counter % 10 == 0:
                         print('Counter: ' + str(counter))
 
-            # Not deleting
-            print('Avoid deleting file')
+            # Deleting mjpegx file if exists and rename
+            if os.path.exists(output_video):
+                os.remove(output_video)
+
+            # Naming new
+            os.rename(file_path_temp, output_video)
 
     # Method must have extension .mjpegx
     @ staticmethod
     def convert_video_mjpegx(file_path: str, cam_number: str):
         extension = os.path.splitext(file_path)[1]
+
+        min_percent = 0.05
+
+        if ClassUtils.cam_calib_exists(cam_number):
+            calib_params = ClassUtils.load_cam_calib_params(cam_number)
+        else:
+            print('Warning: Calib params not found for camera {0}'.format(cam_number))
+            calib_params = None
 
         if extension != '.mjpegx':
             raise Exception('file_path must have extension .mjpegx')
@@ -59,8 +74,6 @@ class ClassMjpegConverter:
 
             images = ClassMjpegReader.process_video_mjpegx(file_path)
             print('Len images: ' + str(len(images)))
-
-            homo_mat = ClassUtils.load_homo_mat(cam_number)
 
             with open(output_video, 'wb') as newFile:
                 counter = 0
@@ -73,8 +86,9 @@ class ClassMjpegConverter:
                     vectors = json_dict['vectors']
 
                     # Make all processing here
-                    positions = ClassMjpegConverter._process_positions(vectors, homo_mat)
+                    positions = ClassMjpegConverter._process_positions(vectors, min_percent, calib_params)
                     json_dict['positions'] = positions
+                    json_dict['camNumber'] = cam_number
 
                     # Write in new file
                     ClassMjpegConverter._write_in_file(newFile, ticks, image, json_dict)
@@ -82,6 +96,8 @@ class ClassMjpegConverter:
                     counter += 1
                     if counter % 10 == 0:
                         print('Counter: ' + str(counter))
+                        if calib_params is None:
+                            print('Warning: Calib params not found for camera {0}'.format(cam_number))
 
             # Delete old
             os.remove(file_path)
@@ -116,7 +132,7 @@ class ClassMjpegConverter:
             os.rename(output_video, file_path)
 
     @staticmethod
-    def _process_positions(vectors, homo_mat):
+    def _process_positions(vectors, min_percent, calib_params):
         """
         Calculate position based on the torse
         Project position to the floor in the leg
@@ -125,12 +141,12 @@ class ClassMjpegConverter:
 
         for vector in vectors:
 
-            result = ClassUtils.check_vector_integrity(vector)
+            result = ClassUtils.check_vector_integrity_part(vector, min_percent)
             score = 0
             pos_x = 0
             pos_y = 0
 
-            if result:
+            if result and calib_params is not None:
                 score = 1
 
                 # Get center of mass of the 3 points
@@ -140,11 +156,15 @@ class ClassMjpegConverter:
                 # Project the position to one of the legs
                 y_pos = vector[10][1]
 
-                if vector[10][2] < ClassMjpegConverter.min_percent:
+                if vector[10][2] < min_percent:
                     y_pos = vector[13][1]
 
                 # Project points
-                projected = ClassUtils.project_points(homo_mat, np.asanyarray([c_x, y_pos], dtype=np.float))
+                center = np.array(calib_params['centerPoints'])
+                angle_deg = calib_params['angleDegrees']
+                homo_mat = np.array(calib_params['homographyMat'])
+                projected = ClassUtils.project_points_angle(homo_mat, np.asanyarray([c_x, y_pos], dtype=np.float),
+                                                            center, angle_deg)
 
                 # Update points
                 pos_x = projected[0]

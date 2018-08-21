@@ -87,4 +87,3 @@ class ClassMjpegReader:
 
             return list_images
 
-
