@@ -7,31 +7,37 @@ from os import path
 from classmjpegreader import ClassMjpegReader
 from classmjpegconverter import ClassMjpegConverter
 from classutils import ClassUtils
+from sys import platform
 import logging
+import math
 
-video_base_path = '/home/mauricio/Videos/Oviedo'
+
 logger = logging.getLogger('ClassMjpegDate')
 
 
 class ClassMjpegDate:
+    video_base_path = '/home/mauricio/Videos/Oviedo'
 
-    def __init__(self, cam_number):
+    # Static region
+    if platform == 'win32':
+        video_base_path = 'C:\\VideosPython'
+
+    def __init__(self, cam_number, extension='.mjpegx'):
         logger.info('Initializing class MjpegDate')
         self._cam_number = cam_number
         self._frame_info_list = []
         self._frame_info = []
         self._frame_date = datetime.now()
         self._last_frame = None
+        self._extension = extension
+        self._last_index = 0
 
     def load_frame(self, date: datetime):
         logger.debug(self._frame_date)
 
         logger.debug('Get frame to load')
 
-        minutes = int(date.minute / 15) * 15
-        seconds = 0
-        microseconds = 0
-        date_file = date.replace(minute=minutes, second=seconds, microsecond=microseconds)
+        date_file = self.get_date_file(date)
 
         # Check fist if date is in list
         found = False
@@ -47,10 +53,22 @@ class ClassMjpegDate:
         if not found:
             logger.debug('Loading file name')
             logger.debug(date_file)
-            file_path = self._load_path_by_date(date_file)
+            file_path = self.load_path_by_date(date_file, self._cam_number, self._extension)
 
             if not path.exists(file_path):
-                raise Exception('Path does not exists {0}'.format(file_path))
+                # Avoid exceptions - Video partial
+                print('Path does not exists {0}'.format(file_path))
+                frame_info = []
+                self._frame_info = frame_info
+                self._frame_date = date_file
+
+                if self._last_frame is None:
+                    raise Exception('Fist video must exist!')
+
+                self._frame_info_list.append({
+                    'date_video': date_file,
+                    'frame_info': frame_info
+                })
             else:
                 logger.debug('Loading video from path')
                 frame_info = ClassMjpegReader.process_video_mjpegx(file_path)
@@ -92,7 +110,7 @@ class ClassMjpegDate:
             frame_info = frame_item['frame_info']
             date_video = frame_item['date_video']
 
-            path_video = self._load_path_by_date(date_video)
+            path_video = self.load_path_by_date(date_video, self._cam_number, self._extension)
 
             # Converting video from list
             ClassMjpegConverter.save_video_from_list_frames(path_video, frame_info)
@@ -100,10 +118,19 @@ class ClassMjpegDate:
 
         logger.debug('Done converting videos')
 
-    def _load_path_by_date(self, date: datetime):
+    @staticmethod
+    def get_date_file(date):
+        minutes = int(date.minute / 15) * 15
+        seconds = 0
+        microseconds = 0
+        date_file = date.replace(minute=minutes, second=seconds, microsecond=microseconds)
+        return date_file
+
+    @classmethod
+    def load_path_by_date(cls, date: datetime, cam_number: str, extension: str):
         logger.debug('Generating path by date')
-        file_name = date.strftime('%H-%M-%S') + '.mjpegx'
-        file_path = path.join(video_base_path, date.strftime('%Y-%m-%d'), str(self._cam_number), file_name)
+        file_name = date.strftime('%H-%M-%S') + extension
+        file_path = path.join(cls.video_base_path, date.strftime('%Y-%m-%d'), str(cam_number), file_name)
         logger.debug(file_path)
         return file_path
 
@@ -114,18 +141,35 @@ class ClassMjpegDate:
         min_delta = -1
         logger.debug('Loading frame by date')
 
+        # Improves processing time
+        self._last_index += 1
         selected_frame = None
-        for frame in self._frame_info:
+
+        if self._last_index < len(self._frame_info):
+            frame = self._frame_info[self._last_index]
             ticks = frame[1]
 
             date_frame = ClassUtils.ticks_to_datetime(ticks)
-            delta = date - date_frame
+            delta = math.fabs((date - date_frame).seconds)
 
-            if min_delta == -1 or delta < min_delta:
-                if delta.total_seconds() > 0:
-                    min_delta = delta
-                    selected_frame = frame
+            if delta < 0.05:
+                selected_frame = frame
 
+        # Iterate over all elems
+        if selected_frame is None:
+            for index, frame in enumerate(self._frame_info):
+                ticks = frame[1]
+
+                date_frame = ClassUtils.ticks_to_datetime(ticks)
+                delta = date - date_frame
+
+                if min_delta == -1 or delta < min_delta:
+                    if delta.total_seconds() > 0:
+                        min_delta = delta
+                        selected_frame = frame
+                        self._last_index = index
+
+        # Get last if not found
         if selected_frame is None:
             selected_frame = self._last_frame
 

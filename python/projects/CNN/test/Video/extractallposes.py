@@ -67,7 +67,7 @@ def main():
 
                 arr_pass = list()
                 for elem in arr:
-                    if ClassUtils.check_vector_integrity_part(elem, min_score):
+                    if ClassUtils.check_vector_integrity_pos(elem, min_score):
                         arr_pass.append(elem)
 
                 if len(arr_pass) > 0:

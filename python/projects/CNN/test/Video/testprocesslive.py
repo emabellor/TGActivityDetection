@@ -37,7 +37,7 @@ def main():
         # Checking vector integrity for all elements
         # Verify there is at least one arm and one leg
         for elem in arr:
-            if ClassUtils.check_vector_integrity_part(elem, min_score):
+            if ClassUtils.check_vector_integrity_pos(elem, min_score):
                 arr_pass.append(elem)
 
         if len(arr_pass) != 1:
@@ -50,7 +50,7 @@ def main():
 
             # Descriptors
             data_to_add = results['angles']
-            data_to_add += ClassUtils.get_flat_list(results['transformed_points'])
+            data_to_add += ClassUtils.get_flat_list(results['transformedPoints'])
 
             data_np = np.asanyarray(data_to_add, dtype=np.float)
 

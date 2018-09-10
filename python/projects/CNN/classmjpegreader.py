@@ -44,8 +44,8 @@ class ClassMjpegReader:
     def process_video_mjpegx(video_path):
         extension = os.path.splitext(video_path)[1]
 
-        if extension != '.mjpegx':
-            raise Exception('Video must have .mjpegx extension')
+        if extension != '.mjpegx' and extension != '.mjpegxr':
+            raise Exception('Video must have .mjpegx extension or .mjpegxr extension')
         else:
             logger.info('Opening video {0}'.format(video_path))
             list_images = []

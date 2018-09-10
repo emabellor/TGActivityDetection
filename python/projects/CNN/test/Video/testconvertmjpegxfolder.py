@@ -8,6 +8,7 @@ from classutils import ClassUtils
 
 def main():
     print('Initializing main function')
+    print('Warning - You mist convert to mjpegx first')
 
     # Withdrawing Tkinter window
     Tk().withdraw()

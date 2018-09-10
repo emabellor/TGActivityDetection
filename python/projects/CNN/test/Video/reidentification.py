@@ -18,6 +18,8 @@ CNN_BASE_FOLDER = '/home/mauricio/CNN/Images'
 
 
 def main():
+    print('Warning: This code is deprecated')
+    print('Use testconvertmjpegxr.py instead')
     FORMAT = "%(asctime)s [%(name)-16.16s] [%(levelname)-5.5s]  %(message)s"
     logging.basicConfig(level=logging.INFO, format=FORMAT)
     print('Init re-id')

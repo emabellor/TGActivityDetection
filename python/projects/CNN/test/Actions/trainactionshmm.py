@@ -153,7 +153,7 @@ def get_poses_seq(folder: str, instance_nn: ClassNN, instance_pose: ClassOpenPos
             person_arr = arr_pass[0]
 
         result_desc = ClassDescriptors.get_person_descriptors(person_arr, min_score)
-        list_desc.append(result_desc['full_desc'])
+        list_desc.append(result_desc['fullDesc'])
 
     list_desc_np = np.asarray(list_desc, np.float)
     results = instance_nn.predict_model_array(list_desc_np)

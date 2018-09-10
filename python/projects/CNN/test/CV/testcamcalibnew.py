@@ -24,10 +24,10 @@ angle_deg = 0
 # Default positions
 # Change if model of cells changes
 default_positions = [
-    [-125, 750],
-    [125, 750],
-    [-125, 250],
-    [125, 250]
+    [-95, 644],
+    [95, 644],
+    [-95, 250],
+    [95, 250]
 ]
 
 
@@ -70,7 +70,7 @@ def main():
     Tk().withdraw()
     cam_number = input('Insert camera number: ')
 
-    base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calibration.json'
+    base_dir = get_base_dir(cam_number)
 
     global continue_load
     continue_load = True
@@ -143,6 +143,18 @@ def ask_position_angle(cam_number: str):
     e2.grid(row=1, column=1)
     e3.grid(row=2, column=1)
 
+    base_dir = get_base_dir(cam_number)
+    if os.path.exists(base_dir):
+        with open(base_dir, 'r') as file:
+            file_str = file.read()
+
+        # Insert default values
+        print('File read: {0}'.format(file_str))
+        obj_params = json.loads(file_str)
+        e1.insert(0, str(obj_params['centerPoints'][0]))
+        e2.insert(0, str(obj_params['centerPoints'][1]))
+        e3.insert(0, str(obj_params['angleDegrees']))
+
     def read_params():
         global ok_params
         global center
@@ -208,6 +220,11 @@ def calc_homo(cam_number: str):
         file.write(elem_str)
 
     print('Done!')
+
+
+def get_base_dir(cam_number: str):
+    base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calibration.json'
+    return base_dir
 
 
 if __name__ == '__main__':

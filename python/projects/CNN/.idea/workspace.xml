@@ -2,25 +2,55 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f2489776-2545-484d-a1fe-234d78a20310" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/classhmm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/Actions/trainactionshmm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/CV/testcaliberr.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/CV/testcalibmulti.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/CV/testcamcalibnew.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/CV/testcamcalibprojnew.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/CV/testtransformdegrees.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/NCS/ncs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/Video/videovisualizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classcolorcomparison.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classmjpegclient.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classpeoplereid.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classvideosaver.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/CV/testcolorpoints.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Classes/testmjpeg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Image/comparecolors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Image/testbtf.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Image/testgethistpeople.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/OpenPose/testposelegs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/classifycolors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/extractcolors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/testcolordiff.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/testcomputemeancircular.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/testdate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/testdrawpose.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/testreference.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Utils/testreidcolor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/UtilsPython/testarray.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/UtilsPython/testarrayslice.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/Video/testconvertmjpegxr.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classdescriptors.py" beforeDir="false" afterPath="$PROJECT_DIR$/classdescriptors.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classmjpegconverter.py" beforeDir="false" afterPath="$PROJECT_DIR$/classmjpegconverter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classmjpegdate.py" beforeDir="false" afterPath="$PROJECT_DIR$/classmjpegdate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classmjpegreader.py" beforeDir="false" afterPath="$PROJECT_DIR$/classmjpegreader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classutils.py" beforeDir="false" afterPath="$PROJECT_DIR$/classutils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/CV/testcamcalib.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/CV/testcamcalib.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/CV/testcamcalibproj.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/CV/testcamcalibproj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/HMM/hmmclassifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/HMM/hmmclassifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Actions/processactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Actions/processactions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Actions/trainactionshmm.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Actions/trainactionshmm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/CV/testcamcalibnew.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/CV/testcamcalibnew.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/CV/testtransformdegrees.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/CV/testtransformdegrees.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/Image/poseclassification.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Image/poseclassification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/Video/testconvertmjpegfolder.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/testconvertmjpegfolder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Image/processimage.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Image/processimage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Image/testclassimages.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Image/testclassimages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/NN/trainingnnposes.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/NN/trainingnnposes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Video/extractallposes.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/extractallposes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Video/reidentification.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/reidentification.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Video/testprocesslive.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/testprocesslive.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Video/testresavingvideo.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Video/videoselection.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/videoselection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Video/videovisualizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/videovisualizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/loadingdataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/NN/loadingdataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testbinaryconversion.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/UtilsPython/testbinaryconversion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testcluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/KMeans/testcluster.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testinternet.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/NN/testinternet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testloadingnp.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/numpy/testloadingnp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testmjpegreader.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Video/testmjpegreader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testutils.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/Utils/testutils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -31,104 +61,94 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="testgethistpeople.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/Image/testgethistpeople.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="468">
+              <caret line="155" lean-forward="true" selection-start-line="155" selection-end-line="155" />
+              <folding>
+                <element signature="e#0#33#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="poseclassification.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/Image/poseclassification.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="608">
-              <caret line="40" column="43" selection-start-line="40" selection-start-column="43" selection-end-line="40" selection-end-column="43" />
+            <state relative-caret-position="216">
+              <caret line="77" column="49" selection-start-line="77" selection-start-column="41" selection-end-line="77" selection-end-column="49" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="poselabeling.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/Image/poselabeling.py">
+      <file leaf-file-name="comparecolors.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/Image/comparecolors.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="181">
-              <caret line="93" column="10" lean-forward="true" selection-start-line="93" selection-start-column="10" selection-end-line="104" selection-end-column="42" />
+            <state relative-caret-position="1007">
+              <caret line="60" column="91" selection-start-line="60" selection-start-column="91" selection-end-line="60" selection-end-column="91" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="classhmm.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/classhmm.py">
+      <file leaf-file-name="testbtf.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/Image/testbtf.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="644">
-              <caret line="102" selection-start-line="102" selection-end-line="102" />
+            <state relative-caret-position="512">
+              <caret line="187" selection-start-line="187" selection-end-line="187" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="videovisualizer.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/Video/videovisualizer.py">
+      <file leaf-file-name="apport_python_hook.py" pinned="false" current-in-tab="false">
+        <entry file="file:///usr/lib/python3/dist-packages/apport_python_hook.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="741">
-              <caret line="123" column="8" selection-start-line="123" selection-start-column="8" selection-end-line="123" selection-end-column="8" />
+            <state relative-caret-position="266">
+              <caret line="48" selection-start-line="48" selection-end-line="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="classdescriptors.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/classdescriptors.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="19">
+              <caret line="16" column="27" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
               <folding>
-                <element signature="e#178#219#0" expanded="true" />
+                <element signature="e#0#33#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="testconvertmjpegxfolder.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py">
+      <file leaf-file-name="testfolderpose.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/Image/testfolderpose.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="classmjpegdate.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/classmjpegdate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="448">
-              <caret line="34" column="52" selection-start-line="34" selection-start-column="52" selection-end-line="34" selection-end-column="52" />
-              <folding>
-                <element signature="e#0#30#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="132">
+              <caret line="7" column="51" lean-forward="true" selection-start-line="7" selection-start-column="51" selection-end-line="7" selection-end-column="51" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="classmjpegconverter.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/classmjpegconverter.py">
+      <file leaf-file-name="classpeoplereid.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/classpeoplereid.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="143" column="47" selection-start-line="143" selection-start-column="47" selection-end-line="143" selection-end-column="47" />
+            <state relative-caret-position="664">
+              <caret line="188" selection-start-line="188" selection-end-line="188" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="classutils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/classutils.py">
+      <file leaf-file-name="classcolorcomparison.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/classcolorcomparison.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-95">
-              <caret line="295" column="8" selection-start-line="295" selection-start-column="8" selection-end-line="295" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="classmjpegreader.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/classmjpegreader.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="524">
-              <caret line="88" lean-forward="true" selection-start-line="88" selection-end-line="88" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="testconvertmjpegfolder.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/Video/testconvertmjpegfolder.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="410">
-              <caret line="52" column="47" lean-forward="true" selection-start-line="52" selection-start-column="47" selection-end-line="52" selection-end-column="47" />
-              <folding>
-                <element signature="e#33#63#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="extractallposes.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/Video/extractallposes.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="199">
-              <caret line="76" column="25" selection-start-line="76" selection-start-column="24" selection-end-line="76" selection-end-column="25" />
+            <state relative-caret-position="411">
+              <caret line="32" column="33" selection-start-line="32" selection-start-column="33" selection-end-line="32" selection-end-column="33" />
             </state>
           </provider>
         </entry>
@@ -137,36 +157,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>get_poses_seq</find>
-      <find>folder</find>
-      <find>asarray</find>
-      <find>map_path</find>
-      <find>new_train_data</find>
-      <find>train_data</find>
-      <find>inf</find>
-      <find>[</find>
-      <find>cv2</find>
-      <find>object_points</find>
-      <find>save_points</find>
-      <find>main_win</find>
-      <find>list_points</find>
-      <find>type</find>
-      <find>center</find>
-      <find>homograph</find>
-      <find>transform_angle_point</find>
-      <find>walk</find>
-      <find>camera_number</find>
-      <find>file_path</find>
-      <find>output_video</find>
-      <find>homo_mat</find>
-      <find>_process_positions</find>
-      <find>image</find>
-      <find>_last_frame</find>
-      <find>selected_frame</find>
+      <find>mouse_ca</find>
+      <find>load_</find>
+      <find>mouse_callback</find>
+      <find>image_width</find>
+      <find>rectangle</find>
+      <find>draw_po</find>
+      <find>show_images</find>
+      <find>result_image</find>
+      <find>_draw_line_pose</find>
+      <find>check_vector_integrity_pos</find>
+      <find>than</find>
+      <find>askopen</find>
+      <find>draw_pose</find>
+      <find>draw_vectors</find>
+      <find>local_pos</find>
+      <find>test_color_compare_hist</find>
+      <find>hist</find>
+      <find>KMeans</find>
+      <find>compare_images</find>
       <find>imdecode</find>
-      <find>c</find>
-      <find>draw_people</find>
-      <find>text</find>
+      <find>len</find>
+      <find>video_base_path</find>
+      <find>.mjp</find>
+      <find>set_last_image_date</find>
+      <find>new_date</find>
+      <find>cv2</find>
+      <find>n</find>
+      <find>time</find>
+      <find>width</find>
+      <find>filename</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -175,64 +195,64 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/test/NN/testcnnclass.py" />
-        <option value="$PROJECT_DIR$/test/NN/testcnncolor.py" />
-        <option value="$PROJECT_DIR$/test/CRF/testcrf.py" />
-        <option value="$PROJECT_DIR$/test/Keras/testkeras.py" />
-        <option value="$PROJECT_DIR$/test/Video/angledescriptors.py" />
-        <option value="$PROJECT_DIR$/test/loadingdataset.py" />
-        <option value="$PROJECT_DIR$/classimagedataset.py" />
-        <option value="$PROJECT_DIR$/test/testutils.py" />
-        <option value="$PROJECT_DIR$/test/Video/videoselection.py" />
-        <option value="$PROJECT_DIR$/test/SVM/svmtraining.py" />
-        <option value="$PROJECT_DIR$/test/NN/trainingnn.py" />
-        <option value="$PROJECT_DIR$/test/NN/testnnpca.py" />
-        <option value="$PROJECT_DIR$/test/NN/trainingnnposes.py" />
-        <option value="$PROJECT_DIR$/test/Image/classifyposes.py" />
-        <option value="$PROJECT_DIR$/test/Image/processimage.py" />
-        <option value="$PROJECT_DIR$/test/Classes/testcalcangles.py" />
-        <option value="$PROJECT_DIR$/test/Classes/test_transform_points.py" />
-        <option value="$PROJECT_DIR$/test/Classes/testguesspoints.py" />
-        <option value="$PROJECT_DIR$/test/Classes/testgetflatlist.py" />
-        <option value="$PROJECT_DIR$/test/Video/extractallposes.py" />
-        <option value="$PROJECT_DIR$/test/Decision Trees/testdecision.py" />
-        <option value="$PROJECT_DIR$/test/Image/testfolderpose.py" />
-        <option value="$PROJECT_DIR$/test/Image/poselabeling.py" />
-        <option value="$PROJECT_DIR$/test/Video/testprocesslive.py" />
-        <option value="$PROJECT_DIR$/classnn.py" />
-        <option value="$PROJECT_DIR$/classdescriptors.py" />
-        <option value="$PROJECT_DIR$/test/Actions/processactions.py" />
-        <option value="$PROJECT_DIR$/test/Image/addzeronames.py" />
-        <option value="$PROJECT_DIR$/test/Image/testclassimages.py" />
-        <option value="$PROJECT_DIR$/test/Image/poseclassification.py" />
-        <option value="$PROJECT_DIR$/test/HMM/hmmclassifier.py" />
-        <option value="$PROJECT_DIR$/classhmm.py" />
-        <option value="$PROJECT_DIR$/test/Actions/trainactionshmm.py" />
-        <option value="$PROJECT_DIR$/test/NCS/ncs.py" />
-        <option value="$PROJECT_DIR$/test/CV/testcamcalibmulti.py" />
-        <option value="$PROJECT_DIR$/test/CV/testcaliberr.py" />
-        <option value="$PROJECT_DIR$/test/CV/testrepdegress.py" />
-        <option value="$PROJECT_DIR$/test/CV/testtransformdegrees.py" />
-        <option value="$PROJECT_DIR$/test/CV/testcamcalib.py" />
-        <option value="$PROJECT_DIR$/test/CV/testcamcalibnew.py" />
-        <option value="$PROJECT_DIR$/test/CV/testcamcalibproj.py" />
         <option value="$PROJECT_DIR$/test/CV/testcamcalibprojnew.py" />
         <option value="$PROJECT_DIR$/test/Video/testconvertmjpegfolder.py" />
-        <option value="$PROJECT_DIR$/classutils.py" />
         <option value="$PROJECT_DIR$/classopenpose.py" />
-        <option value="$PROJECT_DIR$/classmjpegconverter.py" />
-        <option value="$PROJECT_DIR$/test/Video/reidentification.py" />
-        <option value="$PROJECT_DIR$/classmjpegdate.py" />
-        <option value="$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py" />
-        <option value="$PROJECT_DIR$/test/Video/videovisualizer.py" />
+        <option value="$PROJECT_DIR$/test/CV/testtransformdegrees.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testcomputemeancircular.py" />
+        <option value="$PROJECT_DIR$/classreidentification.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testreidcolor.py" />
+        <option value="$PROJECT_DIR$/test/Utils/classifycolors.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testreference.py" />
+        <option value="$PROJECT_DIR$/test/Image/extractcolors.py" />
+        <option value="$PROJECT_DIR$/test/Utils/extractcolors.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testcolordiff.py" />
+        <option value="$PROJECT_DIR$/test/Video/testconvertmjpegxx.py" />
         <option value="$PROJECT_DIR$/classmjpegreader.py" />
+        <option value="$PROJECT_DIR$/test/Video/reidentification.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testdate.py" />
+        <option value="$PROJECT_DIR$/test/loadingdataset.py" />
+        <option value="$PROJECT_DIR$/test/UtilsPython/testarray.py" />
+        <option value="$PROJECT_DIR$/test/Image/getcolorhist.py" />
+        <option value="$PROJECT_DIR$/test/UtilsPython/testarrayslice.py" />
+        <option value="$PROJECT_DIR$/test/Video/videovisualizer.py" />
+        <option value="$PROJECT_DIR$/test/CV/testcolorpoints.py" />
+        <option value="$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py" />
+        <option value="$PROJECT_DIR$/test/NN/trainingnnposes.py" />
+        <option value="$PROJECT_DIR$/test/Video/extractallposes.py" />
+        <option value="$PROJECT_DIR$/test/Image/testclassimages.py" />
+        <option value="$PROJECT_DIR$/test/Video/testprocesslive.py" />
+        <option value="$PROJECT_DIR$/test/Image/poseclassification.py" />
+        <option value="$PROJECT_DIR$/test/Actions/processactions.py" />
+        <option value="$PROJECT_DIR$/test/Actions/trainactionshmm.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testgethistpeople.py" />
+        <option value="$PROJECT_DIR$/test/Image/testbtf.py" />
+        <option value="$PROJECT_DIR$/classpeoplereid.py" />
+        <option value="$PROJECT_DIR$/test/Video/testresavingvideo.py" />
+        <option value="$PROJECT_DIR$/test/Video/videoselection.py" />
+        <option value="$PROJECT_DIR$/test/CV/testcamcalibnew.py" />
+        <option value="$PROJECT_DIR$/test/OpenPose/testposelegs.py" />
+        <option value="$PROJECT_DIR$/test/Utils/testdrawpose.py" />
+        <option value="$PROJECT_DIR$/classutils.py" />
+        <option value="$PROJECT_DIR$/test/Video/testconvertmjpegxr.py" />
+        <option value="$PROJECT_DIR$/test/Image/processimage.py" />
+        <option value="$PROJECT_DIR$/classcolorcomparison.py" />
+        <option value="$PROJECT_DIR$/classmjpegstream.py" />
+        <option value="$PROJECT_DIR$/classmjpegconverter.py" />
+        <option value="$PROJECT_DIR$/classvideosaver.py" />
+        <option value="$PROJECT_DIR$/classmjpegclient.py" />
+        <option value="$PROJECT_DIR$/test/Classes/testmjpeg.py" />
+        <option value="$PROJECT_DIR$/test/Image/comparecolors.py" />
+        <option value="$PROJECT_DIR$/classdescriptors.py" />
+        <option value="$PROJECT_DIR$/test/Image/testgethistpeople.py" />
+        <option value="$PROJECT_DIR$/classmjpegdate.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="232" />
-    <option name="y" value="304" />
-    <option name="width" value="1353" />
+    <option name="x" value="810" />
+    <option name="y" value="177" />
+    <option name="width" value="1323" />
     <option name="height" value="875" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -241,6 +261,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -248,28 +269,10 @@
               <item name="CNN" type="b2602c69:ProjectViewProjectNode" />
               <item name="CNN" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="CNN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CNN" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CNN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CNN" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="Image" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CNN" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CNN" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="Video" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -278,15 +281,15 @@
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/test/Image" />
+      <recent name="$PROJECT_DIR$/test/NN" />
+      <recent name="$PROJECT_DIR$/test/KMeans" />
+      <recent name="$PROJECT_DIR$/test/Video" />
+      <recent name="$PROJECT_DIR$/test/numpy" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/test/CV" />
-      <recent name="$PROJECT_DIR$/test/numpy" />
-      <recent name="$PROJECT_DIR$/test/Video" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/test/NN" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -301,8 +304,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.videovisualizer">
-    <configuration name="testcamcalibnew" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.testgethistpeople">
+    <configuration name="poseclassification" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -310,17 +313,17 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/CV" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/Image" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/CV/testcamcalibnew.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/Image/poseclassification.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="testcamcalibprojnew" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="processimage" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -328,11 +331,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/CV" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/Image" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/CV/testcamcalibprojnew.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/Image/processimage.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -356,7 +359,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="testconvertmjpegxfolder" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="testgethistpeople" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -364,17 +367,17 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/Video" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/Image" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/Image/testgethistpeople.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="videovisualizer" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="testmjpeg" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CNN" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -382,30 +385,30 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/Video" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/Classes" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/Video/videovisualizer.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test/Classes/testmjpeg.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
     <list>
-      <item itemvalue="Python.testcamcalibnew" />
-      <item itemvalue="Python.testcamcalibprojnew" />
-      <item itemvalue="Python.testconvertmjpegxfolder" />
+      <item itemvalue="Python.processimage" />
+      <item itemvalue="Python.testgethistpeople" />
+      <item itemvalue="Python.testmjpeg" />
       <item itemvalue="Python.testconvertmjpegfolder" />
-      <item itemvalue="Python.videovisualizer" />
+      <item itemvalue="Python.poseclassification" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.videovisualizer" />
-        <item itemvalue="Python.testconvertmjpegxfolder" />
+        <item itemvalue="Python.testgethistpeople" />
+        <item itemvalue="Python.poseclassification" />
+        <item itemvalue="Python.processimage" />
+        <item itemvalue="Python.testmjpeg" />
         <item itemvalue="Python.testconvertmjpegfolder" />
-        <item itemvalue="Python.testcamcalibnew" />
-        <item itemvalue="Python.testcamcalibprojnew" />
       </list>
     </recent_temporary>
   </component>
@@ -427,30 +430,36 @@
       <option name="project" value="LOCAL" />
       <updated>1534102974234</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Commit changes in files">
+      <created>1534818273046</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1534818273046</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="25" width="1853" height="1055" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1732326" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25688073" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.1996762" side_tool="true" weight="0.38014784" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.22342148" side_tool="true" visible="true" weight="0.22539683" />
       <window_info anchor="bottom" id="Version Control" order="9" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.8003238" visible="true" weight="0.24656084" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.77657855" visible="true" weight="0.22539683" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32910052" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4727469" weight="0.27724868" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.85375065" weight="0.24444444" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49541286" weight="0.21375662" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4943335" weight="0.35449734" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -458,25 +467,22 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Commit" />
+    <MESSAGE value="Commit changes in files" />
+    <MESSAGE value="Commit people reidentification - september 9" />
+    <option name="LAST_COMMIT_MESSAGE" value="Commit people reidentification - september 9" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/test/Video/reidentification.py</url>
-          <line>217</line>
-          <option name="timeStamp" value="135" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/test/SVM/svmexample.py</url>
           <line>4</line>
           <option name="timeStamp" value="148" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/test/CV/testtransformdegrees.py</url>
-          <line>17</line>
-          <option name="timeStamp" value="242" />
+          <url>file://$PROJECT_DIR$/classutils.py</url>
+          <line>635</line>
+          <option name="timeStamp" value="491" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -489,375 +495,328 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="259" />
+      <option name="time" value="524" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/test/numpy/testloadingnp.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/OpenPose/testopenpose.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-45" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/OpenPose/testopenposeclass.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="11" column="58" lean-forward="true" selection-start-line="11" selection-start-column="24" selection-end-line="11" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test/Video/testprocesslive.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-38">
-          <caret line="22" column="16" lean-forward="true" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Classes/testgetflatlist.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="31" selection-start-line="8" selection-start-column="31" selection-end-line="8" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Classes/testcalcangles.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/classimagedataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/testutils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="684">
-          <caret line="37" column="9" selection-start-line="37" selection-start-column="9" selection-end-line="37" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/HMM/testhmmset.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/HMM/testhmmlearn.py">
+    <entry file="file://$PROJECT_DIR$/test/OpenPose/testposelegs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="18" column="24" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.local/lib/python3.6/site-packages/sklearn/externals/joblib/numpy_pickle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="359">
-          <caret line="569" selection-start-line="569" selection-end-line="569" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.local/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="59" selection-start-line="59" selection-end-line="59" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/classdescriptors.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="9" column="8" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/HMM/hmmstock.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file:///usr/lib/python3/dist-packages/numpy/core/numeric.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="530" selection-start-line="530" selection-end-line="530" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/loadingdataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="31" selection-start-line="2" selection-start-column="31" selection-end-line="2" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/HMM/hmmclassifier.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1539">
-          <caret line="81" lean-forward="true" selection-start-line="81" selection-end-line="81" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Image/processimage.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1216">
-          <caret line="72" column="18" selection-start-line="72" selection-start-column="18" selection-end-line="72" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/NCS/ncs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="30" selection-start-line="30" selection-end-line="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Image/testclassimages.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="619">
-          <caret line="97" column="21" selection-start-line="97" selection-start-column="21" selection-end-line="97" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Image/testfolderpose.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="1" column="30" selection-start-line="1" selection-start-column="30" selection-end-line="1" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testcaliberr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="453">
-          <caret line="162" lean-forward="true" selection-start-line="162" selection-end-line="162" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testtransformdegrees.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="532">
-          <caret line="28" lean-forward="true" selection-start-line="28" selection-end-line="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testcamcalib.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="34" lean-forward="true" selection-start-line="34" selection-end-line="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testcalibmulti.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="15" column="34" selection-start-line="15" selection-start-column="34" selection-end-line="15" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testcamcalibproj.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="13" lean-forward="true" selection-end-line="97" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testcamcalibnew.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2383">
-          <caret line="60" lean-forward="true" selection-start-line="60" selection-end-line="60" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Image/addzeronames.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="644">
-          <caret line="46" column="8" selection-start-line="46" selection-start-column="8" selection-end-line="46" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/CV/testcamcalibprojnew.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="543">
-          <caret line="87" column="57" selection-start-line="87" selection-start-column="57" selection-end-line="87" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/testresavingvideo.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/testprocessmjpegx.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
+        <state relative-caret-position="316">
+          <caret line="24" selection-start-line="24" selection-end-line="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/Video/testloadvideodate.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
+          <caret line="2" column="14" lean-forward="true" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/OpenPose/testopenpose.py">
+    <entry file="file://$PROJECT_DIR$/test/Utils/testutils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/testreference.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/NN/testinternet.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/NN/trainingnnposes.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/NN/loadingdataset.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/testcolordiff.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-228">
+        <state relative-caret-position="-159" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/classifycolors.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/extractcolors.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/testcomputemeancircular.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="15" column="29" selection-start-line="15" selection-start-column="29" selection-end-line="15" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/testdate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="9" column="30" selection-start-line="9" selection-start-column="30" selection-end-line="9" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/testdrawpose.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-159">
+          <caret line="41" column="19" lean-forward="true" selection-start-line="41" selection-start-column="19" selection-end-line="41" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Utils/testreidcolor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/CV/testcolorpoints.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="582">
+          <caret line="92" lean-forward="true" selection-start-line="92" selection-end-line="92" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Image/testclassimages.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="664">
+          <caret line="65" column="46" selection-start-line="65" selection-start-column="46" selection-end-line="65" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python3.6/threading.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16283">
+          <caret line="863" selection-start-line="863" selection-end-line="863" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python3/dist-packages/numpy/core/_methods.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Video/testconvertmjpegfolder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="430">
+          <caret line="52" column="46" selection-start-line="52" selection-start-column="46" selection-end-line="52" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Video/videoselection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#0#22#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classopenpose.py">
+    <entry file="file://$PROJECT_DIR$/test/Video/videovisualizer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="475">
-          <caret line="25" column="44" lean-forward="true" selection-start-line="25" selection-start-column="44" selection-end-line="25" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/testinternet.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/testcluster.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" selection-start-line="7" selection-end-line="7" />
-          <folding>
-            <element signature="e#180#214#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Actions/trainactionshmm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="615">
-          <caret line="87" column="9" selection-start-line="87" selection-start-column="9" selection-end-line="87" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/testprocessconverter.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/angledescriptors.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="21" column="26" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Actions/processactions.py">
+    <entry file="file://$PROJECT_DIR$/test/Classes/testmjpeg.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
-          <caret line="21" column="7" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
+          <caret line="17" column="21" selection-start-line="17" selection-start-column="21" selection-end-line="17" selection-end-column="21" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classmjpegdate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1398">
-          <caret line="127" lean-forward="true" selection-start-line="127" selection-end-line="127" />
-          <folding>
-            <element signature="e#38#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/lib/python3/dist-packages/apport_python_hook.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="46" selection-start-line="46" selection-end-line="46" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/test/Classes/testguesspoints.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/classimage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="17" column="8" selection-start-line="17" selection-start-column="8" selection-end-line="17" selection-end-column="8" />
+        <state>
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/reidentification.py">
+    <entry file="file://$PROJECT_DIR$/test/Image/processimage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="63" column="49" lean-forward="true" selection-start-line="63" selection-start-column="49" selection-end-line="63" selection-end-column="49" />
+        <state relative-caret-position="798">
+          <caret line="42" column="33" selection-start-line="42" selection-start-column="33" selection-end-line="42" selection-end-column="33" />
           <folding>
-            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#0#46#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/Video/extractallposes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="76" column="25" selection-start-line="76" selection-start-column="24" selection-end-line="76" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/testconvertmjpegfolder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="410">
-          <caret line="52" column="47" lean-forward="true" selection-start-line="52" selection-start-column="47" selection-end-line="52" selection-end-column="47" />
+        <state relative-caret-position="-7">
           <folding>
-            <element signature="e#33#63#0" expanded="true" />
+            <element signature="e#0#22#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/Image/poselabeling.py">
+    <entry file="file://$PROJECT_DIR$/test/Video/testconvertmjpegxr.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="181">
-          <caret line="93" column="10" lean-forward="true" selection-start-line="93" selection-start-column="10" selection-end-line="104" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Image/poseclassification.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="608">
-          <caret line="40" column="43" selection-start-line="40" selection-start-column="43" selection-end-line="40" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/classhmm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="644">
-          <caret line="102" selection-start-line="102" selection-end-line="102" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/Video/videovisualizer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="741">
-          <caret line="123" column="8" selection-start-line="123" selection-start-column="8" selection-end-line="123" selection-end-column="8" />
-          <folding>
-            <element signature="e#178#219#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="19">
+          <caret line="719" column="36" lean-forward="true" selection-start-line="719" selection-start-column="36" selection-end-line="719" selection-end-column="36" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/Video/testconvertmjpegxfolder.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="448">
-          <caret line="34" column="52" selection-start-line="34" selection-start-column="52" selection-end-line="34" selection-end-column="52" />
+        <state relative-caret-position="456">
+          <caret line="29" column="25" selection-start-line="29" selection-start-column="24" selection-end-line="29" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classcnn.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classutils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="664">
+          <caret line="633" column="16" selection-start-line="633" selection-start-column="16" selection-end-line="633" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classimagedataset.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classmjpegconverter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="664">
+          <caret line="84" column="39" selection-start-line="84" selection-start-column="39" selection-end-line="84" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classmjpegclient.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-957">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
           <folding>
-            <element signature="e#0#30#0" expanded="true" />
+            <element signature="e#272#315#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classmjpegconverter.py">
+    <entry file="file://$PROJECT_DIR$/classvideosaver.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="143" column="47" selection-start-line="143" selection-start-column="47" selection-end-line="143" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/classutils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-95">
-          <caret line="295" column="8" selection-start-line="295" selection-start-column="8" selection-end-line="295" selection-end-column="8" />
+        <state relative-caret-position="544">
+          <caret line="48" column="52" selection-start-line="48" selection-start-column="52" selection-end-line="48" selection-end-column="52" />
+          <folding>
+            <element signature="e#65#98#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/classmjpegreader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="524">
-          <caret line="88" lean-forward="true" selection-start-line="88" selection-end-line="88" />
+        <state relative-caret-position="228">
+          <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classnn.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classopenpose.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="494">
+          <caret line="28" column="8" selection-start-line="28" selection-start-column="8" selection-end-line="28" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classcolorcomparison.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="411">
+          <caret line="32" column="33" selection-start-line="32" selection-start-column="33" selection-end-line="32" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python3/dist-packages/apport_python_hook.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="48" selection-start-line="48" selection-end-line="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Image/testfolderpose.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Image/testbtf.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="512">
+          <caret line="187" selection-start-line="187" selection-end-line="187" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Image/poseclassification.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="77" column="49" selection-start-line="77" selection-start-column="41" selection-end-line="77" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Image/testgethistpeople.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="155" lean-forward="true" selection-start-line="155" selection-end-line="155" />
+          <folding>
+            <element signature="e#0#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/Image/comparecolors.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1007">
+          <caret line="60" column="91" selection-start-line="60" selection-start-column="91" selection-end-line="60" selection-end-column="91" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classpeoplereid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="664">
+          <caret line="188" selection-start-line="188" selection-end-line="188" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classdescriptors.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="16" column="27" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/classmjpegdate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="7" column="51" lean-forward="true" selection-start-line="7" selection-start-column="51" selection-end-line="7" selection-end-column="51" />
         </state>
       </provider>
     </entry>

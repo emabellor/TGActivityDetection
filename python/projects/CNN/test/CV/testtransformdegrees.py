@@ -9,7 +9,7 @@ def main():
 
     # Loading instances
     center = [200, 200]
-    point = [1, 2]
+    point = [1, -2]
 
     angle1 = 0
     angle2 = 180

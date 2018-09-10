@@ -64,7 +64,7 @@ def main():
                 continue
             else:
                 result_des = ClassDescriptors.get_person_descriptors(arr_pass[0], min_pose_score)
-                descriptor_arr = result_des['full_desc']
+                descriptor_arr = result_des['fullDesc']
 
                 # Add descriptors to list
                 desc_list.append(descriptor_arr)

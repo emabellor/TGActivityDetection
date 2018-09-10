@@ -5,6 +5,11 @@ from datetime import datetime
 from datetime import timedelta
 import math
 from datetime import datetime
+import cv2
+import uuid
+from colormath.color_objects import AdobeRGBColor, LabColor, HSVColor, sRGBColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
 
 class ClassUtils:
@@ -53,9 +58,18 @@ class ClassUtils:
         return os.path.exists(base_dir)
 
     @staticmethod
-    def ticks_to_datetime(ticks):
+    def ticks_to_datetime(ticks: float):
         dt = datetime(1, 1, 1) + timedelta(microseconds=ticks / 10)
         return dt
+
+    @staticmethod
+    def datetime_to_ticks(date: datetime):
+        microseconds = int((date - datetime(1, 1, 1)).total_seconds() * 1000000 * 10)
+        return microseconds
+
+    @classmethod
+    def get_euclidean_distance_pt(cls, pt1: list, pt2: list):
+        return cls.get_euclidean_distance(pt1[0], pt1[1], pt2[0], pt2[1])
 
     @staticmethod
     def get_euclidean_distance(x1, y1, x2, y2):
@@ -240,25 +254,33 @@ class ClassUtils:
         return (int(min_x), int(min_y)), (int(max_x), int(max_y))
 
     @staticmethod
-    def check_vector_integrity_low(vector, min_pose_score):
-        """
-        Checking vector integrity
-        Vector 1, 8 must exists -> Torse
-        Vector 2, 5 must be one -> Shoulders
-        Vector 10, 13, must be one -> Legs
-        Score is in the position 2
-        """
+    def get_rectangle_bounds_upper(person_arr, min_score):
+        # Only taking account points 1 to 8
+        min_x = 0
+        min_y = 0
+        max_x = 0
+        max_y = 0
 
-        if vector[1][2] < min_pose_score:
-            return False
-        elif vector[2][2] < min_pose_score and vector[5][2] < min_pose_score:
-            return False
-        elif vector[8][2] < min_pose_score:
-            return False
-        elif vector[10][2] < min_pose_score and vector[13][2] < min_pose_score:
-            return False
-        else:
-            return True
+        first = True
+        for index in range(1, 8 + 1):
+            item = person_arr[index]
+            if item[2] >= min_score:
+                if first:
+                    min_x = item[0]
+                    min_y = item[1]
+                    max_x = item[0]
+                    max_y = item[1]
+                    first = False
+                if item[0] < min_x:
+                    min_x = item[0]
+                if item[1] < min_y:
+                    min_y = item[1]
+                if item[0] > max_x:
+                    max_x = item[0]
+                if item[1] > max_y:
+                    max_y = item[1]
+
+        return (int(min_x), int(min_y)), (int(max_x), int(max_y))
 
     @staticmethod
     def check_point_integrity(point, min_pose_score):
@@ -266,20 +288,6 @@ class ClassUtils:
             return False
         else:
             return True
-
-    @staticmethod
-    def check_vector_integrity_full(vector, min_pose_score):
-        # Checking vector integrity from all elements
-        # Elements from 1 to 14
-        # Total elements: 14
-        result = True
-
-        for i in range(14):
-            if vector[i + 1][2] < min_pose_score:
-                result = False
-                break
-
-        return result
 
     @staticmethod
     def check_point_list(vector_points, min_pose_score):
@@ -292,8 +300,32 @@ class ClassUtils:
 
         return result
 
+    @classmethod
+    def check_vector_only_pos(cls, vector, min_pose_score):
+        # Check if vector is only pos
+        # Vector must be checked with check_vector_integrity_pos first
+        # If not, an exception will be raised
+
+        if not cls.check_vector_integrity_pos(vector, min_pose_score):
+            raise Exception('Vector integrity not valid')
+
+        # Vector integrity part must be used for pose detection
+        # Vector integrity pos must be used only for reidentification and position
+        valid = cls.check_vector_integrity_part(vector, min_pose_score)
+
+        if valid:
+            return False
+        else:
+            return True
+
+    @classmethod
+    def check_vector_integrity_pos(cls, vector, min_pose_score):
+        # More relaxed than check_vector_integrity_part
+        # Detect position elements
+        return cls.check_vector_integrity_part(vector, min_pose_score, only_pos=True)
+
     @staticmethod
-    def check_vector_integrity_part(vector, min_pose_score):
+    def check_vector_integrity_part(vector, min_pose_score, only_pos=False):
         # Checking vector integrity part
         # One part of the vector must exist
 
@@ -301,16 +333,19 @@ class ClassUtils:
         if vector[1][2] < min_pose_score or vector[8][2] < min_pose_score:
             return False
 
-        # Check arms
-        # One of the segments must be valid
-        arms_valid = False
-        if vector[2][2] >= min_pose_score and vector[3][2] >= min_pose_score and vector[4][2] >= min_pose_score:
-            arms_valid = True
-        if vector[5][2] >= min_pose_score and vector[6][2] >= min_pose_score and vector[7][2] >= min_pose_score:
-            arms_valid = True
+        # If only pos is activated
+        # Arms integrity does not care
+        if not only_pos:
+            # Check arms
+            # One of the segments must be valid
+            arms_valid = False
+            if vector[2][2] >= min_pose_score and vector[3][2] >= min_pose_score and vector[4][2] >= min_pose_score:
+                arms_valid = True
+            if vector[5][2] >= min_pose_score and vector[6][2] >= min_pose_score and vector[7][2] >= min_pose_score:
+                arms_valid = True
 
-        if not arms_valid:
-            return False
+            if not arms_valid:
+                return False
 
         # Check legs
         # One of the segments must be valid
@@ -494,3 +529,410 @@ class ClassUtils:
         # Getting cam number
         elems = file_path.split('/')
         return elems[-2]
+
+    @staticmethod
+    def complete_points(person_vector, min_score):
+        # Complete person points
+        # Must be set for position purposes
+
+        new_vector = list()
+        for point in person_vector:
+            new_vector.append([point[0], point[1], point[2]])
+
+        # Complete legs
+        # Consider simultaneous cases
+        # Vector must be checked first with check_vector_integrity_part
+        # Vector 10, 11 are invalid - assume 9 is invalid
+        if new_vector[10][2] < min_score and new_vector[11][2] < min_score:
+            new_vector[9][0] = new_vector[12][0]
+            new_vector[9][1] = new_vector[12][1]
+            new_vector[9][2] = new_vector[12][2]
+            new_vector[10][0] = new_vector[13][0]
+            new_vector[10][1] = new_vector[13][1]
+            new_vector[10][2] = new_vector[13][2]
+            new_vector[11][0] = new_vector[14][0]
+            new_vector[11][1] = new_vector[14][1]
+            new_vector[11][2] = new_vector[14][2]
+        elif min_score and new_vector[13][2] < min_score and new_vector[14][2] < min_score:
+            # Vectors 13 and 14 are invalid - assume 12 is invalid
+            new_vector[12][0] = new_vector[9][0]
+            new_vector[12][1] = new_vector[9][1]
+            new_vector[12][2] = new_vector[9][2]
+            new_vector[13][0] = new_vector[10][0]
+            new_vector[13][1] = new_vector[10][1]
+            new_vector[13][2] = new_vector[10][2]
+            new_vector[14][0] = new_vector[11][0]
+            new_vector[14][1] = new_vector[11][1]
+            new_vector[14][2] = new_vector[11][2]
+
+        # Complete 11 and 14 if invalid
+        if new_vector[11][2] < min_score:
+            # Project points
+            delta_x = new_vector[10][0] - new_vector[9][0]
+            delta_y = new_vector[10][1] - new_vector[9][1]
+            new_vector[11][0] = new_vector[10][0] + delta_x
+            new_vector[11][1] = new_vector[10][1] + delta_y
+            new_vector[11][2] = 1
+        if new_vector[14][2] < min_score:
+            # Project points
+            delta_x = new_vector[13][0] - new_vector[12][0]
+            delta_y = new_vector[13][1] - new_vector[12][1]
+            new_vector[14][0] = new_vector[13][0] + delta_x
+            new_vector[14][1] = new_vector[13][1] + delta_y
+            new_vector[14][2] = 1
+
+        return new_vector
+
+    @classmethod
+    def draw_pose(cls, image, person_vector, min_score):
+        # Draw poses
+        cls._draw_line_pose(image, person_vector[0], person_vector[1], min_score)
+
+        cls._draw_line_pose(image, person_vector[1], person_vector[2], min_score)
+        cls._draw_line_pose(image, person_vector[2], person_vector[3], min_score)
+        cls._draw_line_pose(image, person_vector[3], person_vector[4], min_score)
+
+        cls._draw_line_pose(image, person_vector[1], person_vector[5], min_score)
+        cls._draw_line_pose(image, person_vector[5], person_vector[6], min_score)
+        cls._draw_line_pose(image, person_vector[6], person_vector[7], min_score)
+
+        cls._draw_line_pose(image, person_vector[1], person_vector[8], min_score)
+
+        cls._draw_line_pose(image, person_vector[8], person_vector[9], min_score)
+        cls._draw_line_pose(image, person_vector[9], person_vector[10], min_score)
+        cls._draw_line_pose(image, person_vector[10], person_vector[11], min_score)
+
+        cls._draw_line_pose(image, person_vector[8], person_vector[12], min_score)
+        cls._draw_line_pose(image, person_vector[12], person_vector[13], min_score)
+        cls._draw_line_pose(image, person_vector[13], person_vector[14], min_score)
+
+        # Draw foot
+        cls._draw_line_pose(image, person_vector[14], person_vector[21], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[21], person_vector[20], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[20], person_vector[19], min_score, color=(0, 255, 255))
+
+        cls._draw_line_pose(image, person_vector[11], person_vector[24], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[24], person_vector[23], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[23], person_vector[22], min_score, color=(0, 255, 255))
+
+        # Draw plumb position using femur
+        cls._draw_plumb_femur(image, person_vector, min_score)
+
+        # Done
+
+    @classmethod
+    def _draw_plumb_torso(cls, image, person_vector, min_score):
+        if ClassUtils.check_point_integrity(person_vector[1], min_score) and \
+                ClassUtils.check_point_integrity(person_vector[8], min_score):
+            plumb_factor = 1.5
+            distance_plumb = ClassUtils.get_euclidean_distance_pt(person_vector[1], person_vector[8])
+            distance_plumb *= plumb_factor
+
+            plumb_pt = [person_vector[8][0], person_vector[8][1] + distance_plumb, 1]
+            cls._draw_line_pose(image, person_vector[8], plumb_pt, min_score, color=(161, 0, 255))
+
+    @classmethod
+    def _draw_plumb_femur(cls, image, person_vector, min_score):
+        distance_plumb = 0
+        plumb_factor = 2
+
+        if ClassUtils.check_point_integrity(person_vector[9], min_score) and \
+                ClassUtils.check_point_integrity(person_vector[10], min_score):
+            distance_plumb += ClassUtils.get_euclidean_distance_pt(person_vector[9], person_vector[10])
+
+        if ClassUtils.check_point_integrity(person_vector[12], min_score) and \
+                ClassUtils.check_point_integrity(person_vector[13], min_score):
+            distance_plumb += ClassUtils.get_euclidean_distance_pt(person_vector[12], person_vector[13])
+
+            # Check mean
+            if distance_plumb != 0:
+                distance_plumb /= 2
+
+        if distance_plumb != 0:
+            distance_plumb *= plumb_factor
+            plumb_pt = [person_vector[8][0], person_vector[8][1] + distance_plumb, 1]
+            cls._draw_line_pose(image, person_vector[8], plumb_pt, min_score, color=(161, 0, 255))
+
+    @classmethod
+    def draw_position(cls, image, local_position):
+        x_pos = int(local_position[0])
+        y_pos = int(local_position[1])
+
+        radius = 5
+
+        if x_pos != 0 or y_pos != 0:
+            # Drawing position point
+            cv2.rectangle(image, (x_pos - radius, y_pos - radius), (x_pos + radius, y_pos + radius),
+                          (255, 255, 255), cv2.FILLED)
+
+        # Done!
+
+    @staticmethod
+    def _draw_line_pose(image, point0, point1, min_score, color=(255, 255, 0)):
+        if point0[2] >= min_score and point1[2] > min_score:
+            cv2.line(image, (int(point0[0]), int(point0[1])),
+                     (int(point1[0]), int(point1[1])), color, 3)
+
+    @classmethod
+    def compute_mean_circular_deg(cls, list_angles_deg):
+        list_angle_rad = list()
+        for angle in list_angles_deg:
+            list_angle_rad.append(angle * math.pi / 180)
+
+        mean_angle_rad = cls.compute_mean_circular(list_angle_rad)
+        return mean_angle_rad * 180 / math.pi
+
+    @staticmethod
+    def compute_mean(list_numbers):
+        result = 0
+        for number in list_numbers:
+            result += number
+        return result / len(list_numbers)
+
+    @staticmethod
+    def compute_mean_circular(list_angles_rad: list):
+        # Calculate mean using sphere method
+        # Inspired in stack overflow response
+        # https://stackoverflow.com/questions/491738/how-do-you-calculate-the-average-of-a-set-of-circular-data
+
+        list_points = list()
+        x_avg = 0
+        y_avg = 0
+
+        for angle in list_angles_rad:
+            y_avg += math.sin(angle)
+            x_avg += math.cos(angle)
+
+        # Avoid zero division and control theta quadrant
+        if x_avg != 0:
+            theta = math.atan(y_avg / x_avg)
+        else:
+            theta = math.pi / 2
+
+        if x_avg < 0:
+            theta += math.pi
+
+        if theta < 0:
+            theta += 2 * math.pi
+
+        if theta >= 2 * math.pi:
+            theta -= 2 * math.pi
+
+        return theta
+
+    @classmethod
+    def get_color_diff_bgr(cls, color1_bgr, color2_bgr):
+        if isinstance(color1_bgr, np.ndarray):
+            color1_item = [int(color1_bgr[0, 0, 0]), int(color1_bgr[0, 0, 1]), int(color1_bgr[0, 0, 2])]
+        else:
+            color1_item = color1_bgr
+
+        if isinstance(color2_bgr, np.ndarray):
+            color2_item = [int(color2_bgr[0, 0, 0]), int(color2_bgr[0, 0, 1]), int(color2_bgr[0, 0, 2])]
+        else:
+            color2_item = color2_bgr
+
+        return cls.get_color_diff_rgb([color1_item[2], color1_item[1], color1_item[0]],
+                                      [color2_item[2], color2_item[1], color2_item[0]])
+
+    @classmethod
+    def get_color_diff_rgb(cls, color1_rgb, color2_rgb, eq_lum=False):
+        # Inspired in this post
+        # http://hanzratech.in/2015/01/16/color-difference-between-2-colors-using-python.html
+        # Values must be between 0 and 255
+
+        # Get color diff based on lum equailization
+        # Lab color space
+
+        bgr_elem1 = [int(color1_rgb[2]), int(color1_rgb[1]), int(color1_rgb[0])]
+        cv_point1 = np.array([[bgr_elem1]], dtype=np.uint8)
+
+        bgr_elem2 = [int(color2_rgb[2]), int(color2_rgb[1]), int(color2_rgb[0])]
+        cv_point2 = np.array([[bgr_elem2]], dtype=np.uint8)
+
+        # Convert to lab
+        lab1_pt = cv2.cvtColor(cv_point1, cv2.COLOR_BGR2LAB)
+        lab2_pt = cv2.cvtColor(cv_point2, cv2.COLOR_BGR2LAB)
+
+        # Equals lab2 lum to lab1
+        if eq_lum:
+            lab2_pt[0, 0, 0] = lab1_pt[0, 0, 0]
+
+        # Compare and return result
+        return cls.get_color_diff_lab(lab1_pt, lab2_pt)
+
+    @classmethod
+    def get_color_diff_lum_value(cls, color1_rgb, color2_rgb):
+        bgr_elem1 = [int(color1_rgb[2]), int(color1_rgb[1]), int(color1_rgb[0])]
+        cv_point1 = np.array([[bgr_elem1]], dtype=np.uint8)
+
+        bgr_elem2 = [int(color2_rgb[2]), int(color2_rgb[1]), int(color2_rgb[0])]
+        cv_point2 = np.array([[bgr_elem2]], dtype=np.uint8)
+
+        # Convert to lab
+        lab1_pt = cv2.cvtColor(cv_point1, cv2.COLOR_BGR2LAB)
+        lab2_pt = cv2.cvtColor(cv_point2, cv2.COLOR_BGR2LAB)
+
+        diff_lum = math.fabs(int(lab2_pt[0, 0, 0]) - int(lab1_pt[0, 0, 0]))
+
+        return diff_lum
+
+    @classmethod
+    def get_color_diff_rgb_lum(cls, color1_rgb, color2_rgb):
+        # Compare and return result
+        return cls.get_color_diff_rgb(color1_rgb, color2_rgb, eq_lum=True)
+
+    @staticmethod
+    def get_color_diff_lab(color1_lab, color2_lab):
+
+        if isinstance(color1_lab, np.ndarray):
+            color1_item = [int(color1_lab[0, 0, 0]), int(color1_lab[0, 0, 1]), int(color1_lab[0, 0, 2])]
+        else:
+            color1_item = color1_lab
+
+        if isinstance(color2_lab, np.ndarray):
+            color2_item = [int(color2_lab[0, 0, 0]), int(color2_lab[0, 0, 1]), int(color2_lab[0, 0, 2])]
+        else:
+            color2_item = color2_lab
+
+        color1 = LabColor(color1_item[0] * 100 / 255, color1_item[1] - 128, color1_item[2] - 128)
+        color2 = LabColor(color2_item[0] * 100 / 255, color2_item[1] - 128, color2_item[2] - 128)
+
+        # Find the color difference
+        delta_e = delta_e_cie2000(color1, color2)
+        return delta_e
+
+    @staticmethod
+    def generate_uuid():
+        guid = str(uuid.uuid4())
+        return guid
+
+    @staticmethod
+    def check_valid_vector_points(person_vector, min_score):
+        vector_count = 0
+        for point in person_vector:
+            if point[2] >= min_score:
+                vector_count += 1
+
+        return vector_count
+
+    @staticmethod
+    def cv_key_to_number(key):
+        if key == 48:
+            return 0
+        elif key == 49:
+            return 1
+        elif key == 50:
+            return 2
+        elif key == 51:
+            return 3
+        elif key == 52:
+            return 4
+        elif key == 53:
+            return 5
+        elif key == 54:
+            return 6
+        elif key == 55:
+            return 7
+        elif key == 56:
+            return 8
+        elif key == 57:
+            return 9
+        else:
+            return -1
+
+    @staticmethod
+    def eq_lum_rgb_colors(color_rgb, color_dst_rgb):
+        # Insert arr
+        bgr_elem1 = [int(color_rgb[2]), int(color_rgb[1]), int(color_rgb[0])]
+        cv_point1 = np.array([[bgr_elem1]], dtype=np.uint8)
+
+        bgr_elem2 = [int(color_dst_rgb[2]), int(color_dst_rgb[1]), int(color_dst_rgb[0])]
+        cv_point2 = np.array([[bgr_elem2]], dtype=np.uint8)
+
+        # Convert to lab
+        lab1_pt = cv2.cvtColor(cv_point1, cv2.COLOR_BGR2LAB)
+        lab2_pt = cv2.cvtColor(cv_point2, cv2.COLOR_BGR2LAB)
+
+        # Equals lab2 lum to lab1
+        lab2_pt[0, 0, 0] = lab1_pt[0, 0, 0]
+
+        # Transform again in bgr
+        eq_bgr_color = cv2.cvtColor(lab2_pt, cv2.COLOR_LAB2BGR)
+
+        # Returns arr
+        return [int(eq_bgr_color[0, 0, 2]), int(eq_bgr_color[0, 0, 1]), int(eq_bgr_color[0, 0, 0])]
+
+    @classmethod
+    def compare_colors(cls, upper1_rgb, upper2_rgb, lower1_rgb, lower2_rgb):
+        bgr_upper1 = [int(upper1_rgb[2]), int(upper1_rgb[1]), int(upper1_rgb[0])]
+        cv_upper1 = np.array([[bgr_upper1]], dtype=np.uint8)
+
+        bgr_upper2 = [int(upper2_rgb[2]), int(upper2_rgb[1]), int(upper2_rgb[0])]
+        cv_upper2 = np.array([[bgr_upper2]], dtype=np.uint8)
+
+        bgr_lower1 = [int(lower1_rgb[2]), int(lower1_rgb[1]), int(lower1_rgb[0])]
+        cv_lower1 = np.array([[bgr_lower1]], dtype=np.uint8)
+
+        bgr_lower2 = [int(lower2_rgb[2]), int(lower2_rgb[1]), int(lower2_rgb[0])]
+        cv_lower2 = np.array([[bgr_lower2]], dtype=np.uint8)
+
+        # Convert to lab
+        lab_upper1 = cv2.cvtColor(cv_upper1, cv2.COLOR_BGR2LAB)
+        lab_upper2 = cv2.cvtColor(cv_upper2, cv2.COLOR_BGR2LAB)
+        lab_lower1 = cv2.cvtColor(cv_lower1, cv2.COLOR_BGR2LAB)
+        lab_lower2 = cv2.cvtColor(cv_lower2, cv2.COLOR_BGR2LAB)
+
+        # Calculate delta
+        delta_lower = int(lab_lower2[0, 0, 0]) - int(lab_lower1[0, 0, 0])
+
+        # Add candidates
+        list_upper_cn = list()
+        list_lower_cn = list()
+
+        list_upper_cn.append((lab_upper1, lab_upper2, 0))
+        list_lower_cn.append((lab_lower1, lab_lower2, 0))
+
+        # Add elements into list - Lower_delta
+        # Only if it is less than 100
+        if delta_lower < 100:
+            list_upper_cn.append((cls.add_delta_lab(lab_upper1, delta_lower), lab_upper2, delta_lower))
+            list_lower_cn.append((cls.add_delta_lab(lab_lower1, delta_lower), lab_lower2, delta_lower))
+
+        min_score = -1
+        min_diff_upper = 0
+        min_diff_lower = 0
+        min_delta = 0
+
+        for i in range(len(list_upper_cn)):
+            upper1, upper2, delta = list_upper_cn[i]
+            lower1, lower2, _ = list_lower_cn[i]
+
+            diff_upper = cls.get_color_diff_lab(upper1, upper2)
+            diff_lower = cls.get_color_diff_lab(lower1, lower2)
+
+            score = diff_upper
+            if min_score == -1 or score < min_score:
+                min_score = score
+                min_diff_upper = diff_upper
+                min_diff_lower = diff_lower
+                min_delta = delta
+
+        return min_diff_upper, min_diff_lower, min_delta
+
+    @staticmethod
+    def add_delta_lab(np_lab, delta):
+        new_color = np.copy(np_lab)
+
+        new_lum = int(new_color[0, 0, 0] + delta)
+        if new_lum > 255:
+            new_lum = 255
+        elif new_lum < 0:
+            new_lum = 0
+
+        new_color[0, 0, 0] = new_lum
+
+        return new_color
+
+
+

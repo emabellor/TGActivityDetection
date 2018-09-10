@@ -10,7 +10,9 @@ negative_dir = '/home/mauricio/Datasets/Example/Neg'
 
 def main():
     print('Loading dataset')
-    instance = ClassImageDataSet(positive_dir, negative_dir)
+    width_resize = 28
+    height_resize = 28
+    instance = ClassImageDataSet(positive_dir, negative_dir, width_resize, height_resize)
 
     pos_train, neg_train = instance.load_train_set()
     pos_eval, neg_eval = instance.load_eval_set()

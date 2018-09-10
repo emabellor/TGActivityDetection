@@ -181,7 +181,7 @@ def classify_images(list_folder_data):
             # Fill training and eval list
             # Use angles and position information
             data_to_add = results['angles']
-            data_to_add += ClassUtils.get_flat_list(results['transformed_points'])
+            data_to_add += ClassUtils.get_flat_list(results['transformedPoints'])
             if num_file < total_train:
                 training_data.append(data_to_add)
                 training_labels.append(label)

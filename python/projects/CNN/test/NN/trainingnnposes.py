@@ -7,6 +7,7 @@ from classutils import ClassUtils
 from classdescriptors import ClassDescriptors
 from classnn import ClassNN
 
+min_score = 0.05
 
 def main():
     print('Initializing main function')
@@ -91,14 +92,14 @@ def get_sets_folder(base_folder, label, instance_pose: ClassOpenPose):
         elif len(arr) == 1:
             person_array = arr[0]
 
-            integrity = ClassUtils.check_vector_integrity_low(person_array)
+            integrity = ClassUtils.check_vector_integrity_part(person_array, min_score)
 
             if not integrity:
                 raise Exception('Invalid integrity for points in image: {0}'.format(full_name))
         else:
             found = False
             for arr_index in arr:
-                integrity = ClassUtils.check_vector_integrity_low(arr_index)
+                integrity = ClassUtils.check_vector_integrity_part(arr_index, min_score)
 
                 if integrity:
                     found = True
@@ -108,7 +109,7 @@ def get_sets_folder(base_folder, label, instance_pose: ClassOpenPose):
             if not found:
                 raise Exception('Cant find a valid person array for image {0}'.format(full_name))
 
-        results = ClassDescriptors.get_person_descriptors(person_array)
+        results = ClassDescriptors.get_person_descriptors(person_array, min_score)
 
         if index < training:
             tr_features.append(results['angles'])
