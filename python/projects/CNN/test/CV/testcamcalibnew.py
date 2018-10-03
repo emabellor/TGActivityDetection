@@ -12,6 +12,7 @@ import numpy as np
 import tkinter as tk
 import json
 import os
+from shutil import copyfile
 
 image = None  # type:np.ndarray
 image_points = list()
@@ -29,6 +30,8 @@ default_positions = [
     [-95, 250],
     [95, 250]
 ]
+
+selected_file = ''
 
 
 def mouse_callback(event, x_image, y_image, flags, param):
@@ -99,14 +102,21 @@ def main():
 
 def loading_image(cam_number: str):
     global image
+    global selected_file
+
     print('Loading image')
     init_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number
+
+    if not os.path.exists(init_dir):
+        init_dir = '/home/mauricio/Pictures'
+
     options = {'initialdir': init_dir}
     filename = askopenfilename(**options)
 
     if not filename:
         print('File not selected')
     else:
+        selected_file = filename
         image = cv2.imread(filename)
 
         cv2.namedWindow('image')
@@ -183,6 +193,7 @@ def ask_position_angle(cam_number: str):
 
 
 def calc_homo(cam_number: str):
+    global selected_file
     global image_points
     global object_points
     global center
@@ -219,6 +230,11 @@ def calc_homo(cam_number: str):
     with open(base_dir, 'w') as file:
         file.write(elem_str)
 
+    # Copying base calib image
+    init_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calib.jpg'
+    copyfile(selected_file, init_dir)
+
+    # Print Done Message!
     print('Done!')
 
 

@@ -1,11 +1,11 @@
 from tkinter.filedialog import askopenfilename
+from tkinter import filedialog
 from tkinter import Tk
 import cv2
 import os
 from classopenpose import ClassOpenPose
 from classdescriptors import ClassDescriptors
 from classutils import ClassUtils
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import numpy as np
 import json
@@ -25,7 +25,8 @@ def main():
     option = input('Select 1 to test single - Select 2 to test BTF transformation, 3 test to adjust with '
                    'LAB adjustment - 4 to test lab with json imgs -  5 to test color eq - '
                    '6 to test color comparision - 7 to test full color comparision - '
-                   '8 to view color histogram - 9 to test compare color hist: ')
+                   '8 to view color histogram - 9 to test compare color hist - '
+                   '10 to test compare color hist eq - 11 to reprocess folder: ')
 
     if option == '1':
         process_single()
@@ -45,6 +46,10 @@ def main():
         test_view_histogram()
     elif option == '9':
         test_color_compare_hist()
+    elif option == '10':
+        test_color_compare_hist_eq()
+    elif option == '11':
+        re_process_folder()
     else:
         print('Option not recognized: {0}'.format(option))
 
@@ -292,10 +297,7 @@ def test_color_compare():
 
     # Avoid to open two prompts
     obj_img = ClassDescriptors.load_images_comparision_ext(instance_pose, min_score, load_one_img=True)
-    upper1 = obj_img['colorUpper1']
-    lower1 = obj_img['colorLower1']
-
-    label1 = obj_img['label1']
+    hist_pose1 = obj_img['listPoints1']
 
     list_process = list()
 
@@ -321,62 +323,45 @@ def test_color_compare():
         with open(json_path, 'r') as f:
             obj_json = json.loads(f.read())
 
-        upper2 = obj_json['colorUpper']
-        lower2 = obj_json['colorLower']
-        label2 = obj_json['label']
+        his_pose2 = obj_json['histPose']
+        diff = ClassDescriptors.get_kmeans_diff(hist_pose1, his_pose2)
+        print('Diff {0}'.format(diff))
 
-        diff1 = ClassUtils.get_color_diff_rgb(upper1, upper2)
-        diff2 = ClassUtils.get_color_diff_rgb(lower1, lower2)
-        print('Diffs upper: {0} - lower: {1}'.format(diff1, diff2))
-
-        diff1 = ClassUtils.get_color_diff_rgb_lum(upper1, upper2)
-        diff2 = ClassUtils.get_color_diff_rgb_lum(lower1, lower2)
-        print('Diffs lum eq upper: {0} - lower: {1}'.format(diff1, diff2))
-
-        min_diff_upper, min_diff_lower, delta = ClassUtils.compare_colors(upper1, upper2, lower1, lower2)
-
-        print('Compare colors upper: {0} - lower: {1} - Delta: {2}'.format(min_diff_upper, min_diff_lower, delta))
-        score = min_diff_upper
+        if diff <= 15:
+            res = True
+        else:
+            res = False
 
         list_result.append({
             'filename': ClassUtils.get_filename_no_extension(full_path),
-            'score': score
+            'score': res
         })
 
-        if label1 == label2:
-            if score_max_pt == -1 or score > score_max_pt:
-                score_max_pt = score
-
-    list_result.sort(key=lambda x: x['score'])
+    # list_result.sort(key=lambda x: x['score'])
     print('Printing list result')
-    print(list_result)
+    print(json.dumps(list_result, indent=2))
     print('min_score: {0}'.format(score_max_pt))
 
     print('Done!')
 
 
-def test_color_compare_hist():
+def test_color_compare_hist(perform_eq=False):
     print('Test color comparision')
 
     print('Loading image comparision')
     # Loading instances
     instance_pose = ClassOpenPose()
 
+    ignore_json_color = False
+    if perform_eq:
+        ignore_json_color = True
+
     # Avoid to open two prompts
-    obj_img = ClassDescriptors.load_images_comparision_ext(instance_pose, min_score, load_one_img=True)
+    obj_img = ClassDescriptors.load_images_comparision_ext(instance_pose, min_score, load_one_img=True,
+                                                           perform_eq=perform_eq, ignore_json_color=ignore_json_color)
 
-    # Getting dominant color
-    clusters = 10
-    clt1 = KMeans(n_clusters=clusters)
-
-    clt1.fit(np.array(obj_img['listPoints1']))
-    hist1 = ClassDescriptors.centroid_histogram(clt1)
-
-    # Generating maximum of color
-    max1 = max(hist1)
-    index1 = [i for i, j in enumerate(hist1) if j == max1][0]
-
-    color1 = clt1.cluster_centers_[index1]
+    # Extract color comparision from image
+    hist1 = obj_img['listPoints1']
 
     # Generating examples folder
     list_process = list()
@@ -404,16 +389,28 @@ def test_color_compare_hist():
             obj_json = json.loads(f.read())
 
         image2 = cv2.imread(full_path)
-        pose2 = obj_json['vector']
-        points2 = ClassDescriptors.get_points_by_pose(image2, pose2, min_score)
 
-        clt2 = KMeans(n_clusters=clusters)
+        if perform_eq:
+            image2 = ClassUtils.equalize_hist(image2)
 
-        clt2.fit(np.array(points2))
+        if 'vector' in obj_json:
+            pose2 = obj_json['vector']
+        elif 'vectors' in obj_json:
+            pose2 = obj_json['vectors']
+        else:
+            raise Exception('Invalid vector property for vector custom')
 
-        for centroid in clt2.cluster_centers_:
-            diff = ClassUtils.get_color_diff_rgb(color1, centroid)
-            print('Diff: {0}'.format(diff))
+        hist2 = ClassDescriptors.get_points_by_pose(image2, pose2, min_score)
+
+        diff = ClassDescriptors.get_kmeans_diff(hist1, hist2)
+
+        # Getting mean y from image 2 - discarding purposes
+        pt1, pt2 = ClassUtils.get_rectangle_bounds(pose2, min_score)
+        image2_crop = image2[pt1[1]:pt2[1], pt1[0]:pt2[0]]
+        image2_ycc = cv2.cvtColor(image2_crop, cv2.COLOR_BGR2YCrCb)
+        mean_y = np.mean(image2_ycc[:, :, 0])
+
+        print('Diff color: {0} - Mean y: {1}'.format(diff, mean_y))
 
     """
     list_result.sort(key=lambda x: x['score'])
@@ -461,10 +458,10 @@ def test_view_histogram():
     instance_pose = ClassOpenPose()
 
     # Loading images
-    image1, _, pose1, _ = ClassDescriptors.load_images_comparision(instance_pose, load_one_img=True)
+    image1, _, pose1, _ = ClassDescriptors.load_images_comparision(instance_pose, min_score, load_one_img=True)
 
     # Drawing poses
-    ClassUtils.draw_pose(image1, pose1, min_score)
+    ClassDescriptors.draw_pose(image1, pose1, min_score)
 
     # Showing image
     cv2.namedWindow('main_window', cv2.WND_PROP_AUTOSIZE)
@@ -474,6 +471,55 @@ def test_view_histogram():
     cv2.waitKey(0)
 
     cv2.destroyAllWindows()
+    print('Done!')
+
+
+def test_color_compare_hist_eq():
+    print('Initialize color compare hist eq')
+    perform_eq = True
+    test_color_compare_hist(perform_eq)
+
+
+def re_process_folder():
+    print('Init folder processing')
+
+    init_dir = '/home/mauricio/Pictures/BTF'
+    options = {'initialdir': init_dir}
+
+    folder = filedialog.askdirectory(**options)
+
+    if folder is None:
+        raise Exception('Folder not selected!')
+
+    files = os.listdir(folder)
+
+    for file in files:
+        full_path = os.path.join(folder, file)
+        ext = ClassUtils.get_filename_extension(full_path)
+
+        if ext == '.jpg':
+            print('Processing file: {0}'.format(full_path))
+
+            file_json = ClassUtils.get_filename_no_extension(full_path) + '.json'
+
+            with open(file_json, 'r') as f:
+                json_txt = f.read()
+
+            json_data = json.loads(json_txt)
+
+            if 'vectors' in json_data:
+                vectors = json_data['vectors']
+            elif 'vector' in json_data:
+                vectors = json_data['vector']
+            else:
+                raise Exception('Vector not found!')
+
+            img_cv = cv2.imread(full_path)
+
+            param = ClassDescriptors.get_person_descriptors(vectors, min_score, image=img_cv, decode_img=False)
+            with open(file_json, 'w') as f:
+                f.write(json.dumps(param, indent=2))
+
     print('Done!')
 
 

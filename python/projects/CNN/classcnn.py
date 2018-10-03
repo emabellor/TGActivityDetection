@@ -14,6 +14,8 @@ import os
 
 
 class ClassCNN:
+    model_dir_action = '/home/mauricio/models/cnn_classifier_action'
+
     def __init__(self,
                  model_dir,
                  classes,

@@ -12,34 +12,53 @@ import json
 from classnn import ClassNN
 import numpy as np
 import random
+from tkinter import Tk
 
 seed = 1234
 
+csv_dir = '/home/mauricio/Pictures/PosesNew/data.csv'
+csv_train = '/home/mauricio/Pictures/PosesNew/training.csv'
+csv_eval = '/home/mauricio/Pictures/PosesNew/eval.csv'
+csv_dir_files = '/home/mauricio/Pictures/PosesNew/files.csv'
+
 
 def main():
+    Tk().withdraw()
+
     print('Initializing pose classification')
 
     # Loading list images
     # Folders have indexes
     # Each folder has its own score!
 
+    # This numbers must be maintained
+    # Poses 6 and 7 are used for position adjustment
     list_folder_data = [
         ('/home/mauricio/Pictures/PosesNew/Back', 0.05, 0),
-        # ('/home/mauricio/Pictures/PosesNew/Chat_Left', 0.05, 2),
         ('/home/mauricio/Pictures/PosesNew/Hands_Left', 0.05, 1),
-        # ('/home/mauricio/Pictures/PosesNew/Chat_Right', 0.05, 4),
         ('/home/mauricio/Pictures/PosesNew/Hands_Right', 0.05, 2),
-        # ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 6),
-        # ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 7),
         ('/home/mauricio/Pictures/PosesNew/Front', 0.05, 3),
         ('/home/mauricio/Pictures/PosesNew/Left', 0.05, 4),
         ('/home/mauricio/Pictures/PosesNew/Right', 0.05, 5),
         ('/home/mauricio/Pictures/PosesNew/Squat_Left', 0.05, 6),
         ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 7)
+        # ('/home/mauricio/Pictures/PosesNew/Chat_Left', 0.05, 8),
+        # ('/home/mauricio/Pictures/PosesNew/Chat_Right', 0.05, 9),
+        # ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 10),
+        # ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 11),
     ]
 
     # Delete re calculate option - Enter directly to classify option
-    classify_images(list_folder_data)
+    res = input('Press 1 to classify images - 2 to recalculate descriptors - 3 to get transformed points: ')
+
+    if res == '1':
+        classify_images(list_folder_data)
+    elif res == '2':
+        reprocess_images(list_folder_data)
+    elif res == '3':
+        get_transformed_points()
+    else:
+        raise Exception('Option not recognized: {0}'.format(res))
 
 
 # Deprecated
@@ -130,19 +149,13 @@ def classify_images(list_folder_data):
     eval_labels = list()
     eval_files = list()
 
-    model_dir = '/home/mauricio/models/nn_classifier'
-    csv_dir = '/home/mauricio/Pictures/PosesNew/data.csv'
-    csv_train = '/home/mauricio/Pictures/PosesNew/training.csv'
-    csv_eval = '/home/mauricio/Pictures/PosesNew/eval.csv'
-    csv_dir_files = '/home/mauricio/Pictures/PosesNew/files.csv'
-
     classes_number = len(list_folder_data)
     hidden_number = 40
-    learning_rate = 0.05
+    learning_rate = 0.04
     steps = 20000
 
     # Initialize classifier instance
-    nn_classifier = ClassNN(model_dir=model_dir,
+    nn_classifier = ClassNN(model_dir=ClassNN.model_dir_pose,
                             classes=classes_number,
                             hidden_number=hidden_number,
                             learning_rate=learning_rate)
@@ -169,19 +182,25 @@ def classify_images(list_folder_data):
             with open(full_path, 'r') as text_file:
                 arr_json = text_file.read()
 
-            person_arr = json.loads(arr_json)
+            params = json.loads(arr_json)
+            vectors = params['vectors']
+            angles = params['angles']
+            transformed_points = params['transformedPoints']
 
-            valid = ClassUtils.check_vector_integrity_part(person_arr, min_score)
+            valid = ClassUtils.check_vector_integrity_pos(vectors, min_score)
+            only_pos = ClassUtils.check_vector_only_pos(vectors, min_score)
 
             if not valid:
                 raise Exception('Vector integrity not valid for file: {0}'.format(full_path))
 
-            results = ClassDescriptors.get_person_descriptors(person_arr, min_score)
+            if only_pos:
+                raise Exception('Invalid vector to perform detection')
 
             # Fill training and eval list
             # Use angles and position information
-            data_to_add = results['angles']
-            data_to_add += ClassUtils.get_flat_list(results['transformedPoints'])
+            data_to_add = list()
+            data_to_add += angles
+            data_to_add += ClassUtils.get_flat_list(transformed_points)
             if num_file < total_train:
                 training_data.append(data_to_add)
                 training_labels.append(label)
@@ -285,6 +304,91 @@ def classify_images(list_folder_data):
         print('Labels: {0}'.format(label_names))
     else:
         raise Exception('Option not supported')
+
+
+def reprocess_images(list_folder_data):
+    print('Init reprocess_images')
+
+    for index, item in enumerate(list_folder_data):
+        folder = item[0]
+        min_score = item[1]
+
+        print('Processing folder: {0}'.format(folder))
+        list_files = os.listdir(folder)
+        random.Random(seed).shuffle(list_files)
+
+        for num_file, filename in enumerate(list_files):
+            file = os.path.join(folder, filename)
+            extension = ClassUtils.get_filename_extension(file)
+
+            if extension == '.json':
+                with open(file, 'r') as f:
+                    data_str = f.read()
+
+                data_json = json.loads(data_str)
+                if 'vectors' in data_json:
+                    print('Processing json file with new format: {0}'.format(file))
+                    person_arr = data_json['vectors']
+                else:
+                    print('Processing json file: {0}'.format(file))
+                    person_arr = data_json
+
+                valid = ClassUtils.check_vector_integrity_pos(person_arr, min_score)
+                only_pos = ClassUtils.check_vector_only_pos(person_arr, min_score)
+
+                if not valid:
+                    raise Exception('Vector integrity not valid for file: {0}'.format(file))
+
+                if only_pos:
+                    raise Exception('Invalid vector to perform detection')
+
+                descriptors = ClassDescriptors.get_person_descriptors(person_arr, min_score, cam_number=0,
+                                                                      image=None, calib_params=None,
+                                                                      decode_img=False,
+                                                                      instance_nn_pose=None)
+
+                with open(file, 'w') as f:
+                    f.write(json.dumps(descriptors))
+
+                transformed_points = descriptors['transformedPoints']
+
+                # Save pose for debugging purposes
+                re_scale_factor = 100
+                new_points = ClassDescriptors.re_scale_pose_factor(transformed_points,
+                                                                   re_scale_factor, min_score)
+                img_pose = ClassDescriptors.draw_pose_image(new_points, min_score, is_transformed=True)
+                new_file_name = ClassUtils.get_filename_no_extension(file) + '_1.jpg'
+                cv2.imwrite(new_file_name, img_pose)
+
+    print('Done!')
+
+
+def get_transformed_points():
+    min_score = 0.05
+    instance_pose = ClassOpenPose()
+    res = ClassDescriptors.load_images_comparision_ext(instance_pose, min_score, load_one_img=True)
+
+    person_arr = res['pose1']
+    descriptors = ClassDescriptors.get_person_descriptors(person_arr, min_score, cam_number=0,
+                                                          image=None, calib_params=None,
+                                                          decode_img=False,
+                                                          instance_nn_pose=None)
+    transformed_points = descriptors['transformedPoints']
+    print(transformed_points)
+
+    # Save pose for debugging purposes
+    re_scale_factor = 100
+    new_points = ClassDescriptors.re_scale_pose_factor(transformed_points,
+                                                       re_scale_factor, min_score)
+    img_pose = ClassDescriptors.draw_pose_image(new_points, min_score, is_transformed=True)
+
+    cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)
+    cv2.imshow('main_window', img_pose)
+
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+    print('Done!')
 
 
 if __name__ == '__main__':

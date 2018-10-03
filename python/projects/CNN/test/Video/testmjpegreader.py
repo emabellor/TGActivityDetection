@@ -23,7 +23,7 @@ def main():
         image = elem[0]
         ticks = elem[1]
 
-        image_np = np.frombuffer(image, dtype="int32")
+        image_np = np.frombuffer(image, dtype=np.uint8)
         print(ticks)
         print(len(image))
         image_cv = cv2.imdecode(image_np, cv2.IMREAD_ANYCOLOR)

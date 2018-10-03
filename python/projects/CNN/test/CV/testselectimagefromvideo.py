@@ -19,7 +19,7 @@ def main():
     print('Select video from folder')
     Tk().withdraw()
 
-    init_dir = '/home/mauricio/Videos/Oviedo/2018-02-24/' + text
+    init_dir = '/home/mauricio/Videos/Oviedo/2018-09-10/' + text
     if not os.path.isdir(init_dir):
         init_dir = '/home/mauricio/Videos/Oviedo/'
 
@@ -47,6 +47,12 @@ def main():
 
                 if k == 13:  # enter
                     base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + text + '/image_' + text + '.jpg'
+
+                    folder_dir = os.path.dirname(base_dir)
+
+                    if not os.path.exists(folder_dir):
+                        os.makedirs(folder_dir)
+
                     print('Saving image ' + base_dir)
 
                     with open(base_dir, 'wb') as file:

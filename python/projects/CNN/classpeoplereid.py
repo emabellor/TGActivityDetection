@@ -1,5 +1,6 @@
 from datetime import datetime
 from classutils import ClassUtils
+from classdescriptors import ClassDescriptors
 import uuid
 import math
 
@@ -10,11 +11,17 @@ class ClassPeopleReId:
         self.person_param = _person_param
 
         self.last_date = _date_ref
+        self.list_poses = list()
 
         if _person_guid == '':
             self.person_guid = str(uuid.uuid4())
         else:
             self.person_guid = _person_guid
+
+        ticks = ClassUtils.datetime_to_ticks(_date_ref)
+        self._add_pose_to_list(ticks, _person_param)
+
+        self.update_counter = 0
 
     @property
     def vectors(self):
@@ -37,6 +44,10 @@ class ClassPeopleReId:
         return self.person_param['colorLower']
 
     @property
+    def hist_pose(self):
+        return self.person_param['histPose']
+
+    @property
     def cam_number(self):
         return self.person_param['camNumber']
 
@@ -44,11 +55,32 @@ class ClassPeopleReId:
     def pose_guid(self):
         return self.person_param['poseGuid']
 
+    @property
+    def only_pos(self):
+        return self.person_param['onlyPos']
+
+    @property
+    def transformed_points(self):
+        return self.person_param['transformedPoints']
+
     def get_guid_relation(self):
         return {
             'personGuid': self.person_guid,
             'poseGuid': self.pose_guid
         }
+
+    def _add_pose_to_list(self, ticks, param):
+        self.list_poses.append({
+            'transformedPoints': param['transformedPoints'],
+            'ticks': ticks,
+            'keyPose': param['keyPose'],
+            'probability': param['probability'],
+            'poseGuid': param['poseGuid'],
+            'globalPosition': param['globalPosition'],
+            'localPosition': param['localPosition'],
+            'vectors': param['vectors'],
+            'angles': param['angles']
+        })
 
     @classmethod
     def load_people_from_frame_info(cls, frame_info, date_ref):
@@ -56,41 +88,47 @@ class ClassPeopleReId:
 
         params = frame_info[2]['params']
 
+        ticks = ClassUtils.datetime_to_ticks(date_ref)
+        counter = 0
         for param in params:
+            cam_number = param['camNumber']
             integrity = param['integrity']
+            only_pos = param['onlyPos']
 
-            if integrity:
-                list_people.append(cls(param, date_ref))
+            # Add elements using only pos
+            if integrity and not only_pos:
+                person_guid = '{0}_{1}_{2}'.format(cam_number, counter, ticks)
+                list_people.append(cls(param, date_ref, _person_guid=person_guid))
+                counter += 1
 
         return list_people
 
     @classmethod
     def load_list_people(cls, frame_info_list, date_ref):
+        # Only for debugging purposes!
         list_people = list()
 
         for frame_info in frame_info_list:
-            list_people = frame_info[2]['listPeople']
             params = frame_info[2]['params']
 
-            for person in list_people:
-                pose_guid = person['poseGuid']
-                person_guid = person['personGuid']
+            for param in params:
+                person_guid = param['personGuid']
 
-                found = False
-                for param in params:
-                    if param['pose_guid'] == pose_guid:
-                        found = True
-                        list_people.append(cls(param, date_ref, person_guid))
-                        break
-
-                if not found:
-                    raise Exception('Cant find pose guid {0}'.format(pose_guid))
+                if person_guid != '':
+                    list_people.append(cls(param, date_ref, person_guid))
 
         return list_people
 
     def update_values_from_person(self, person, date_ref):
         self.person_param = person.person_param
         self.last_date = date_ref
+
+        ticks = ClassUtils.datetime_to_ticks(date_ref)
+        self._add_pose_to_list(ticks, person.person_param)
+        self.update_counter = 0
+
+    def set_not_updated(self):
+        self.update_counter += 1
 
     @classmethod
     def get_people_diff(cls, person1: 'ClassPeopleReId', person2: 'ClassPeopleReId'):
@@ -103,13 +141,16 @@ class ClassPeopleReId:
 
         diff_colors = math.fabs(diff_colors_1 - diff_colors_2)
 
+        diff_k_means = ClassDescriptors.get_kmeans_diff(person1.hist_pose, person2.hist_pose)
+
         distance = cls.get_person_distance(person1, person2)
 
         return_data = {
             'diffUpper': diff_upper,
             'diffLower': diff_lower,
             'diffColors': diff_colors,
-            'distance': distance
+            'distance': distance,
+            'diffKMeans': diff_k_means
         }
 
         return return_data
@@ -168,7 +209,7 @@ class ClassPeopleReId:
 
     def get_rgb_color(self):
         # Getting RGB color from GUID
-        uuid_bin = uuid.UUID(self.person_guid).bytes
+        uuid_bin = self.person_guid.encode('utf-8')
 
         # Return first bytes to get color
         return uuid_bin[0], uuid_bin[1], uuid_bin[2]

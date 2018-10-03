@@ -12,8 +12,14 @@ import os
 import shutil
 import json
 
+# To predict model without recreating graph for prediction
+# Refer to this link
+
 
 class ClassNN:
+    model_dir_pose = '/home/mauricio/models/nn_classifier'
+    classes_num_pose = 8
+    hidden_num_pose = 40
 
     def __init__(self, model_dir, classes, hidden_number, label_names=list(), learning_rate=0.001):
         self.model_dir = model_dir
@@ -25,6 +31,7 @@ class ClassNN:
                                                                         mode, classes, hidden_number, learning_rate),
             model_dir=model_dir)
         tf.logging.set_verbosity(tf.logging.INFO)
+        self.fast_predict = FastPredict(self.classifier)
 
     @classmethod
     def load_from_params(cls, model_dir):
@@ -100,50 +107,65 @@ class ClassNN:
     def predict_model(self, predict_data: np.ndarray):
         # Check dimensionality first
         if predict_data.ndim != 1:
-            print('Dimension of array is not one. ndim: ' + str(predict_data.ndim))
-            return -1
-        else:
-            # Initializing prediction
-            array = np.expand_dims(predict_data, axis=0)
-            predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-                x={'x': array},  # The dimensionality is preserved ->Checking
-                num_epochs=1,
-                shuffle=False
-            )
+            raise Exception('Dimension of array is not one. number dim: {0}'.format(predict_data.ndim))
 
-            predict_results = self.classifier.predict(input_fn=predict_input_fn)
+        # Initializing prediction
+        array = np.expand_dims(predict_data, axis=0)
 
-            # Returns a generator
-            print('Reading predictions')
-            result = 0
-            for prediction in predict_results:
-                result = prediction
+        print('Build model')
+        predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={'x': array},  # The dimensionality is preserved ->Checking
+            num_epochs=1,
+            shuffle=False
+        )
+        print('Predict model')
 
-            # Returned result
-            return result
+        predict_results = self.classifier.predict(input_fn=predict_input_fn)
+
+        # Returns a generator
+        print('Reading predictions')
+        result = 0
+        for prediction in predict_results:
+            result = prediction
+
+        # Returned result
+        return result
 
     def predict_model_array(self, predict_data: np.ndarray):
         if predict_data.ndim != 2:
-            print('Dimension of array is not two. ndim: ' + str(predict_data.ndim))
-            return list()
-        else:
-            # Initializing prediction
-            predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-                x={'x': predict_data},  # The dimensionality is preserved ->Checking
-                num_epochs=1,
-                shuffle=False
-            )
+            raise Exception('Dimension of array is not two. number dim: {0}'.format(predict_data.ndim))
 
-            predict_results = self.classifier.predict(input_fn=predict_input_fn)
+        # Initializing prediction
+        predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={'x': predict_data},  # The dimensionality is preserved ->Checking
+            num_epochs=1,
+            shuffle=False
+        )
 
-            # Returns a generator
-            print('Reading predictions')
-            list_predictions = []
-            for prediction in predict_results:
-                list_predictions.append(prediction)
+        predict_results = self.classifier.predict(input_fn=predict_input_fn)
 
-            # Returned result
-            return list_predictions
+        # Returns a generator
+        print('Reading predictions')
+        list_predictions = []
+        for prediction in predict_results:
+            list_predictions.append(prediction)
+
+        # Returned result
+        return list_predictions[0]
+
+    def predict_model_fast(self, predict_data: np.ndarray):
+        if predict_data.ndim != 1:
+            raise Exception('Dimension of array is not one. number dim: {0}'.format(predict_data.ndim))
+
+        predict_results = self.fast_predict.predict(predict_data)
+
+        # Returns a generator
+        list_predictions = []
+        for prediction in predict_results:
+            list_predictions.append(prediction)
+
+        # Return result
+        return list_predictions[0]
 
     @staticmethod
     def nn_model_fn(features, labels, mode, classes, hidden_number, learning_rate):
@@ -185,3 +207,72 @@ class ClassNN:
         }
 
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metrics_ops)
+
+
+class FastPredict:
+    def __init__(self, estimator: tf.estimator.Estimator):
+        self.estimator = estimator
+        self.first_run = True
+        self.closed = False
+        self.next_features = []
+        self.features_size = 0
+        self.predictions = None
+        self.type = None
+
+    def _create_generator(self):
+        while not self.closed:
+            yield self.next_features
+
+    def predict(self, feature_batch: np.ndarray):
+        """ Runs a prediction on a set of features. Calling multiple times
+            does *not* regenerate the graph which makes predict much faster.
+            feature_batch a list of list of features. IMPORTANT: If you're only classifying 1 thing,
+            you still need to make it a batch of 1 by wrapping it in a list (i.e. predict([my_feature]), not predict(my_feature)
+        """
+        # Initializing prediction
+        if feature_batch.ndim != 1:
+            raise Exception('NDim is not one: {0}'.format(feature_batch.ndim))
+
+        features = np.expand_dims(feature_batch, axis=0)
+        self.next_features = features
+        if self.first_run:
+            if features.dtype == np.float32:
+                self.type = tf.float32
+            elif features.dtype == np.float64:
+                self.type = tf.float64
+            else:
+                raise Exception('Type not supported: {0}'.format(features.dtype))
+
+            self.features_size = features.shape[1]
+            self.predictions = self.estimator.predict(
+                input_fn=self.example_input_fn(self._create_generator))
+            self.first_run = False
+        elif self.features_size != features.shape[1]:
+            raise ValueError("All batches must be of the same size. First-batch:" + str(self.features_size) +
+                             " This-batch:" + str(features.shape[1]))
+
+        # Only read one size
+        results = list()
+        results.append(next(self.predictions))
+        return results
+
+    def close(self):
+        self.closed = True
+        try:
+            next(self.predictions)
+        except:
+            print("Exception in fast_predict. This is probably OK")
+
+    def example_input_fn(self, generator):
+        """ An example input function to pass to predict. It must take a generator as input """
+        def _inner_input_fn():
+            data_set = tf.data.Dataset().from_generator(generator, output_types=self.type).batch(1)
+            iterator = data_set.make_one_shot_iterator()
+            features = iterator.get_next()
+
+            # Reshape elements to same size that batch_size
+            features = tf.reshape(features, [1, self.features_size])
+
+            return {'x': features}
+
+        return _inner_input_fn

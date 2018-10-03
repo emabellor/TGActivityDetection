@@ -4,6 +4,13 @@ from threading import Timer
 import cv2
 from datetime import datetime
 from classvideosaver import ClassVideoSaver
+from classmjpegconverter import ClassMjpegConverter
+from classutils import ClassUtils
+import logging
+import time
+import os
+
+logger = logging.getLogger('Main')
 
 period_milliseconds = 500
 width_resize = 320
@@ -13,8 +20,44 @@ close = False
 
 list_cams = [
     {
+        'idCam': 597,
+        'urlCam': '',
+        'username': '',
+        'password': ''
+    },
+    {
+        'idCam': 598,
+        'urlCam': '',
+        'username': '',
+        'password': ''
+    },
+    {
+        'idCam': 599,
+        'urlCam': '',
+        'username': '',
+        'password': ''
+    },
+    {
+        'idCam': 605,
+        'urlCam': '',
+        'username': '',
+        'password': ''
+    },
+    {
+        'idCam': 606,
+        'urlCam': '',
+        'username': '',
+        'password': ''
+    },
+    {
+        'idCam': 607,
+        'urlCam': '',
+        'username': '',
+        'password': ''
+    },
+    {
         'idCam': 1000,
-        'urlCam': 'http://24.172.4.142/mjpg/video.mjpg?COUNTER',
+        'urlCam': '',
         'username': '',
         'password': ''
     }
@@ -56,7 +99,7 @@ def new_frame(obj: ClassMjpegClient, frame: np.ndarray):
         mov_threshold = 5
         save_frame = False
         seconds_after_mov = 5
-        key_frame_period_sec = 10
+        key_frame_period_sec = 30
 
         if movement >= mov_threshold or obj.first_frame:
             obj.first_frame = False
@@ -100,12 +143,30 @@ def new_error(obj: ClassMjpegClient, exception):
 
 
 def main():
+    FORMAT = "%(asctime)s [%(name)-16.16s] [%(levelname)-5.5s]  %(message)s"
+    logging.basicConfig(level=logging.ERROR, format=FORMAT)
+
     global counter
     global close
+    global list_cams
     list_instances_grabber = list()
     date_init = datetime.now()
 
-    print('Initializing main function')
+    logger.debug('Initializing main function')
+
+    # Generating url cam into list
+    for item_cam in list_cams:
+        id_cam = item_cam['idCam']
+        url_cam = item_cam['urlCam']
+
+        if url_cam == '':
+            prefix = int(id_cam / 100)
+            suffix = id_cam % 100
+
+            url_cam = 'http://192.168.1{0}.1{1}/videostream.cgi?rate=6&user=admin&pwd='.format(
+                str(prefix).zfill(2), str(suffix).zfill(2)
+            )
+            item_cam['urlCam'] = url_cam
 
     # Checking period integrity
     if 1000 % period_milliseconds != 0:
@@ -130,6 +191,8 @@ def main():
 
         instance_grabber.init_stream()
         list_instances_grabber.append(instance_grabber)
+
+    # Generate video conversion thread
 
     input('Done! Press enter to stop recording')
     close = True

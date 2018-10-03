@@ -1,5 +1,5 @@
 from classopenpose import ClassOpenPose
-from classutils import ClassUtils
+from classdescriptors import ClassDescriptors
 import cv2
 
 min_score = 0.05
@@ -22,7 +22,7 @@ def main():
     per_arr = arr[0]
     print(per_arr)
 
-    ClassUtils.draw_pose(image, per_arr, min_score)
+    ClassDescriptors.draw_pose(image, per_arr, min_score)
     cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)
 
     cv2.imshow('main_window', image)

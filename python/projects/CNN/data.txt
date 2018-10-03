@@ -1,0 +1,11 @@
+TeamViewer Oviedo Server
+343 322 157
+Controles2017
+
+Datos de procesamiento
+/videostream.cgi?rate=14&user=admin&pwd=
+
+Camara custom
+http://24.172.4.142/mjpg/video.mjpg?COUNTER
+
+

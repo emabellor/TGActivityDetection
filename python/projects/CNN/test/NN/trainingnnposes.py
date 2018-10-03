@@ -9,6 +9,7 @@ from classnn import ClassNN
 
 min_score = 0.05
 
+
 def main():
     print('Initializing main function')
 

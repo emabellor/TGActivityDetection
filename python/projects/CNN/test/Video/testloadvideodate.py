@@ -23,7 +23,6 @@ def main():
         image = frame[0]
 
         logger.info('frame len: {0}'.format(len(image)))
-    
 
 
 if __name__ == '__main__':

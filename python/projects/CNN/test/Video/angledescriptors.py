@@ -25,10 +25,10 @@ def main():
 
         # Generating other descriptors
         # Assume image is OK
-        shoulder_dis = ClassUtils.get_euclidean_point(person_array[1], person_array[2]) + \
-                       ClassUtils.get_euclidean_point(person_array[1], person_array[5])
+        shoulder_dis = ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[2]) + \
+                       ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[5])
 
-        torso_dis = ClassUtils.get_euclidean_point(person_array[1], person_array[8])
+        torso_dis = ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[8])
 
         # In total, we have a vector with 8 angles
         # We need to extract the characteristics of the 8 angles

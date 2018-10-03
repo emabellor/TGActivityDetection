@@ -25,7 +25,7 @@ def main():
         frame_info = list_frames[index]
         frame_bin = frame_info[0]
 
-        image_np = np.frombuffer(frame_bin, dtype="int32")
+        image_np = np.frombuffer(frame_bin, dtype=np.uint8)
         frame = cv2.imdecode(image_np, cv2.IMREAD_ANYCOLOR)
 
         print('Showing frame {0} of {1}'.format(index, len(list_frames)))

@@ -59,7 +59,7 @@ def main():
                 frame = info[0]
                 ticks = info[1]
 
-                image_np = np.frombuffer(frame, dtype="int32")
+                image_np = np.frombuffer(frame, dtype=np.uint8)
                 image = cv2.imdecode(image_np, cv2.IMREAD_ANYCOLOR)
 
                 arr, image_draw = instance_pose.recognize_image_tuple(image)

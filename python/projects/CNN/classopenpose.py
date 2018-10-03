@@ -1,6 +1,7 @@
 import numpy as np
 import openpose as op
 import cv2
+from sys import platform
 
 
 class ClassOpenPose:
@@ -22,6 +23,10 @@ class ClassOpenPose:
         params['num_gpu_start'] = 0
         params['disable_blending'] = False
         params['default_model_folder'] = "/home/mauricio/Programs/openpose/openpose/models/"
+
+        # Static region
+        if platform == 'win32':
+            params['default_model_folder'] = 'C:\\OpenPose\\openpose-master\\models\\'
 
         self.open_pose = op.OpenPose(params)
         print('Openpose initialized')

@@ -11,17 +11,10 @@ from sys import platform
 import logging
 import math
 
-
 logger = logging.getLogger('ClassMjpegDate')
 
 
 class ClassMjpegDate:
-    video_base_path = '/home/mauricio/Videos/Oviedo'
-
-    # Static region
-    if platform == 'win32':
-        video_base_path = 'C:\\VideosPython'
-
     def __init__(self, cam_number, extension='.mjpegx'):
         logger.info('Initializing class MjpegDate')
         self._cam_number = cam_number
@@ -37,7 +30,7 @@ class ClassMjpegDate:
 
         logger.debug('Get frame to load')
 
-        date_file = self.get_date_file(date)
+        date_file = ClassUtils.get_date_file(date)
 
         # Check fist if date is in list
         found = False
@@ -53,7 +46,7 @@ class ClassMjpegDate:
         if not found:
             logger.debug('Loading file name')
             logger.debug(date_file)
-            file_path = self.load_path_by_date(date_file, self._cam_number, self._extension)
+            file_path = ClassUtils.load_path_by_date(date_file, self._cam_number, self._extension)
 
             if not path.exists(file_path):
                 # Avoid exceptions - Video partial
@@ -110,29 +103,13 @@ class ClassMjpegDate:
             frame_info = frame_item['frame_info']
             date_video = frame_item['date_video']
 
-            path_video = self.load_path_by_date(date_video, self._cam_number, self._extension)
+            path_video = ClassUtils.load_path_by_date(date_video, self._cam_number, self._extension)
 
             # Converting video from list
             ClassMjpegConverter.save_video_from_list_frames(path_video, frame_info)
             logger.info('Video saved in path {0}'.format(path_video))
 
         logger.debug('Done converting videos')
-
-    @staticmethod
-    def get_date_file(date):
-        minutes = int(date.minute / 15) * 15
-        seconds = 0
-        microseconds = 0
-        date_file = date.replace(minute=minutes, second=seconds, microsecond=microseconds)
-        return date_file
-
-    @classmethod
-    def load_path_by_date(cls, date: datetime, cam_number: str, extension: str):
-        logger.debug('Generating path by date')
-        file_name = date.strftime('%H-%M-%S') + extension
-        file_path = path.join(cls.video_base_path, date.strftime('%Y-%m-%d'), str(cam_number), file_name)
-        logger.debug(file_path)
-        return file_path
 
     def _load_frame_by_date(self, date: datetime):
         """

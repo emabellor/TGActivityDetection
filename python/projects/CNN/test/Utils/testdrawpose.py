@@ -39,7 +39,7 @@ def main():
         raise Exception('Invalid len for arr: {0}'.format(len(valid_arr)))
 
     person_arr = valid_arr[0]
-    ClassUtils.draw_pose(image, person_arr, min_score)
+    ClassDescriptors.draw_pose(image, person_arr, min_score)
 
     cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)
     cv2.imshow('main_window', image)

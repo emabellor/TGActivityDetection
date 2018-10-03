@@ -10,6 +10,7 @@ import numpy as np
 from datetime import datetime
 from datetime import timedelta
 from classutils import ClassUtils
+from classdescriptors import ClassDescriptors
 
 game_period_ms = 500
 min_score = 0.05
@@ -246,10 +247,10 @@ def draw_images(frame_info_list):
         cam_number = dict_frame['camNumber']
 
         if frame_info is None:
-            image_arr = np.frombuffer(dummy_frame, dtype="int32")
+            image_arr = np.frombuffer(dummy_frame, dtype=np.uint8)
             image_cv = cv2.imdecode(image_arr, cv2.IMREAD_ANYCOLOR)
         else:
-            image_arr = np.frombuffer(frame_info[0], dtype="int32")
+            image_arr = np.frombuffer(frame_info[0], dtype=np.uint8)
             image_cv = cv2.imdecode(image_arr, cv2.IMREAD_ANYCOLOR)
             draw_vectors(image_cv, frame_info)
 
@@ -273,9 +274,10 @@ def draw_vectors(image: np.ndarray, frame_info):
     vectors = dict_frame['vectors']
 
     # Draw all poses
+    """
     for vector in vectors:
-        ClassUtils.draw_pose(image, vector, min_score)
-
+        ClassDescriptors.draw_pose(image, vector, min_score)
+    """
 
 def draw_people(list_images):
     global list_people
@@ -295,6 +297,7 @@ def draw_people(list_images):
         global last_upper
         global last_lower
 
+        """
         # Draw elements into image
         pt1, pt2 = ClassUtils.get_rectangle_bounds(person.vectors, min_score)
         cv2.rectangle(image_cv, pt1, pt2, person.get_bgr_color(), 5)
@@ -354,6 +357,8 @@ def draw_people(list_images):
         cv2.putText(image_cv, 'DC {0:.0f}'.format(diff_colors), pos_txt,
                     font, font_scale, font_color, line_type)
 
+        """
+
         last_upper = person.color_upper
         last_lower = person.color_lower
 
@@ -382,7 +387,7 @@ def show_images(list_images):
             image_down = np.hstack((image_down, list_images[i]['imageCv']))
 
     result_image = np.vstack((image_up, image_down))
-    resize_factor = 1
+    resize_factor = 2
     new_y = int(result_image.shape[0] / resize_factor)
     new_x = int(result_image.shape[1] / resize_factor)
 

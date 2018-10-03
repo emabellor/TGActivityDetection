@@ -7,8 +7,10 @@ mnist = input_data.read_data_sets('MNIST_data')
 def input(dataset):
     return dataset.images, dataset.labels.astype(np.int32)
 
+
 # Specify feature
 feature_columns = [tf.feature_column.numeric_column("x", shape=[28, 28])]
+
 
 # Build 2 layer DNN classifier
 classifier = tf.estimator.DNNClassifier(

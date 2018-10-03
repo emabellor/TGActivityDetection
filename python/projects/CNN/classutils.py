@@ -1,20 +1,39 @@
 import numpy as np
 import os
 import json
-from datetime import datetime
 from datetime import timedelta
 import math
 from datetime import datetime
 import cv2
 import uuid
 from colormath.color_objects import AdobeRGBColor, LabColor, HSVColor, sRGBColor
-from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+from sys import platform
+import logging
+from os import path
+
+logger = logging.getLogger('ClassUtils')
 
 
 class ClassUtils:
     # Class Variables
     MIN_POSE_SCORE = 0.1
+
+    video_base_path = '/home/mauricio/Videos/Oviedo'
+    file_log_mov = '/home/mauricio/Videos/Oviedo/movelog.txt'
+
+    cnn_folder = '/home/mauricio/Pictures/CNN/Images/'
+    cnn_partial_folder_mov = '/home/mauricio/Pictures/CNN/Images_Partial/Mov'
+    cnn_partial_folder_no_mov = '/home/mauricio/Pictures/CNN/Images_Partial/No_Mov'
+    cnn_class_folder = '/home/mauricio/Pictures/CNN/Classes'
+
+    no_img_path = '/home/mauricio/Pictures/novideo.jpg'
+
+    # Static region
+    if platform == 'win32':
+        video_base_path = 'C:\\VideosPython'
+        file_log_mov = 'C:\\VideosPython\\movelog.txt'
+        cnn_folder_mov = 'C:\\CNN\\Images'
 
     @staticmethod
     def project_points(homo_matrix: np.ndarray, point2d: np.ndarray):
@@ -68,8 +87,23 @@ class ClassUtils:
         return microseconds
 
     @classmethod
-    def get_euclidean_distance_pt(cls, pt1: list, pt2: list):
-        return cls.get_euclidean_distance(pt1[0], pt1[1], pt2[0], pt2[1])
+    def get_euclidean_distance_pt(cls, pt1, pt2):
+        if type(pt1) is dict:
+            x1 = pt1['x']
+            y1 = pt1['y']
+
+        else:
+            x1 = pt1[0]
+            y1 = pt1[1]
+
+        if type(pt2) is dict:
+            x2 = pt2['x']
+            y2 = pt2['y']
+        else:
+            x2 = pt2[0]
+            y2 = pt2[1]
+
+        return cls.get_euclidean_distance(x1, y1, x2, y2)
 
     @staticmethod
     def get_euclidean_distance(x1, y1, x2, y2):
@@ -79,25 +113,6 @@ class ClassUtils:
     def write_bin_to_file(path_file: str, bin_array):
         with open(path_file, 'wb') as newFile:
             newFile.write(bin_array)
-
-    @staticmethod
-    def get_euclidean_point(point1, point2):
-        if type(point1) is dict:
-            x1 = point1['x']
-            y1 = point1['y']
-
-        else:
-            x1 = point1[0]
-            y1 = point1[1]
-
-        if type(point2) is dict:
-            x2 = point2['x']
-            y2 = point2['y']
-        else:
-            x2 = point2[0]
-            y2 = point2[1]
-
-        return ClassUtils.get_euclidean_distance(x1, y1, x2, y2)
 
     @staticmethod
     def get_angle(point1, point2, point3):
@@ -208,7 +223,7 @@ class ClassUtils:
         Checking vector integrity
         Vector 1, 2, 5, 8 must exists -> Torse
         Vector 10, 13, must be one -> Legs
-        Score is in the position 2
+        Score is in the 2
         """
 
         print('Checking vector integrity')
@@ -583,90 +598,6 @@ class ClassUtils:
 
         return new_vector
 
-    @classmethod
-    def draw_pose(cls, image, person_vector, min_score):
-        # Draw poses
-        cls._draw_line_pose(image, person_vector[0], person_vector[1], min_score)
-
-        cls._draw_line_pose(image, person_vector[1], person_vector[2], min_score)
-        cls._draw_line_pose(image, person_vector[2], person_vector[3], min_score)
-        cls._draw_line_pose(image, person_vector[3], person_vector[4], min_score)
-
-        cls._draw_line_pose(image, person_vector[1], person_vector[5], min_score)
-        cls._draw_line_pose(image, person_vector[5], person_vector[6], min_score)
-        cls._draw_line_pose(image, person_vector[6], person_vector[7], min_score)
-
-        cls._draw_line_pose(image, person_vector[1], person_vector[8], min_score)
-
-        cls._draw_line_pose(image, person_vector[8], person_vector[9], min_score)
-        cls._draw_line_pose(image, person_vector[9], person_vector[10], min_score)
-        cls._draw_line_pose(image, person_vector[10], person_vector[11], min_score)
-
-        cls._draw_line_pose(image, person_vector[8], person_vector[12], min_score)
-        cls._draw_line_pose(image, person_vector[12], person_vector[13], min_score)
-        cls._draw_line_pose(image, person_vector[13], person_vector[14], min_score)
-
-        # Draw foot
-        cls._draw_line_pose(image, person_vector[14], person_vector[21], min_score, color=(0, 255, 255))
-        cls._draw_line_pose(image, person_vector[21], person_vector[20], min_score, color=(0, 255, 255))
-        cls._draw_line_pose(image, person_vector[20], person_vector[19], min_score, color=(0, 255, 255))
-
-        cls._draw_line_pose(image, person_vector[11], person_vector[24], min_score, color=(0, 255, 255))
-        cls._draw_line_pose(image, person_vector[24], person_vector[23], min_score, color=(0, 255, 255))
-        cls._draw_line_pose(image, person_vector[23], person_vector[22], min_score, color=(0, 255, 255))
-
-        # Draw plumb position using femur
-        cls._draw_plumb_femur(image, person_vector, min_score)
-
-        # Done
-
-    @classmethod
-    def _draw_plumb_torso(cls, image, person_vector, min_score):
-        if ClassUtils.check_point_integrity(person_vector[1], min_score) and \
-                ClassUtils.check_point_integrity(person_vector[8], min_score):
-            plumb_factor = 1.5
-            distance_plumb = ClassUtils.get_euclidean_distance_pt(person_vector[1], person_vector[8])
-            distance_plumb *= plumb_factor
-
-            plumb_pt = [person_vector[8][0], person_vector[8][1] + distance_plumb, 1]
-            cls._draw_line_pose(image, person_vector[8], plumb_pt, min_score, color=(161, 0, 255))
-
-    @classmethod
-    def _draw_plumb_femur(cls, image, person_vector, min_score):
-        distance_plumb = 0
-        plumb_factor = 2
-
-        if ClassUtils.check_point_integrity(person_vector[9], min_score) and \
-                ClassUtils.check_point_integrity(person_vector[10], min_score):
-            distance_plumb += ClassUtils.get_euclidean_distance_pt(person_vector[9], person_vector[10])
-
-        if ClassUtils.check_point_integrity(person_vector[12], min_score) and \
-                ClassUtils.check_point_integrity(person_vector[13], min_score):
-            distance_plumb += ClassUtils.get_euclidean_distance_pt(person_vector[12], person_vector[13])
-
-            # Check mean
-            if distance_plumb != 0:
-                distance_plumb /= 2
-
-        if distance_plumb != 0:
-            distance_plumb *= plumb_factor
-            plumb_pt = [person_vector[8][0], person_vector[8][1] + distance_plumb, 1]
-            cls._draw_line_pose(image, person_vector[8], plumb_pt, min_score, color=(161, 0, 255))
-
-    @classmethod
-    def draw_position(cls, image, local_position):
-        x_pos = int(local_position[0])
-        y_pos = int(local_position[1])
-
-        radius = 5
-
-        if x_pos != 0 or y_pos != 0:
-            # Drawing position point
-            cv2.rectangle(image, (x_pos - radius, y_pos - radius), (x_pos + radius, y_pos + radius),
-                          (255, 255, 255), cv2.FILLED)
-
-        # Done!
-
     @staticmethod
     def _draw_line_pose(image, point0, point1, min_score, color=(255, 255, 0)):
         if point0[2] >= min_score and point1[2] > min_score:
@@ -934,5 +865,76 @@ class ClassUtils:
 
         return new_color
 
+    @classmethod
+    def write_in_file(cls, file, ticks, image, json_dict=None):
+        bytes_to_write = cls.get_bytes_file(ticks, image, json_dict)
+        file.write(bytes_to_write)
 
+    @staticmethod
+    def get_bytes_file(ticks, image, json_dict=None):
+        # If json_dict exist
+        # File is mjpegx
 
+        len_json = 0
+        len_json_bin = bytes()
+        json_bytes = bytes()  # Len 0
+
+        # Support mjpeg and mjpegx conversion
+        if json_dict is not None:
+            json_string = json.dumps(json_dict)
+            json_bytes = bytes(json_string, encoding='utf-8')
+            len_json = len(json_bytes)
+            len_json_bin = len_json.to_bytes(length=4, byteorder='little')
+
+        len_total = len(image)
+        if json_dict is not None:
+            len_total += len_json + 4  # 4 -> 4 is the len of json data
+
+        len_total_bin = len_total.to_bytes(length=4, byteorder='little')
+
+        ticks_bin = ticks.to_bytes(length=8, byteorder='little')
+
+        result = len_total_bin + ticks_bin + image
+
+        # Write mjpegx part
+        if json_dict is not None:
+            result += json_bytes + len_json_bin
+
+        return result
+
+    @staticmethod
+    def get_date_file(date):
+        minutes = int(date.minute / 15) * 15
+        seconds = 0
+        microseconds = 0
+        date_file = date.replace(minute=minutes, second=seconds, microsecond=microseconds)
+        return date_file
+
+    @classmethod
+    def load_path_by_date(cls, date: datetime, cam_number: str, extension: str):
+        logger.debug('Generating path by date')
+        file_name = date.strftime('%H-%M-%S') + extension
+        file_path = path.join(cls.video_base_path, date.strftime('%Y-%m-%d'), str(cam_number), file_name)
+        logger.debug(file_path)
+        return file_path
+
+    @classmethod
+    def equalize_hist(cls, image: np.ndarray):
+        img_yuv = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+
+        # Equalize hist from YUV channel
+        img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
+
+        img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+        return img_output
+
+    @classmethod
+    def blur(cls, image: np.ndarray, size: int):
+        if size % 2 == 0:
+            raise Exception('size must be an odd number!')
+
+        # Blurring image using kernel
+        kernel = np.ones((size, size), np.float32) / (size * size)
+
+        dst = cv2.filter2D(image, -1, kernel)
+        return dst

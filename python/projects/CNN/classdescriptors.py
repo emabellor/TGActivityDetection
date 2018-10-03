@@ -6,6 +6,8 @@ from tkinter.filedialog import askopenfilename
 from classopenpose import ClassOpenPose
 import os
 import json
+from sklearn.cluster import KMeans
+from classnn import ClassNN
 import time
 
 
@@ -13,42 +15,54 @@ import time
 class ClassDescriptors:
 
     @classmethod
-    def get_person_descriptors(cls, person_array, min_pose_score, cam_number=0, image=None, calib_params=None,
-                               decode_img=False):
+    def get_person_descriptors(cls, person_array, min_pose_score, cam_number=0,
+                               image=None, calib_params=None, decode_img=False,
+                               instance_nn_pose: ClassNN=None):
 
         # Person descriptors for vector integrity
         # In function ClassUtils.check_vector_integrity_part
         # One part of the arms and one of the legs must exist
         # Vectors 11 and 14 are optional
         # Vectors of the torso must exist
-        if not decode_img:
+        if not decode_img or image is None:
             image_np = image
         else:
-            image_buffer = np.frombuffer(image, dtype="int32")
+            image_buffer = np.frombuffer(image, dtype=np.uint8)
             image_np = cv2.imdecode(image_buffer, cv2.IMREAD_ANYCOLOR)
 
-        if ClassUtils.check_vector_integrity_pos(person_array, min_pose_score):
-            integrity = True
-            only_pos = ClassUtils.check_vector_only_pos(person_array, min_pose_score)
-        else:
+        mean_y_pose = 0
+
+        if not ClassUtils.check_vector_integrity_pos(person_array, min_pose_score):
             integrity = False
             only_pos = False
+        else:
+            # Get color
+            # Lum average from person must be greater than certain value
+            mean_y_pose = cls._get_mean_lum_pose(image_np, person_array, min_pose_score)
+            if mean_y_pose < 50 and image_np is not None:
+                integrity = False
+                only_pos = False
+            else:
+                # Ingnore mean_y_pose if image_np does not exist
+                integrity = True
+                only_pos = ClassUtils.check_vector_only_pos(person_array, min_pose_score)
 
         # Getting relation torso
-        relation = ClassDescriptors._get_torso_shoulders_relation(person_array, min_pose_score,
+        relation = cls._get_torso_shoulders_relation(person_array, min_pose_score,
                                                                   only_pos=only_pos, integrity=integrity)
 
         # Getting angles
-        list_angles, list_angles_degrees = ClassDescriptors._get_person_descriptors_angles(person_array, min_pose_score,
+        list_angles, list_angles_degrees = cls._get_person_descriptors_angles(person_array, min_pose_score,
                                                                                            only_pos=only_pos,
                                                                                            integrity=integrity)
 
         # Getting transformed points
-        transformed_points = ClassDescriptors._get_transformed_points(person_array, min_pose_score,
+        transformed_points = cls._get_transformed_points(person_array, min_pose_score, calib_params,
                                                                       only_pos=only_pos, integrity=integrity)
 
         # Getting descriptor for neural net
-        full_desc = list_angles
+        full_desc = list()
+        full_desc += list_angles
         full_desc += ClassUtils.get_flat_list(transformed_points)
 
         info_upper = cls._process_upper_color(person_array, min_pose_score, image_np, integrity=integrity)
@@ -58,8 +72,28 @@ class ClassDescriptors:
         hists = cls.get_color_histograms(person_array, min_pose_score, image_np, decode_img=False,
                                          cumulative=False, normalize=False, integrity=integrity)
 
-        local_position, global_position = cls._process_position_vector(person_array, min_pose_score, calib_params)
+        hist_pose = cls.get_points_by_pose(image, person_array, min_pose_score)
+        pose_guid = ClassUtils.generate_uuid()
 
+        key_pose = -1
+        probability = 0
+        if instance_nn_pose is not None \
+                and integrity and not only_pos:
+            # Valid pose for detection
+            data_to_add = list()
+            data_to_add += list_angles
+            data_to_add += ClassUtils.get_flat_list(transformed_points)
+
+            if len(data_to_add) != 38:
+                print('Hello 2')
+
+            data_np = np.asanyarray(data_to_add, dtype=np.float)
+            result = instance_nn_pose.predict_model_fast(data_np)
+            key_pose = int(result['classes'])
+            probability = float(result['probabilities'][key_pose])
+
+        local_position, global_position = cls._process_position_vector(person_array, min_pose_score, integrity,
+                                                                       calib_params, key_pose)
         result = {
             'vectors': person_array,
             'relation': relation,
@@ -74,52 +108,107 @@ class ClassDescriptors:
             'hists': hists,
             'camNumber': cam_number,
             'localPosition': local_position,
-            'globalPosition': global_position
+            'globalPosition': global_position,
+            'histPose': hist_pose,
+            'meanYPose': mean_y_pose,
+            'poseGuid': pose_guid,
+            'personGuid': '',
+            'keyPose': key_pose,
+            'probability': probability
         }
 
         return result
 
-    @staticmethod
-    def _process_position_vector(vector, min_percent, calib_params):
+    @classmethod
+    def _get_femur_distance(cls, person_array, min_pose_score):
+        distance_femur = 0
+        counter = 0
+
+        if ClassUtils.check_point_integrity(person_array[9], min_pose_score) and \
+                ClassUtils.check_point_integrity(person_array[10], min_pose_score):
+            distance_femur += ClassUtils.get_euclidean_distance_pt(person_array[9], person_array[10])
+            counter += 1
+
+        if ClassUtils.check_point_integrity(person_array[12], min_pose_score) and \
+                ClassUtils.check_point_integrity(person_array[13], min_pose_score):
+            distance_femur += ClassUtils.get_euclidean_distance_pt(person_array[12], person_array[13])
+            counter += 1
+
+        # Check mean
+        if counter == 2:
+            distance_femur /= 2
+
+        return distance_femur
+
+    @classmethod
+    def get_local_position_point(cls, person_array, min_pose_score, key_pose):
+        plumb_pt = [0, 0, 0]
+
+        # Key pose == -1 -> Only pos
+        if ClassUtils.check_vector_integrity_pos(person_array, min_pose_score):
+            if key_pose == 6 or key_pose == 7 or key_pose == -1:
+                # Complete legs and get maximum
+                list_points_right_leg = cls._complete_legs(person_array[9], person_array[10], person_array[11],
+                                                           person_array[12], person_array[13], person_array[14],
+                                                           person_array[8], min_pose_score)
+
+                list_points_left_leg = cls._complete_legs(person_array[12], person_array[13], person_array[14],
+                                                          person_array[9], person_array[10], person_array[11],
+                                                          person_array[8], min_pose_score)
+
+                max_y = 0
+                for point in list_points_right_leg:
+                    if point[1] > max_y:
+                        max_y = point[1]
+
+                for point in list_points_left_leg:
+                    if point[1] > max_y:
+                        max_y = point[1]
+
+                local_pos_x = person_array[8][0]
+                plumb_pt = [local_pos_x, max_y, 1]
+            else:
+                # Complete points using plumb method
+                distance_femur = cls._get_femur_distance(person_array, min_pose_score)
+                plumb_factor = 2
+
+                if distance_femur != 0:
+                    distance_plumb = distance_femur * plumb_factor
+                    plumb_pt = [person_array[8][0], person_array[8][1] + distance_plumb, 1]
+
+        return plumb_pt
+
+    @classmethod
+    def _process_position_vector(cls, vector, min_percent, integrity, calib_params, key_pose):
         """
         Calculate position based on the torse
         Project position to the floor in the leg
         """
-
-        result = ClassUtils.check_vector_integrity_pos(vector, min_percent)
         score = 0
         global_pos_x = 0
         global_pos_y = 0
-        local_pos_x = 0
-        local_pos_y = 0
+        local_position = [0, 0, 0]
 
-        if result and calib_params is not None:
+        if integrity and calib_params is not None:
             score = 1
-
-            vector_guess = ClassUtils.complete_points(vector, min_percent)
-
-            local_pos_x = vector_guess[8][0]
-
-            # Project the position to the max point of the leg
-            local_pos_y = vector_guess[11][1]
-
-            if vector_guess[14][1] > local_pos_y:
-                local_pos_y = vector_guess[14][1]
+            local_position = cls.get_local_position_point(vector, min_percent, key_pose)
 
             # Project points
             center = np.array(calib_params['centerPoints'])
             angle_deg = calib_params['angleDegrees']
+
+            if angle_deg != 0 and angle_deg != 180:
+                raise Exception('Angle degrees not supported: {0}'.format(angle_deg))
+
             homo_mat = np.array(calib_params['homographyMat'])
-            projected = ClassUtils.project_points_angle(homo_mat, np.asanyarray([local_pos_x, local_pos_y],
+            projected = ClassUtils.project_points_angle(homo_mat, np.asanyarray([local_position[0], local_position[1]],
                                                         dtype=np.float), center, angle_deg)
 
             # Update points
             global_pos_x = projected[0]
             global_pos_y = projected[1]
 
-        local_position = [local_pos_x, local_pos_y, score]
         global_position = [global_pos_x, global_pos_y, score]
-
         return local_position, global_position
 
     @classmethod
@@ -132,7 +221,7 @@ class ClassDescriptors:
         blue_hist = [0 for _ in range(256)]
         len_items = 0
 
-        if not integrity:
+        if not integrity or image is None:
             # Dummy command
             # Does not do anything
             len_items = 0
@@ -297,7 +386,7 @@ class ClassDescriptors:
             if not decode_img:
                 image_np = image
             else:
-                image_buffer = np.frombuffer(image, dtype="int32")
+                image_buffer = np.frombuffer(image, dtype=np.uint8)
                 image_np = cv2.imdecode(image_buffer, cv2.IMREAD_ANYCOLOR)
 
             for vector in vectors:
@@ -323,7 +412,7 @@ class ClassDescriptors:
         if not decode_img:
             image_np = image
         else:
-            image_buffer = np.frombuffer(image, dtype="int32")
+            image_buffer = np.frombuffer(image, dtype=np.uint8)
             image_np = cv2.imdecode(image_buffer, cv2.IMREAD_ANYCOLOR)
 
         upper_color = cls._process_upper_color(person_vector, min_percent, image_np)[1]
@@ -581,6 +670,9 @@ class ClassDescriptors:
             for angle in list_angles:
                 list_angles_degrees.append(angle * 180 / math.pi)
 
+        if len(list_angles) != 12:
+            print('Hello')
+
         return list_angles, list_angles_degrees
 
     @staticmethod
@@ -593,15 +685,15 @@ class ClassDescriptors:
         if only_pos or not integrity:
             relation_shoulders = 0
         else:
-            torso_dis = ClassUtils.get_euclidean_point(person_array[1], person_array[8])
+            torso_dis = ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[8])
 
             if person_array[2][2] >= min_pose_score and person_array[5][2] >= min_pose_score:
-                shoulder_dis = ClassUtils.get_euclidean_point(person_array[1], person_array[2]) + \
-                               ClassUtils.get_euclidean_point(person_array[1], person_array[5])
+                shoulder_dis = ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[2]) + \
+                               ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[5])
             elif person_array[2][2] >= min_pose_score:
-                shoulder_dis = 2 * ClassUtils.get_euclidean_point(person_array[1], person_array[2])
+                shoulder_dis = 2 * ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[2])
             elif person_array[5][2] >= min_pose_score:
-                shoulder_dis = 2 * ClassUtils.get_euclidean_point(person_array[1], person_array[5])
+                shoulder_dis = 2 * ClassUtils.get_euclidean_distance_pt(person_array[1], person_array[5])
             else:
                 raise Exception('Invalid confidence for shoulder points')
 
@@ -609,103 +701,189 @@ class ClassDescriptors:
 
         return relation_shoulders
 
-    @staticmethod
-    def _get_transformed_points(person_array, min_pose_score, only_pos=False, integrity=True):
+    @classmethod
+    def _get_transformed_points(cls, person_array, min_pose_score, calib_params,  only_pos=False, integrity=True):
         # 12 points in list
+
+        # Checking calib params
+        angle_degrees = 0
+        if calib_params is not None:
+            angle_degrees = calib_params['angleDegrees']
+
+        if angle_degrees != 0 and angle_degrees != 180:
+            raise Exception('Invalid angle degrees: {0}'.format(angle_degrees))
 
         list_points = list()
         if not integrity:
             # If not integrity, add points as zero
-            for _ in range(12):
+            for _ in range(13):
                 list_points.append([0, 0])
         else:
             # Function compatible with check_vector_integrity_part
             # Depends of vector integrity of shoulders and arms
             neck_point = person_array[1]
-            torso_dis = ClassUtils.get_euclidean_point(person_array[1], person_array[8])
+            hips_point = person_array[8]
+
+            distance_femur = cls._get_femur_distance(person_array, min_pose_score)
+            torso_dis = distance_femur * 2
 
             # Let point 1 be the origin
             # Transform the rest of the points
-
-            points_arm_right = [person_array[2], person_array[3], person_array[4]]
-            points_arm_left = [person_array[5], person_array[6], person_array[7]]
-
-            points_leg_right = [person_array[9], person_array[10], person_array[11]]
-            points_leg_left = [person_array[12], person_array[13], person_array[14]]
-            points_leg_partial = [person_array[9], person_array[10], person_array[12], person_array[13]]
-
-            # Arms points
-            def add_arm_right():
-                list_points.append(ClassDescriptors._transform_point(person_array[2], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[3], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[4], neck_point, torso_dis))
-
-            def add_arm_left():
-                list_points.append(ClassDescriptors._transform_point(person_array[5], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[6], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[7], neck_point, torso_dis))
-
             if only_pos:
-                # Add six points in blank - only pos element!
                 for _ in range(6):
                     list_points.append([0, 0])
-            elif ClassUtils.check_point_list(points_arm_right, min_pose_score) \
-                    and ClassUtils.check_point_list(points_arm_left, min_pose_score):
-                add_arm_right()
-                add_arm_left()
-            elif ClassUtils.check_point_list(points_arm_right, min_pose_score):
-                for _ in range(2):
-                    add_arm_right()
-            elif ClassUtils.check_point_list(points_arm_left, min_pose_score):
-                for _ in range(2):
-                    add_arm_left()
             else:
-                raise Exception('Cant find valid arms integrity')
+                list_points_right_arm = cls._complete_arms(person_array[2], person_array[3], person_array[4],
+                                                           neck_point,
+                                                           hips_point, person_array[5], min_pose_score)
+                list_points_left_arm = cls._complete_arms(person_array[5], person_array[6], person_array[7],
+                                                          neck_point,
+                                                          hips_point, person_array[2], min_pose_score)
+
+                for point in list_points_right_arm:
+                    list_points.append(ClassDescriptors._transform_point(point, neck_point, torso_dis))
+                for point in list_points_left_arm:
+                    list_points.append(ClassDescriptors._transform_point(point, neck_point, torso_dis))
 
             # Torso points
             list_points.append(ClassDescriptors._transform_point(person_array[8], neck_point, torso_dis))
 
-            # Legs points
-            # Check add_leg_partial_function
-            def add_leg_right():
-                list_points.append(ClassDescriptors._transform_point(person_array[9], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[10], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[11], neck_point, torso_dis))
+            list_points_right_leg = cls._complete_legs(person_array[9], person_array[10], person_array[11],
+                                                       person_array[12], person_array[13], person_array[14],
+                                                       person_array[8], min_pose_score)
 
-            def add_leg_left():
-                list_points.append(ClassDescriptors._transform_point(person_array[12], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[13], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[14], neck_point, torso_dis))
+            list_points_left_leg = cls._complete_legs(person_array[12], person_array[13], person_array[14],
+                                                      person_array[9], person_array[10], person_array[11],
+                                                      person_array[8], min_pose_score)
 
-            # Points 11 and 14 not valid
-            # Try to guess points
-            def add_leg_partial():
-                list_points.append(ClassDescriptors._transform_point(person_array[9], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[10], neck_point, torso_dis))
-                point_11 = ClassDescriptors._guess_leg_point(person_array[9], person_array[10])
-                list_points.append(ClassDescriptors._transform_point(point_11, neck_point, torso_dis))
+            # Init leg point transformation
+            for point in list_points_left_leg:
+                list_points.append(ClassDescriptors._transform_point(point, neck_point, torso_dis))
+            for point in list_points_right_leg:
+                list_points.append(ClassDescriptors._transform_point(point, neck_point, torso_dis))
 
-                list_points.append(ClassDescriptors._transform_point(person_array[12], neck_point, torso_dis))
-                list_points.append(ClassDescriptors._transform_point(person_array[13], neck_point, torso_dis))
-                point_14 = ClassDescriptors._guess_leg_point(person_array[12], person_array[13])
-                list_points.append(ClassDescriptors._transform_point(point_14, neck_point, torso_dis))
-
-            if ClassUtils.check_point_list(points_leg_right, min_pose_score) \
-                    and ClassUtils.check_point_list(points_leg_left, min_pose_score):
-                add_leg_right()
-                add_leg_left()
-            elif ClassUtils.check_point_list(points_leg_right, min_pose_score):
-                for _ in range(2):
-                    add_leg_right()
-            elif ClassUtils.check_point_list(points_leg_left, min_pose_score):
-                for _ in range(2):
-                    add_leg_left()
-            elif ClassUtils.check_point_list(points_leg_partial, min_pose_score):
-                add_leg_partial()
-            else:
-                raise Exception('Cant find valid legs integrity')
+        if angle_degrees == 180:
+            # Mirror camera from list
+            list_points = cls.mirror_pose_transformed(list_points)
 
         return list_points
+
+    @staticmethod
+    def _complete_arms(p_shoulder, p_elbow, p_hand, p_neck, p_hips, p_shoulder_other, min_pose_score):
+        # Add points based on integrity
+        point_shoulder = [p_shoulder[0], p_shoulder[1], p_shoulder[2]]
+        point_elbow = [p_elbow[0], p_elbow[1], p_elbow[2]]
+        point_hand = [p_hand[0], p_hand[1], p_hand[2]]
+
+        if not ClassUtils.check_point_integrity(point_shoulder, min_pose_score):
+            if not ClassUtils.check_point_integrity(p_shoulder_other, min_pose_score):
+                raise Exception('Invalid integrity for skeleton')
+
+            delta_x = p_shoulder_other[0] - p_neck[0]
+            delta_y = p_shoulder_other[1] - p_neck[1]
+
+            point_shoulder[0] = p_neck[0] - delta_x
+            point_shoulder[1] = p_neck[1] - delta_y
+            point_shoulder[2] = 1
+
+        if not ClassUtils.check_point_integrity(point_elbow, min_pose_score):
+            delta_x = p_hips[0] - p_neck[0]
+            delta_y = p_hips[1] - p_neck[1]
+
+            point_elbow[0] = point_shoulder[0] + delta_x / 2
+            point_elbow[1] = point_shoulder[1] + delta_y / 2
+            point_elbow[2] = 1
+
+            point_hand[0] = point_shoulder[0] + delta_x
+            point_hand[1] = point_shoulder[1] + delta_y
+            point_hand[2] = 2
+
+        if not ClassUtils.check_point_integrity(point_hand, min_pose_score):
+            # Extend element into list
+            delta_x = point_elbow[0] - point_shoulder[0]
+            delta_y = point_elbow[1] - point_shoulder[1]
+
+            point_hand[0] = point_elbow[0] + delta_x
+            point_hand[1] = point_elbow[1] + delta_y
+            point_hand[2] = 1
+
+        return [point_shoulder, point_elbow, point_hand]
+
+    @staticmethod
+    def _complete_legs(p_side_hip, p_knee, p_foot, p_side_hip_other, p_knee_other, p_foot_other, p_hips, min_score):
+        point_side_hip = [p_side_hip[0], p_side_hip[1], p_side_hip[2]]
+        point_knee = [p_knee[0], p_knee[1], p_knee[2]]
+        point_foot = [p_foot[0], p_foot[1], p_foot[2]]
+
+        # Initializing points
+        if not ClassUtils.check_point_integrity(point_side_hip, min_score):
+            if not ClassUtils.check_point_integrity(p_side_hip_other, min_score):
+                raise Exception('Invalid skeleton integrity')
+
+            delta_x = p_side_hip_other[0] - p_hips[0]
+            delta_y = p_side_hip_other[1] - p_hips[1]
+
+            point_side_hip[0] = p_hips[0] - delta_x
+            point_side_hip[1] = p_hips[1] - delta_y
+            point_side_hip[2] = 1
+
+        if not ClassUtils.check_point_integrity(point_knee, min_score):
+            if not ClassUtils.check_point_integrity(p_knee_other, min_score):
+                raise Exception('Invalid skeleton integrity')
+
+            delta_x = p_knee_other[0] - p_side_hip_other[0]
+            delta_y = p_knee_other[1] - p_side_hip_other[1]
+
+            point_knee[0] = point_side_hip[0] + delta_x
+            point_knee[1] = point_side_hip[1] + delta_y
+            point_knee[2] = 1
+
+        # Most difficult
+        # Must manage relation between list
+        if ClassUtils.check_point_integrity(point_foot, min_score):
+            d_hips_knee = ClassUtils.get_euclidean_distance_pt(point_side_hip, point_knee)
+            d_knee_foot = ClassUtils.get_euclidean_distance_pt(point_knee, point_foot)
+
+            relation = d_knee_foot / d_hips_knee
+            if relation < 0.75:
+                integrity = False
+                extend = True
+            else:
+                integrity = True
+                extend = False
+        else:
+            relation = 0
+            integrity = False
+            extend = False
+
+        if not integrity:
+            if not extend:
+                if ClassUtils.check_point_integrity(p_knee_other, min_score) \
+                        and ClassUtils.check_point_integrity(p_foot_other, min_score):
+
+                    # Extend legs using other points
+                    delta_x = p_foot_other[0] - p_knee_other[0]
+                    delta_y = p_foot_other[1] - p_knee_other[1]
+                else:
+                    delta_x = point_knee[0] - point_side_hip[0]
+                    delta_y = point_knee[1] - point_side_hip[1]
+
+                point_foot[0] = point_knee[0] + delta_x
+                point_foot[1] = point_knee[1] + delta_y
+                point_foot[2] = 1
+            else:
+                # Extend legs using femur and angle
+                delta_x_foot = point_foot[0] - point_knee[0]
+                delta_y_foot = point_foot[1] - point_knee[1]
+
+                delta_x_foot /= relation
+                delta_y_foot /= relation
+
+                point_foot[0] = point_knee[0] + delta_x_foot
+                point_foot[1] = point_knee[1] + delta_y_foot
+                point_foot[2] = 1
+
+        return [point_side_hip, point_knee, point_foot]
 
     @staticmethod
     def _transform_point(point, base_point, base_len):
@@ -748,59 +926,63 @@ class ClassDescriptors:
     def get_points_by_pose(cls, image: np.ndarray, pose, min_score, draw=False):
         # Pose must be checked with calc pose first
         # List points is in rgb format
-        list_points = list()
-        cls.add_list_pt(list_points, pose[1], pose[8], min_score)
+        if image is None:
+            return list()
+        else:
+            list_points = list()
+            cls.add_list_pt(list_points, pose[1], pose[8], min_score)
 
-        cls.add_list_pt(list_points, pose[1], pose[2], min_score)
-        cls.add_list_pt(list_points, pose[2], pose[3], min_score)
-        cls.add_list_pt(list_points, pose[3], pose[4], min_score)
+            cls.add_list_pt(list_points, pose[1], pose[2], min_score)
+            cls.add_list_pt(list_points, pose[2], pose[3], min_score)
+            cls.add_list_pt(list_points, pose[3], pose[4], min_score)
 
-        cls.add_list_pt(list_points, pose[1], pose[5], min_score)
-        cls.add_list_pt(list_points, pose[5], pose[6], min_score)
-        cls.add_list_pt(list_points, pose[6], pose[7], min_score)
+            cls.add_list_pt(list_points, pose[1], pose[5], min_score)
+            cls.add_list_pt(list_points, pose[5], pose[6], min_score)
+            cls.add_list_pt(list_points, pose[6], pose[7], min_score)
 
-        return_pts = list()
-        width = cls.get_width_relation(pose)
+            return_pts = list()
+            width = cls.get_width_relation(pose)
 
-        """
-        pt1, pt2 = ClassUtils.get_rectangle_bounds_upper(pose, min_score)
-        pt1 = cls._convert_pt_int(pt1)
-        pt2 = cls._convert_pt_int(pt2)
-        
-        # First approach
-        # Measure line pt
-        for i in range(pt1[0] - width, pt2[0] + width):
-            for j in range(pt1[1] - width, pt2[1] + width):
-                if i < 0 or i >= image.shape[1] or j < 0 or j >= image.shape[0]:
-                    continue
+            # Second approach
+            # Create temporal image to store points
+            temp_image = np.zeros(image.shape, np.uint8)
 
-                # Check if point is contained in any rect
-                contained = False
+            for pt1, pt2 in list_points:
+                cls._draw_points(image, temp_image, pt1, pt2, width, return_pts, draw)
 
-                for pt1_con, pt2_con in list_points:
-                    if cls.is_contained_in_line(pt1_con, pt2_con, [i, j], width):
-                        contained = True
-                        break
+            return return_pts
 
-                if contained:
-                    red_val = int(image[j, i, 2])
-                    green_val = int(image[j, i, 1])
-                    blue_val = int(image[j, i, 0])
+    @classmethod
+    def get_kmeans_diff(cls, image1_hist, image2_hist):
+        # Compare images using k-means
+        clusters = 3
 
-                    return_pts.append([red_val, green_val, blue_val])
-                    if draw:
-                        # Images are in bgr format
-                        image[j, i] = (0, 0, 255)
-        """
+        # Fit histograms
+        clt1 = KMeans(n_clusters=clusters)
+        clt1.fit(image1_hist)
 
-        # Second approach
-        # Create temporal image to store points
-        temp_image = np.zeros(image.shape, np.uint8)
+        clt2 = KMeans(n_clusters=clusters)
+        clt2.fit(image2_hist)
 
-        for pt1, pt2 in list_points:
-            cls._draw_points(image, temp_image, pt1, pt2, width, return_pts, draw)
+        # Color comparision
+        hist1 = cls.centroid_histogram(clt1)
 
-        return return_pts
+        max_color = [0, 0, 0]
+        max_percent = -1
+        for (percent, color) in zip(hist1, clt1.cluster_centers_):
+            if percent > max_percent or percent == -1:
+                max_color = color
+                max_percent = percent
+
+        min_distance = -1
+        for color in clt2.cluster_centers_:
+            dist = ClassUtils.get_color_diff_rgb(max_color, color)
+            print('Distance: {0}'.format(dist))
+
+            if min_distance == -1 or dist < min_distance:
+                min_distance = dist
+
+        return min_distance
 
     @classmethod
     def _draw_points(cls, image, temp_image, pt1, pt2, width, return_pts: list, draw):
@@ -880,94 +1062,6 @@ class ClassDescriptors:
         if ClassUtils.check_point_integrity(pt1, min_score) and ClassUtils.check_point_integrity(pt2, min_score):
             list_pt.append((pt1, pt2))
 
-    @classmethod
-    def get_points_by_line(cls, image: np.ndarray, pt1, pt2, width, draw=False):
-        # Iterate over region
-        # Get histogram elems
-        list_points = list()
-
-        pt1 = cls._convert_pt_int(pt1)
-        pt2 = cls._convert_pt_int(pt2)
-
-        # Get min values
-        min_x = min([pt1[0], pt2[0]])
-        min_y = min([pt1[1], pt2[1]])
-        max_x = max([pt1[0], pt2[0]])
-        max_y = max([pt1[1], pt2[1]])
-
-        return_pts = list()
-
-        for i in range(min_x - width, max_x + width):
-            for j in range(min_y - width, max_y + width):
-                if i < 0 or i >= image.shape[1] or j < 0 or j >= image.shape[0]:
-                    continue
-
-                if cls.is_contained_in_line(pt1, pt2, [i, j], width):
-                    red_val = int(image[j, i, 2])
-                    green_val = int(image[j, i, 1])
-                    blue_val = int(image[j, i, 0])
-
-                    return_pts.append([red_val, green_val, blue_val])
-
-                    if draw:
-                        # Images are in bgr format
-                        image[j, i] = (0, 0, 255)
-
-        return return_pts
-
-    @classmethod
-    def is_contained_in_line(cls, pt1, pt2, pt_eval, width):
-        min_x = min([pt1[0], pt2[0]])
-        min_y = min([pt1[1], pt2[1]])
-        max_x = max([pt1[0], pt2[0]])
-        max_y = max([pt1[1], pt2[1]])
-
-        delta_y = pt2[1] - pt1[1]
-        delta_x = pt2[0] - pt1[0]
-
-        if delta_y == 0:
-            point_int = [pt_eval[0], pt1[1]]
-        elif delta_x == 0:
-            point_int = [pt1[0], pt_eval[1]]
-        else:
-            # Get slope
-            m = delta_y / delta_x
-            b = pt1[1] - m * pt1[0]
-
-            # Get eq of rect
-            m_per = -1 / m
-            b_per = pt_eval[1] - m_per * pt_eval[0]
-
-            # Calculate intersection
-            x_int = (b_per - b)/(m - m_per)
-            y_int = m * x_int + b
-
-            point_int = [x_int, y_int]
-
-        # Limit points
-        if point_int[0] < min_x:
-            point_int[0] = min_x
-        if point_int[0] > max_x:
-            point_int[0] = max_x
-        if point_int[1] < min_y:
-            point_int[1] = min_y
-        if point_int[1] > max_y:
-            point_int[1] = max_y
-
-        # Get euclidean distance of points
-        distance = ClassUtils.get_euclidean_distance_pt(point_int, pt_eval)
-
-        if distance < width:
-            contained = True
-        else:
-            contained = False
-
-        return contained
-
-    @staticmethod
-    def _convert_pt_int(pt):
-        return [int(pt[0]), int(pt[1])]
-
     @staticmethod
     def centroid_histogram(clt):
         # grab the number of different clusters and create a histogram
@@ -983,7 +1077,9 @@ class ClassDescriptors:
         return hist
 
     @classmethod
-    def load_images_comparision_ext(cls, instance_pose: ClassOpenPose, min_score, load_one_img=False):
+    def load_images_comparision_ext(cls, instance_pose: ClassOpenPose, min_score,
+                                    load_one_img=False, perform_eq=False, ignore_json_color=False,
+                                    draw_points=False):
         print('Load image comparision')
 
         # Loading filename 1
@@ -1019,6 +1115,15 @@ class ClassDescriptors:
         if image2 is None:
             raise Exception('Invalid image in filename {0}'.format(filename2))
 
+        if perform_eq:
+            kernel_size = 5
+
+            image1 = ClassUtils.blur(image1, kernel_size)
+            image1 = ClassUtils.equalize_hist(image1)
+
+            image2 = ClassUtils.blur(image2, kernel_size)
+            image2 = ClassUtils.equalize_hist(image2)
+
         is_json1 = True
         is_json2 = True
 
@@ -1045,18 +1150,34 @@ class ClassDescriptors:
                 raise Exception('Pose 1 not valid')
 
             pose1 = poses1[0]
-            label1 = 0
 
+            integrity = ClassUtils.check_vector_integrity_pos(pose1, min_score)
+            only_pos = ClassUtils.check_vector_only_pos(pose1, min_score)
+            calib_params = None
+            transformed_points_1 = cls._get_transformed_points(pose1, min_score, calib_params,
+                                                               only_pos=only_pos,
+                                                               integrity=integrity)
+            label1 = 0
             color_upper1, color_lower1 = cls.process_colors_person(pose1, min_score, image1,
                                                                    decode_img=False)
         else:
             with open(new_file_1, 'r') as f:
                 obj_json1 = json.loads(f.read())
 
-            pose1 = obj_json1['vector']
+            if 'vector' in obj_json1:
+                pose1 = obj_json1['vector']
+            elif 'vectors' in obj_json1:
+                pose1 = obj_json1['vectors']
+            else:
+                raise Exception('Invalid vector property for vector 1')
 
-            color_upper1 = obj_json1['colorUpper']
-            color_lower1 = obj_json1['colorLower']
+            transformed_points_1 = obj_json1['transformedPoints']
+            if not ignore_json_color:
+                color_upper1 = obj_json1['colorUpper']
+                color_lower1 = obj_json1['colorLower']
+            else:
+                color_upper1, color_lower1 = cls.process_colors_person(pose1, min_score, image1,
+                                                                       decode_img=False)
 
             if 'label' in obj_json1:
                 label1 = obj_json1['label']
@@ -1075,17 +1196,34 @@ class ClassDescriptors:
                 raise Exception('Pose 2 not valid')
 
             pose2 = poses2[0]
+            integrity = ClassUtils.check_vector_integrity_pos(pose2, min_score)
+            only_pos = ClassUtils.check_vector_only_pos(pose2, min_score)
+
+            calib_params = None
+            transformed_points_2 = cls._get_transformed_points(pose2, min_score, calib_params,
+                                                               integrity=integrity,
+                                                               only_pos=only_pos)
             label2 = 0
             color_upper2, color_lower2 = cls.process_colors_person(pose2, min_score, image2,
-                                                                                decode_img=False)
+                                                                   decode_img=False)
         else:
             with open(new_file_2, 'r') as f:
                 obj_json2 = json.loads(f.read())
 
-            pose2 = obj_json2['vector']
+            if 'vector' in obj_json2:
+                pose2 = obj_json2['vector']
+            elif 'vectors' in obj_json2:
+                pose2 = obj_json2['vectors']
+            else:
+                raise Exception('Invalid vector property for vector 2')
 
-            color_upper2 = obj_json2['colorUpper']
-            color_lower2 = obj_json2['colorLower']
+            transformed_points_2 = obj_json2['transformedPoints']
+            if not ignore_json_color:
+                color_upper2 = obj_json2['colorUpper']
+                color_lower2 = obj_json2['colorLower']
+            else:
+                color_upper2, color_lower2 = cls.process_colors_person(pose2, min_score, image2,
+                                                                       decode_img=False)
 
             if 'label' in obj_json2:
                 label2 = obj_json2['label']
@@ -1095,8 +1233,8 @@ class ClassDescriptors:
             if not ClassUtils.check_vector_integrity_pos(pose2, min_score):
                 raise Exception('Pose 2 not valid')
 
-        list_points1 = cls.get_points_by_pose(image1, pose1, min_score)
-        list_points2 = cls.get_points_by_pose(image2, pose2, min_score)
+        list_points1 = cls.get_points_by_pose(image1, pose1, min_score, draw=draw_points)
+        list_points2 = cls.get_points_by_pose(image2, pose2, min_score, draw=draw_points)
 
         return {
             'image1': image1,
@@ -1110,10 +1248,186 @@ class ClassDescriptors:
             'colorUpper2': color_upper2,
             'colorLower2': color_lower2,
             'listPoints1': list_points1,
-            'listPoints2': list_points2
+            'listPoints2': list_points2,
+            'transformedPoints1': transformed_points_1,
+            'transformedPoints2': transformed_points_2
         }
 
     @classmethod
     def load_images_comparision(cls, instance_pose, min_score, load_one_img=False):
         obj_json = cls.load_images_comparision_ext(instance_pose, min_score, load_one_img)
         return obj_json['image1'], obj_json['image2'], obj_json['pose1'], obj_json['pose2']
+
+    @classmethod
+    def _get_mean_lum_pose(cls, image: np.ndarray, pose: list, min_score):
+        if image is None:
+            return 0
+        else:
+            # Warning
+            # Vector integrity must be checked first
+            pt1, pt2 = ClassUtils.get_rectangle_bounds(pose, min_score)
+
+            image_cropped = image[pt1[1]:pt2[1], pt1[0]:pt2[0]]
+            image_ycc = cv2.cvtColor(image_cropped, cv2.COLOR_BGR2YCrCb)
+
+            mean_y = np.mean(image_ycc[:, :, 0])
+            return mean_y
+
+    @classmethod
+    def mirror_pose_transformed(cls, pose_vector):
+        # Pose transformed does not have neck
+        # Add one at the end - Compatible with most of the functions from the list
+        # Only has 2 positions
+        x_neck = 0
+
+        new_pose_vector = list()
+        for point in pose_vector:
+            new_point = [point[0], point[1]]
+
+            delta_x = new_point[0] - x_neck
+            new_point[0] = x_neck - delta_x
+
+            new_pose_vector.append(new_point)
+
+        return new_pose_vector
+
+    @classmethod
+    def re_scale_pose_transformed(cls, pose_vector, torso_dis_pixels, min_score):
+        # Pose transformed does not have head and neck
+        # Assume position 0, 0
+        distance = ClassUtils.get_euclidean_distance_pt(pose_vector[6], [0, 0])
+        relation = torso_dis_pixels / distance
+
+        return cls._re_scale_pose(pose_vector, relation, min_score)
+
+    @classmethod
+    def re_scale_pose_factor(cls, pose_vector, re_scale_factor, min_score):
+        # Pose transformed does not have head and neck
+        # Assume position 0, 0
+        # pose must be transformed
+
+        if len(pose_vector) == 25:
+            raise Exception('Pose must be transformed. Got BODY25')
+
+        relation = re_scale_factor
+        return cls._re_scale_pose(pose_vector, relation, min_score)
+
+    @classmethod
+    def _re_scale_pose(cls, pose_vector, relation, min_score):
+        new_vector_list = list()
+        for point in pose_vector:
+            if len(point) == 3:
+                score = point[2]
+            else:
+                score = 1
+
+            new_point = [point[0], point[1], score]
+            if new_point[2] >= min_score:
+                new_point[0] *= relation
+                new_point[1] *= relation
+
+            new_vector_list.append(new_point)
+
+        return new_vector_list
+
+    @classmethod
+    def draw_pose(cls, image, person_vector, min_score, key_pose=-1):
+        # Draw poses
+        cls._draw_line_pose(image, person_vector[0], person_vector[1], min_score)
+
+        cls._draw_line_pose(image, person_vector[1], person_vector[2], min_score, color=(255, 0, 255))
+        cls._draw_line_pose(image, person_vector[2], person_vector[3], min_score, color=(255, 0, 255))
+        cls._draw_line_pose(image, person_vector[3], person_vector[4], min_score, color=(255, 0, 255))
+
+        cls._draw_line_pose(image, person_vector[1], person_vector[5], min_score)
+        cls._draw_line_pose(image, person_vector[5], person_vector[6], min_score)
+        cls._draw_line_pose(image, person_vector[6], person_vector[7], min_score)
+
+        cls._draw_line_pose(image, person_vector[1], person_vector[8], min_score)
+
+        cls._draw_line_pose(image, person_vector[8], person_vector[9], min_score)
+        cls._draw_line_pose(image, person_vector[9], person_vector[10], min_score)
+        cls._draw_line_pose(image, person_vector[10], person_vector[11], min_score)
+
+        cls._draw_line_pose(image, person_vector[8], person_vector[12], min_score)
+        cls._draw_line_pose(image, person_vector[12], person_vector[13], min_score)
+        cls._draw_line_pose(image, person_vector[13], person_vector[14], min_score)
+
+        # Draw foot
+        cls._draw_line_pose(image, person_vector[14], person_vector[21], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[21], person_vector[20], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[20], person_vector[19], min_score, color=(0, 255, 255))
+
+        cls._draw_line_pose(image, person_vector[11], person_vector[24], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[24], person_vector[23], min_score, color=(0, 255, 255))
+        cls._draw_line_pose(image, person_vector[23], person_vector[22], min_score, color=(0, 255, 255))
+
+        # Draw plumb position using femur
+        if ClassUtils.check_vector_integrity_pos(person_vector, min_score):
+            cls._draw_plumb_position(image, person_vector, min_score, key_pose)
+
+        # Done
+
+    @classmethod
+    def _draw_plumb_position(cls, image, person_vector, min_score, key_pose):
+        plumb_pt = ClassDescriptors.get_local_position_point(person_vector, min_score, key_pose)
+        cls._draw_line_pose(image, person_vector[8], plumb_pt, min_score, color=(161, 0, 255))
+
+    @staticmethod
+    def _draw_line_pose(image, point0, point1, min_score, color=(255, 255, 0)):
+        if point0[2] >= min_score and point1[2] > min_score:
+            cv2.line(image, (int(point0[0]), int(point0[1])),
+                     (int(point1[0]), int(point1[1])), color, 3)
+
+    @classmethod
+    def draw_pose_image(cls, pose_vector, min_score, is_transformed=False, key_pose=-1):
+        # Integrity must be checked first
+
+        valid_points = list()
+        new_list_points = list()
+
+        if not is_transformed:
+            for point in pose_vector:
+                new_list_points.append([point[0], point[1], point[2]])
+                if point[2] >= min_score:
+                    valid_points.append([point[0], point[1], point[2]])
+        else:
+            # Add head
+            new_list_points.append([0, 0, 0])
+
+            # Add neck
+            new_list_points.append([0, 0, 1])
+            valid_points.append([0, 0, 1])
+
+            # Add points
+            for point in pose_vector:
+                new_list_points.append([point[0], point[1], 1])
+                valid_points.append([point[0], point[1], 1])
+
+            # Add other elements
+            for _ in range(10):
+                new_list_points.append([0, 0, 0])
+
+        valid_points_np = np.array(valid_points)
+        min_x = int(np.min(valid_points_np[:, 0]))
+        max_x = int(np.max(valid_points_np[:, 0]))
+
+        min_y = int(np.min(valid_points_np[:, 1]))
+        max_y = int(np.max(valid_points_np[:, 1]))
+
+        size_x = max_x - min_x + 1
+        size_y = max_y - min_y + 1
+
+        image = np.zeros((size_y, size_x, 3), dtype=np.uint8)
+
+        # Set white image to draw
+        image[:, :] = (255, 255, 255)
+
+        for point in new_list_points:
+            if point[2] >= min_score:
+                point[0] -= min_x
+                point[1] -= min_y
+
+        cls.draw_pose(image, new_list_points, min_score, key_pose)
+
+        return image

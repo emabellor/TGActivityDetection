@@ -4,11 +4,12 @@ import os
 from classmjpegconverter import ClassMjpegConverter
 from tkinter import Tk
 from classutils import ClassUtils
+from classnn import ClassNN
 
 
 def main():
     print('Initializing main function')
-    print('Warning - You mist convert to mjpegx first')
+    print('Warning - You must convert to mjpegx first')
 
     # Withdrawing Tkinter window
     Tk().withdraw()
@@ -22,6 +23,12 @@ def main():
         print('Folder not selected')
     else:
         print(folder)
+
+        # Initializing pose instance
+        instance_nn_pose = ClassNN(model_dir=ClassNN.model_dir_pose,
+                                   classes=ClassNN.classes_num_pose,
+                                   hidden_number=ClassNN.hidden_num_pose)
+
         print('Extracting all mjpegx files')
 
         for root, _, files in os.walk(folder):
@@ -33,7 +40,7 @@ def main():
                     print(file)
                     print('Reprocessing ' + full_path + ' to mjpegx')
                     camera_number = ClassUtils.get_cam_number_from_path(full_path)
-                    ClassMjpegConverter.convert_video_mjpegx(full_path, camera_number)
+                    ClassMjpegConverter.convert_video_mjpegx(full_path, camera_number, instance_nn_pose)
 
 
 if __name__ == '__main__':
