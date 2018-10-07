@@ -20,20 +20,21 @@ class ClassUtils:
     MIN_POSE_SCORE = 0.1
 
     video_base_path = '/home/mauricio/Videos/Oviedo'
-    file_log_mov = '/home/mauricio/Videos/Oviedo/movelog.txt'
-
-    cnn_folder = '/home/mauricio/Pictures/CNN/Images/'
-    cnn_partial_folder_mov = '/home/mauricio/Pictures/CNN/Images_Partial/Mov'
-    cnn_partial_folder_no_mov = '/home/mauricio/Pictures/CNN/Images_Partial/No_Mov'
-    cnn_class_folder = '/home/mauricio/Pictures/CNN/Classes'
-
+    cnn_base_path = '/home/mauricio/CNN'
     no_img_path = '/home/mauricio/Pictures/novideo.jpg'
+    cnn_folder_mov = '/home/mauricio/Mov/Images'
 
-    # Static region
+    # Variable changing - If platform is not same
     if platform == 'win32':
         video_base_path = 'C:\\VideosPython'
-        file_log_mov = 'C:\\VideosPython\\movelog.txt'
         cnn_folder_mov = 'C:\\CNN\\Images'
+        cnn_base_path = 'C:\\SharedFTP'
+        no_img_path = 'C:\\novideo.jpg'
+
+    cnn_folder = os.path.join(cnn_base_path, 'Images/')
+    cnn_partial_folder_mov = os.path.join(cnn_base_path, 'Images_Partial/Mov')
+    cnn_partial_folder_no_mov = os.path.join(cnn_base_path, 'Images_Partial/No_Mov')
+    cnn_class_folder = os.path.join(cnn_base_path, 'Classes')
 
     @staticmethod
     def project_points(homo_matrix: np.ndarray, point2d: np.ndarray):
