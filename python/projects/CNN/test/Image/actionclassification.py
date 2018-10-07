@@ -18,15 +18,15 @@ def main():
 
     list_folder_data = [
         {
-            'folderPath': '/home/mauricio/Pictures/CNN/Classes/No_Mov/Door',
+            'folderPath': os.path.join(ClassUtils.cnn_base_path, 'Classes/No_Mov/Door'),
             'label': 0
         },
         {
-            'folderPath': '/home/mauricio/Pictures/CNN/Classes/No_Mov/Moving',
+            'folderPath': os.path.join(ClassUtils.cnn_base_path, 'Classes/No_Mov/Moving'),
             'label': 1
         },
         {
-            'folderPath': '/home/mauricio/Pictures/CNN/Classes/No_Mov/Squat',
+            'folderPath': os.path.join(ClassUtils.cnn_base_path, 'Classes/No_Mov/Squat'),
             'label': 2
         }
     ]
