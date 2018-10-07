@@ -22,7 +22,15 @@ class ClassCNN:
                  width,
                  height,
                  channels,
-                 train_steps=20000):
+                 train_steps=20000,
+                 batch_size=64):
+
+        self.classes = classes
+        self.width = width
+        self.height = height
+        self.channels = channels
+        self.train_steps = train_steps
+        self.batch_size = batch_size
 
         if width % 4 != 0:
             raise Exception('Width must be multiple of 4')
@@ -32,10 +40,9 @@ class ClassCNN:
             self.model_dir = model_dir
             self.classifier = tf.estimator.Estimator(
                 model_fn=lambda features, labels, mode:
-                    ClassCNN.cnn_model_fn(features, labels, mode, classes, width, height, channels),
+                    self.cnn_model_fn(features, labels, mode),
                 model_dir=model_dir)
             tf.logging.set_verbosity(tf.logging.INFO)
-            self.train_steps = train_steps
 
     def train_model(self, train_data, train_labels):
         print('Training model')
@@ -52,7 +59,7 @@ class ClassCNN:
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": train_data},
             y=train_labels,
-            batch_size=50,
+            batch_size=100,
             num_epochs=None,
             shuffle=True)
 
@@ -60,6 +67,9 @@ class ClassCNN:
             input_fn=train_input_fn,
             steps=self.train_steps,
             hooks=[logging_hook])
+
+    def update_batch_size(self, batch_size):
+        self.batch_size = batch_size
 
     def eval_model(self, eval_data, eval_labels):
         print('Evaluate the model and print results')
@@ -104,8 +114,7 @@ class ClassCNN:
     1024 Neurons dense layer
     Support multichannel from images
     """
-    @staticmethod
-    def cnn_model_fn(features, labels, mode, classes, width, height, channels):
+    def cnn_model_fn(self, features, labels, mode):
         # Input layer
         input_layer = tf.convert_to_tensor(features['x'])
 
@@ -135,7 +144,7 @@ class ClassCNN:
 
         # Dense layer
         # TODO -> Check dimension with the number of channels!
-        pool2_flat_width = int(width / 4 * height / 4 * 64)
+        pool2_flat_width = int(self.width / 4 * self.height / 4 * 64)
         pool2_flat = tf.reshape(pool2, [-1, pool2_flat_width])
         dense = tf.layers.dense(
             inputs=pool2_flat,
@@ -147,7 +156,7 @@ class ClassCNN:
         dropout = tf.layers.dropout(inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
         # Logits layer
-        logits = tf.layers.dense(inputs=dropout, units=classes)
+        logits = tf.layers.dense(inputs=dropout, units=self.classes)
 
         # Predictions, use argmax function
         predictions = {

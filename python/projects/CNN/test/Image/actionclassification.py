@@ -32,8 +32,7 @@ def main():
     ]
 
     classes = len(list_folder_data)
-    instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth,
-                              train_steps=2000)
+    instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth)
     classify_images(list_folder_data, instance_train)
 
 
@@ -102,7 +101,9 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN):
 
 def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray, instance_train: ClassCNN):
     print('Training model into list')
+
     # Init training!
+    instance_train.update_batch_size(training_data_np.shape[0])
     instance_train.train_model(training_data_np, training_labels_np)
 
     # Done!

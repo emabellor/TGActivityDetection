@@ -13,6 +13,8 @@ from classnn import ClassNN
 import numpy as np
 import random
 from tkinter import Tk
+from enum import Enum
+import math
 
 seed = 1234
 
@@ -20,6 +22,14 @@ csv_dir = '/home/mauricio/Pictures/PosesNew/data.csv'
 csv_train = '/home/mauricio/Pictures/PosesNew/training.csv'
 csv_eval = '/home/mauricio/Pictures/PosesNew/eval.csv'
 csv_dir_files = '/home/mauricio/Pictures/PosesNew/files.csv'
+
+
+class EnumDesc(Enum):
+    ANGLES = 0
+    ANGLES_TRANSFORMED = 1
+    POINTS = 2
+    ALL = 3
+    ALL_TRANSFORMED = 4
 
 
 def main():
@@ -49,10 +59,43 @@ def main():
     ]
 
     # Delete re calculate option - Enter directly to classify option
-    res = input('Press 1 to classify images - 2 to recalculate descriptors - 3 to get transformed points: ')
+    res = input('Press 1 to classify images, '
+                '2 to reprocess images, '
+                '3 to get transformed points: ')
 
     if res == '1':
-        classify_images(list_folder_data)
+        res = input('Press 1 to classify images using angles, '
+                    '2 to classify images using angles transformed, '
+                    '3 to classify images using points, '
+                    '4 to classify images using all points, '
+                    '5 to classify images using all points transformed: ')
+
+        if res == '1' or res == '2':
+            # No pose variant descriptors
+
+            list_folder_data = [
+                ('/home/mauricio/Pictures/PosesNew/Back', 0.05, 0),
+                ('/home/mauricio/Pictures/PosesNew/Hands_Left', 0.05, 1),
+                ('/home/mauricio/Pictures/PosesNew/Hands_Right', 0.05, 1),
+                ('/home/mauricio/Pictures/PosesNew/Front', 0.05, 0),
+                ('/home/mauricio/Pictures/PosesNew/Left', 0.05, 2),
+                ('/home/mauricio/Pictures/PosesNew/Right', 0.05, 2),
+                ('/home/mauricio/Pictures/PosesNew/Squat_Left', 0.05, 3),
+                ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 3)
+            ]
+
+            if res == '1':
+                classify_images(list_folder_data, EnumDesc.ANGLES)
+            else:
+                classify_images(list_folder_data, EnumDesc.ANGLES_TRANSFORMED)
+        elif res == '3':
+            classify_images(list_folder_data, EnumDesc.POINTS)
+        elif res == '4':
+            classify_images(list_folder_data, EnumDesc.ALL)
+        elif res == '5':
+            classify_images(list_folder_data, EnumDesc.ALL_TRANSFORMED)
+        else:
+            raise Exception('Option not recognized: {0}'.format(res))
     elif res == '2':
         reprocess_images(list_folder_data)
     elif res == '3':
@@ -141,7 +184,7 @@ def pre_process_images(list_folders_scores, recalculate):
     print('Done!')
 
 
-def classify_images(list_folder_data):
+def classify_images(list_folder_data: list, type_desc: EnumDesc):
     training_data = list()
     training_labels = list()
     training_files = list()
@@ -149,7 +192,18 @@ def classify_images(list_folder_data):
     eval_labels = list()
     eval_files = list()
 
-    classes_number = len(list_folder_data)
+    classes_number = 0
+
+    cont = True
+    while cont:
+        cont = False
+
+        for folder_data in list_folder_data:
+            if folder_data[2] == classes_number:
+                classes_number += 1
+                cont = True
+                break
+
     hidden_number = 40
     learning_rate = 0.04
     steps = 20000
@@ -198,9 +252,7 @@ def classify_images(list_folder_data):
 
             # Fill training and eval list
             # Use angles and position information
-            data_to_add = list()
-            data_to_add += angles
-            data_to_add += ClassUtils.get_flat_list(transformed_points)
+            data_to_add = get_descriptor_list(angles, transformed_points, type_desc)
             if num_file < total_train:
                 training_data.append(data_to_add)
                 training_labels.append(label)
@@ -233,11 +285,15 @@ def classify_images(list_folder_data):
         label_names.append((label_name, label))
 
     print('Total training: {0}'.format(len(training_labels)))
-    print('Total data: {0}'.format(len(eval_labels)))
+    print('Total eval: {0}'.format(len(eval_labels)))
+    print('Shape training: {0}'.format(training_data_np.shape))
+    print('Shape eval: {0}'.format(eval_data_np.shape))
+    print('Classes number: {0}'.format(classes_number))
 
     # Prompt for user input
-    selection = input('Training selected. Press 1 to train, 2 to evaluate, 3 to predict, 4 to save csv, '
-                      + ' 5 to get confusion matrix: ')
+    selection = input('Training selected {0}. '
+                      'Press 1 to train, 2 to evaluate, 3 to predict, 4 to save csv, '
+                      '5 to get confusion matrix: '.format(type_desc))
 
     if selection == '1':
         # Training
@@ -304,6 +360,43 @@ def classify_images(list_folder_data):
         print('Labels: {0}'.format(label_names))
     else:
         raise Exception('Option not supported')
+
+
+def get_descriptor_list(angles, transformed_points, type_desc: EnumDesc):
+    if type_desc == EnumDesc.ANGLES:
+        return angles
+    elif type_desc == EnumDesc.POINTS:
+        return ClassUtils.get_flat_list(transformed_points)
+    elif type_desc == EnumDesc.ALL:
+        data_to_add = list()
+        data_to_add += angles
+        data_to_add += ClassUtils.get_flat_list(transformed_points)
+        return data_to_add
+    elif type_desc == EnumDesc.ANGLES_TRANSFORMED:
+        data_to_add = list()
+
+        for angle in angles:
+            sin_angle = math.sin(angle)
+            cos_angle = math.cos(angle)
+
+            data_to_add.append(sin_angle)
+            data_to_add.append(cos_angle)
+
+        return data_to_add
+    elif type_desc == EnumDesc.ALL_TRANSFORMED:
+        data_to_add = list()
+
+        for angle in angles:
+            sin_angle = math.sin(angle)
+            cos_angle = math.cos(angle)
+
+            data_to_add.append(sin_angle)
+            data_to_add.append(cos_angle)
+
+        data_to_add += ClassUtils.get_flat_list(transformed_points)
+        return data_to_add
+    else:
+        raise Exception('Invalid option: {0}'.format(type_desc))
 
 
 def reprocess_images(list_folder_data):

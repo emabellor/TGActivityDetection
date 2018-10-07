@@ -3,6 +3,7 @@ from tkinter.filedialog import askopenfilename
 import json
 import numpy as np
 from classutils import ClassUtils
+from classnn import ClassNN
 import os
 import cv2
 import math
@@ -15,7 +16,8 @@ def main():
     Tk().withdraw()
 
     print('Initializing main function')
-    res = input('Select option: 1 to test CNN image generation - 2 to CNN image generation folder: ')
+    res = input('Select option: 1 to test CNN image generation, '
+                '2 to CNN image generation folder: ')
 
     if res == '1':
         cnn_image_generation()
@@ -23,6 +25,37 @@ def main():
         cnn_image_generation_folder()
     else:
         raise Exception('Option not recognized')
+
+
+def create_cnn_image_pose(param, instance_nn):
+    list_poses = param['listPoses']
+    max_confidence = 1
+
+    image_height = 8
+    image_width = len(list_poses)
+
+    image_np = np.zeros((image_height, image_width), dtype=np.uint8)
+
+    for index_pose, pose in enumerate(list_poses):
+        angles = pose['angles']
+        transformed_points = pose['transformedPoints']
+
+        list_desc = list()
+        list_desc += angles
+        list_desc += ClassUtils.get_flat_list(transformed_points)
+
+        list_desc_np = np.asanyarray(list_desc, dtype=np.float)
+
+        res = instance_nn.predict_model_fast(list_desc_np)
+
+        probabilities = res['probabilities']
+        for index, value in enumerate(probabilities):
+            pixel_value = int(value * 255 / max_confidence)
+            image_np[index, index_pose] = pixel_value
+
+    # Resizing image
+    image_res = cv2.resize(image_np, (cnn_image_height, cnn_image_width))
+    return image_res
 
 
 def create_cnn_image_angles(param):
@@ -154,8 +187,13 @@ def cnn_image_generation():
 
 
 def cnn_image_generation_folder():
+    # Initializing instance nn
+    classes_number = 8
+    hidden_layers = 40
+
     list_folders = list()
     list_folders.append(ClassUtils.cnn_class_folder)
+    instance_nn = ClassNN(ClassNN.model_dir_pose, classes_number, hidden_layers)
 
     # File walk
     for folder in list_folders:
@@ -178,15 +216,20 @@ def cnn_image_generation_folder():
                     # All image generation
                     image_name_pos = ClassUtils.get_filename_no_extension(full_path) + '_p.jpg'
                     image_name_angle = ClassUtils.get_filename_no_extension(full_path) + '_a.jpg'
+                    image_name_pose = ClassUtils.get_filename_no_extension(full_path) + '_s.jpg'
 
                     image_res_pos = create_cnn_image_pos(json_data)
                     image_res_angle = create_cnn_image_angles(json_data)
+                    image_res_pose = create_cnn_image_pose(json_data, instance_nn)
 
                     print('Writing image pos: {0}'.format(image_name_pos))
                     cv2.imwrite(image_name_pos, image_res_pos)
 
                     print('Writing image angle: {0}'.format(image_name_angle))
                     cv2.imwrite(image_name_angle, image_res_angle)
+
+                    print('Writing image pose: {0}'.format(image_name_pose))
+                    cv2.imwrite(image_name_pose, image_res_pose)
 
     print('Done!')
 

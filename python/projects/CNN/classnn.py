@@ -154,6 +154,9 @@ class ClassNN:
         return list_predictions[0]
 
     def predict_model_fast(self, predict_data: np.ndarray):
+        # Return value
+        # classes: number
+        # probabilities: array
         if predict_data.ndim != 1:
             raise Exception('Dimension of array is not one. number dim: {0}'.format(predict_data.ndim))
 
