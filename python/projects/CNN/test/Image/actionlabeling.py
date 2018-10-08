@@ -92,6 +92,41 @@ def create_cnn_image_angles(param):
     return image_res
 
 
+def create_image_cnn_angles_black(param):
+    # Ge timage len
+
+    list_poses = param['listPoses']
+
+    min_angle = 0
+    max_angle = math.pi
+
+    # Last item - movement vector
+    # Total elements: 27
+    image_height = cnn_image_height
+    image_width = len(list_poses)
+
+    if image_height < len(list_poses[0]['angles']):
+        raise Exception('Invalid angles len: {0}'.format(list_poses[0]['angles']))
+
+    image_np = np.zeros((image_height, image_width), dtype=np.uint8)
+
+    for index_pose, pose in enumerate(list_poses):
+        points = pose['angles']
+        for index, item in enumerate(points):
+            delta = math.pi
+
+            if item < min_angle or item > max_angle:
+                raise Exception('Invalid angle: {0}'.format(item))
+
+            pixel_value = int((item - min_angle) * 255 / delta)
+            image_np[index, index_pose] = pixel_value
+
+    # Resizing image
+    image_res = cv2.resize(image_np, (cnn_image_height, cnn_image_width))
+
+    # Return created image
+    return image_res
+
 def create_cnn_image_pos(param):
     # For now
     # Only consider transformed points
@@ -217,10 +252,12 @@ def cnn_image_generation_folder():
                     image_name_pos = ClassUtils.get_filename_no_extension(full_path) + '_p.jpg'
                     image_name_angle = ClassUtils.get_filename_no_extension(full_path) + '_a.jpg'
                     image_name_pose = ClassUtils.get_filename_no_extension(full_path) + '_s.jpg'
+                    image_name_pose_black = ClassUtils.get_filename_no_extension(full_path) + '_b.jpg'
 
                     image_res_pos = create_cnn_image_pos(json_data)
                     image_res_angle = create_cnn_image_angles(json_data)
                     image_res_pose = create_cnn_image_pose(json_data, instance_nn)
+                    image_res_pose_black = create_image_cnn_angles_black(json_data)
 
                     print('Writing image pos: {0}'.format(image_name_pos))
                     cv2.imwrite(image_name_pos, image_res_pos)
@@ -230,6 +267,9 @@ def cnn_image_generation_folder():
 
                     print('Writing image pose: {0}'.format(image_name_pose))
                     cv2.imwrite(image_name_pose, image_res_pose)
+
+                    print('Writing image pose black: {0}'.format(image_name_pose_black))
+                    cv2.imwrite(image_name_pose_black, image_res_pose_black)
 
     print('Done!')
 

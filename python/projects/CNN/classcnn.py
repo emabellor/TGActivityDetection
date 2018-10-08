@@ -34,15 +34,17 @@ class ClassCNN:
 
         if width % 4 != 0:
             raise Exception('Width must be multiple of 4')
-        elif height % 4 != 0:
+        if height % 4 != 0:
             raise Exception('Height must be multiple of 4')
-        else:
-            self.model_dir = model_dir
-            self.classifier = tf.estimator.Estimator(
-                model_fn=lambda features, labels, mode:
-                    self.cnn_model_fn(features, labels, mode),
-                model_dir=model_dir)
-            tf.logging.set_verbosity(tf.logging.INFO)
+
+        self.model_dir = model_dir
+        self.classifier = tf.estimator.Estimator(
+            model_fn=lambda features, labels, mode:
+                self.cnn_model_fn(features, labels, mode),
+            model_dir=model_dir)
+        tf.logging.set_verbosity(tf.logging.INFO)
+
+        self.fast_predict = FastPredict(self.classifier)
 
     def train_model(self, train_data, train_labels):
         print('Training model')
@@ -108,6 +110,23 @@ class ClassCNN:
 
             # Returned result
             return result
+
+    def predict_model_fast(self, predict_data: np.ndarray):
+        # Return value
+        # classes: number
+        # probabilities: array
+        if predict_data.ndim != 3:
+            raise Exception('Dimension of array is not three. number dim: {0}'.format(predict_data.ndim))
+
+        predict_results = self.fast_predict.predict(predict_data)
+
+        # Returns a generator
+        list_predictions = []
+        for prediction in predict_results:
+            list_predictions.append(prediction)
+
+        # Return result
+        return list_predictions[0]
 
     """
     ConvNet 32 filters first layer, 64 filters second layer
@@ -185,4 +204,81 @@ class ClassCNN:
             'accuracy': tf.metrics.accuracy(labels=labels, predictions=predictions['classes'])
         }
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+
+class FastPredict:
+    def __init__(self, estimator: tf.estimator.Estimator):
+        self.estimator = estimator
+        self.first_run = True
+        self.closed = False
+        self.next_features = []
+        self.features_height = 0
+        self.features_width = 0
+        self.features_dim = 0
+        self.predictions = None
+        self.type = None
+
+    def _create_generator(self):
+        while not self.closed:
+            yield self.next_features
+
+    def predict(self, feature_batch: np.ndarray):
+        """ Runs a prediction on a set of features. Calling multiple times
+            does *not* regenerate the graph which makes predict much faster.
+            feature_batch a list of list of features. IMPORTANT: If you're only classifying 1 thing,
+            you still need to make it a batch of 1 by wrapping it in a list (i.e. predict([my_feature]), not predict(my_feature)
+        """
+        # Initializing prediction
+        if feature_batch.ndim != 3:
+            raise Exception('NDim is not three: {0}'.format(feature_batch.ndim))
+
+        features = np.expand_dims(feature_batch, axis=0)
+        self.next_features = features
+        if self.first_run:
+            if features.dtype == np.float32:
+                self.type = tf.float32
+            elif features.dtype == np.float64:
+                self.type = tf.float64
+            else:
+                raise Exception('Type not supported: {0}'.format(features.dtype))
+
+            self.features_height = features.shape[1]
+            self.features_width = features.shape[2]
+            self.features_dim = features.shape[3]
+
+            self.predictions = self.estimator.predict(
+                input_fn=self.example_input_fn(self._create_generator))
+            self.first_run = False
+
+        elif self.features_height != features.shape[1] or \
+                self.features_width != features.shape[2] or \
+                self.features_dim != features.shape[3]:
+            raise ValueError("All batches must be of the same size. Current-batch:" + str(features.shape) +
+                             " This-batch:" + str(features.shape[1]))
+
+        # Only read one size
+        results = list()
+        results.append(next(self.predictions))
+        return results
+
+    def close(self):
+        self.closed = True
+        try:
+            next(self.predictions)
+        except:
+            print("Exception in fast_predict. This is probably OK")
+
+    def example_input_fn(self, generator):
+        """ An example input function to pass to predict. It must take a generator as input """
+        def _inner_input_fn():
+            data_set = tf.data.Dataset().from_generator(generator, output_types=self.type).batch(1)
+            iterator = data_set.make_one_shot_iterator()
+            features = iterator.get_next()
+
+            # Reshape elements to same size that batch_size
+            features = tf.reshape(features, [1, self.features_height, self.features_width, self.features_dim])
+
+            return {'x': features}
+
+        return _inner_input_fn
 

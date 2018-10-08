@@ -20,7 +20,7 @@ class ClassUtils:
     MIN_POSE_SCORE = 0.1
 
     video_base_path = '/home/mauricio/Videos/Oviedo'
-    cnn_base_path = '/home/mauricio/CNN'
+    cnn_base_path = '/home/mauricio/Pictures/CNN'
     no_img_path = '/home/mauricio/Pictures/novideo.jpg'
     cnn_folder_mov = '/home/mauricio/Mov/Images'
 

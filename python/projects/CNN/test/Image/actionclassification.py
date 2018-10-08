@@ -12,9 +12,11 @@ seed = 1234
 img_width = 28
 img_height = 28
 depth = 1
+classes = 0
 
 
 def main():
+    global classes
 
     list_folder_data = [
         {
@@ -31,12 +33,15 @@ def main():
         }
     ]
 
+    suffix = input('Select image index: Ej: _a -> angles image, _p -> points image, _s -> poses image, '
+                   '_b -> angles image no resize: ')
+
     classes = len(list_folder_data)
     instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth)
-    classify_images(list_folder_data, instance_train)
+    classify_images(list_folder_data, instance_train, suffix)
 
 
-def classify_images(list_folder_data: list, instance_train: ClassCNN):
+def classify_images(list_folder_data: list, instance_train: ClassCNN, suffix: str):
     training_data = list()
     training_labels = list()
     training_files = list()
@@ -56,7 +61,7 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN):
             for file in files:
                 full_path = os.path.join(root, file)
 
-                if '_p' in full_path:
+                if suffix in full_path:
                     img_cv = cv2.imread(full_path, cv2.IMREAD_GRAYSCALE)
 
                     if img_cv.shape != (img_height, img_width):
@@ -88,6 +93,9 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN):
     print('Shape images training: {0}'.format(training_data_np.shape))
     print('Shape labels training: {0}'.format(training_labels_np.shape))
 
+    if training_data_np.shape[0] == 0:
+        raise Exception('No files found for suffix: {0}'.format(suffix))
+
     print('Initializing main function')
     res = input('Press 1 to train - 2 to eval: ')
 
@@ -113,6 +121,22 @@ def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray, in
 def eval_model(eval_data_np: np.ndarray, eval_labels_np: np.ndarray, instance_train: ClassCNN):
     # Evaluate
     instance_train.eval_model(eval_data_np, eval_labels_np)
+
+    # Getting confussion matrix
+    print('Getting confusion matrix')
+
+    confusion_np = np.zeros((classes, classes))
+    for i in range(eval_data_np.shape[0]):
+        data = eval_data_np[i]
+        expected = eval_labels_np[i]
+        obtained = instance_train.predict_model_fast(data)
+        class_prediction = obtained['classes']
+        print('Class: {0}'.format(class_prediction))
+
+        confusion_np[expected, class_prediction] += 1
+
+    print('Confusion matrix')
+    print(confusion_np)
 
     print('Done!')
 
