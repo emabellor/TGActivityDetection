@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;HelloJNI/print.h&apos; to &apos;Print.h&apos;" description="Rename resource &apos;print.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="print.h" name="Print.h" stamp="1518377335670" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;HelloJNI/Print.c&apos; to &apos;Print.cpp&apos;" description="Rename resource &apos;Print.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Print.c" name="Print.cpp" stamp="1518392773962" updateReferences="true"/>
-</session>

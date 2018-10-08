@@ -1,5 +1,0 @@
-#include <jni.h>
-
-JNIEXPORT void JNICALL Java_Hello_sayHello(JNIEnv *env, jobject obj) {
-
-}

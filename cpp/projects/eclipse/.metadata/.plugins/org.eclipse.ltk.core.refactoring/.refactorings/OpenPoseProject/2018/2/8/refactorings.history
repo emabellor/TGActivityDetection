@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;OpenPoseProject/ClassVideoSaver.h&apos; to &apos;ClassMJPEGReader.h&apos;" description="Rename resource &apos;ClassVideoSaver.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ClassVideoSaver.h" name="ClassMJPEGReader.h" stamp="1519177611177" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;OpenPoseProject/ClassVideoSaver.cpp&apos; to &apos;ClassMJPEGReader.cpp&apos;" description="Rename resource &apos;ClassVideoSaver.cpp&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ClassVideoSaver.cpp" name="ClassMJPEGReader.cpp" stamp="1519177625000" updateReferences="true"/>
-</session>
