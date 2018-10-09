@@ -130,7 +130,8 @@ def new_frame(frame: np.ndarray, id_cam: str, video_saver_ref: ClassVideoSaver):
         print('Saving frame for camera {0} {1} mov: {2}'.format(id_cam, now, movement))
 
         # Saving frame for camera into list
-        video_saver_ref.add_frame(frame, now)
+        _, buffer = cv2.imencode('.jpg', frame)
+        video_saver_ref.add_frame(buffer, now)
         counter += 1
 
 

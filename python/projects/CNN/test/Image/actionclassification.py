@@ -100,19 +100,25 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, suffix: st
     res = input('Press 1 to train - 2 to eval: ')
 
     if res == '1':
-        train_model(training_data_np, training_labels_np, instance_train)
+        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train)
     elif res == '2':
         eval_model(eval_data_np, eval_labels_np, instance_train)
     else:
         raise Exception('Option not implemented!')
 
 
-def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray, instance_train: ClassCNN):
+def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray,
+                eval_data_np: np.ndarray, eval_labels_np,
+                instance_train: ClassCNN):
+
     print('Training model into list')
 
     # Init training!
     instance_train.update_batch_size(training_data_np.shape[0])
     instance_train.train_model(training_data_np, training_labels_np)
+
+    # Performing data evaluation
+    eval_model(eval_data_np, eval_labels_np, instance_train)
 
     # Done!
     print('Done!')

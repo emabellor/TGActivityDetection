@@ -120,6 +120,11 @@ def main():
         list_cams = [900]
         date_init = datetime(2017, 11, 3, 11, 0, 0)
         date_end = datetime(2017, 11, 3, 11, 14, 59)
+        select_options(),
+    elif option == '13':
+        list_cams = [99]
+        date_init = datetime(2018, 10, 8, 17, 30, 0)
+        date_end = datetime(2018, 10, 8, 17, 59, 59)
         select_options()
     else:
         print('Option not recognized')

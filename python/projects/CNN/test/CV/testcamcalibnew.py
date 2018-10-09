@@ -21,6 +21,8 @@ do_homo = False
 center = []
 ok_params = False
 angle_deg = 0
+x_object = 0
+y_object = 0
 
 # Default positions
 # Change if model of cells changes
@@ -31,6 +33,7 @@ default_positions = [
     [95, 250]
 ]
 
+use_default_pos = False
 selected_file = ''
 
 
@@ -39,27 +42,71 @@ def mouse_callback(event, x_image, y_image, flags, param):
         global do_homo
         global image
         global default_positions
+        global ok_params
+        global image_points
+        global object_point
+        global x_object
+        global y_object
 
-        image_points.append([x_image, y_image])
-
-        # Draw point
-        print('Drawing point')
-        radius = 5
-        red = (0, 0, 255)
-        cv2.rectangle(image, (x_image - radius, y_image - radius), (x_image + radius, y_image + radius),
-                      red, cv2.FILLED)
-        cv2.imshow('image', image)
-
-        # Add object point
+        # Index for adding object point
         index = len(image_points) - 1
-        x_object = default_positions[index][0]
-        y_object = default_positions[index][1]
-        object_point = [x_object, y_object]
-        object_points.append(object_point)
-        print('Object point loaded: {0}'.format(object_point))
 
-        if len(object_points) == 4:
-            do_homo = True
+        x_object = 0
+        y_object = 0
+        ok_params = False
+
+        if use_default_pos:
+            image_points.append([x_image, y_image])
+            x_object = default_positions[index][0]
+            y_object = default_positions[index][1]
+        else:
+            master = Tk()
+            tk.Label(master, text="x object").grid(row=0)
+            tk.Label(master, text="y object").grid(row=1)
+
+            e1 = tk.Entry(master)
+            e2 = tk.Entry(master)
+
+            e1.grid(row=0, column=1)
+            e2.grid(row=1, column=1)
+
+            def read_params():
+                global ok_params
+                global x_object
+                global y_object
+
+                if e1.get() != '' and e2.get() != '':
+                    x_object = int(e1.get())
+                    y_object = int(e2.get())
+                    ok_params = True
+                    master.quit()
+
+            tk.Button(master, text='Quit', command=master.quit).grid(row=3, column=0, pady=4)
+            tk.Button(master, text='OK', command=read_params).grid(row=3, column=1, pady=4)
+
+            master.mainloop()
+
+            # Destroying window
+            master.destroy()
+
+        if ok_params:
+            print('Ok params!')
+            image_points.append([x_image, y_image])
+
+            # Draw point
+            print('Drawing point')
+            radius = 5
+            red = (0, 0, 255)
+            cv2.rectangle(image, (x_image - radius, y_image - radius), (x_image + radius, y_image + radius),
+                          red, cv2.FILLED)
+            cv2.imshow('image', image)
+
+            object_point = [x_object, y_object]
+            object_points.append(object_point)
+            print('Object point loaded: {0}'.format(object_point))
+
+            if len(object_points) == 4:
+                do_homo = True
 
 
 def main():
@@ -67,6 +114,7 @@ def main():
     global do_homo
     global image_points
     global object_points
+    global use_default_pos
 
     print('OpenCV calibration')
 
@@ -97,6 +145,14 @@ def main():
     if not continue_load:
         print('Quiting')
     else:
+
+        res = input('Use default pos? (Y/N): ')
+
+        if res == 'n' or res == 'N':
+            use_default_pos = False
+        else:
+            use_default_pos = True
+
         loading_image(cam_number)
 
 
