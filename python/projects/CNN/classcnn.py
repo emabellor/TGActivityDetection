@@ -11,10 +11,14 @@ import numpy as np
 import tensorflow as tf
 import shutil
 import os
+from sys import platform
 
 
 class ClassCNN:
     model_dir_action = '/home/mauricio/models/cnn_classifier_action'
+
+    if platform == 'win32':
+        video_base_path = 'C:\\models\\cnn_classifier_action'
 
     def __init__(self,
                  model_dir,
