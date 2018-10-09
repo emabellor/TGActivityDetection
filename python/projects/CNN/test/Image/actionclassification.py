@@ -114,7 +114,7 @@ def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray,
     print('Training model into list')
 
     # Init training!
-    instance_train.update_batch_size(training_data_np.shape[0])
+    # instance_train.update_batch_size(training_data_np.shape[0])
     instance_train.train_model(training_data_np, training_labels_np)
 
     # Performing data evaluation
