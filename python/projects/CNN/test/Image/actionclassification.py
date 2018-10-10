@@ -40,7 +40,7 @@ def main():
                    '_b -> angles image no resize: ')
 
     classes = len(list_folder_data)
-    instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth)
+    instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth, batch_size=32)
 
     hidden_layers = 1000
     instance_train_nn = ClassNN(ClassNN.model_dir_action, classes, hidden_layers, learning_rate=0.000005)
@@ -122,7 +122,7 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_t
         training_data_np = np.reshape(training_data_np, (training_data_np.shape[0], 28 * 28))
         print(training_data_np)
         eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
-        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train_nn, steps=20000)
+        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train_nn, steps=15000)
     elif res == '4':
         eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
         eval_model(eval_data_np, eval_labels_np, instance_train_nn)
