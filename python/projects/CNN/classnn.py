@@ -18,6 +18,7 @@ import json
 
 class ClassNN:
     model_dir_pose = '/home/mauricio/models/nn_classifier'
+    model_dir_action = '/home/mauricio/models/nn_class_action'
     classes_num_pose = 8
     hidden_num_pose = 40
 
@@ -27,7 +28,7 @@ class ClassNN:
         self.hidden_number = hidden_number
         self.label_names = label_names
         self.classifier = tf.estimator.Estimator(
-            model_fn=lambda features, labels, mode: ClassNN.nn_model_fn(features, labels,
+            model_fn=lambda features, labels, mode: self.nn_model_fn(features, labels,
                                                                         mode, classes, hidden_number, learning_rate),
             model_dir=model_dir)
         tf.logging.set_verbosity(tf.logging.INFO)

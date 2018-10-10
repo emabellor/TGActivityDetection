@@ -50,7 +50,8 @@ class ClassCNN:
 
         self.fast_predict = FastPredict(self.classifier)
 
-    def train_model(self, train_data, train_labels):
+    def train_model(self, train_data, train_labels, steps=20000):
+        self.train_steps = steps
         print('Training model')
 
         print('Remove training folder if exists -> Avoid confusions')

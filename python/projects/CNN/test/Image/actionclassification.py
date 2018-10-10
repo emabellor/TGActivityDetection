@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import random
 from classutils import ClassUtils
+from classnn import ClassNN
 import json
 
 seed = 1234
@@ -13,10 +14,12 @@ img_width = 28
 img_height = 28
 depth = 1
 classes = 0
+global_suffix = ''
 
 
 def main():
     global classes
+    global suffix
 
     list_folder_data = [
         {
@@ -38,10 +41,14 @@ def main():
 
     classes = len(list_folder_data)
     instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth)
-    classify_images(list_folder_data, instance_train, suffix)
+
+    hidden_layers = 1000
+    instance_train_nn = ClassNN(ClassNN.model_dir_action, classes, hidden_layers, learning_rate=0.000005)
+    classify_images(list_folder_data, instance_train, instance_train_nn)
 
 
-def classify_images(list_folder_data: list, instance_train: ClassCNN, suffix: str):
+def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_train_nn: ClassNN):
+    global global_suffix
     training_data = list()
     training_labels = list()
     training_files = list()
@@ -53,32 +60,39 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, suffix: st
         folder = item['folderPath']
         label = item['label']
 
-        total_samples = len(os.listdir(folder))
-        total_train = int(total_samples * 80 / 100)
-
         num_file = 0
+        list_paths = list()
         for root, _, files in os.walk(folder):
             for file in files:
                 full_path = os.path.join(root, file)
 
                 if suffix in full_path:
-                    img_cv = cv2.imread(full_path, cv2.IMREAD_GRAYSCALE)
+                    list_paths.append(full_path)
 
-                    if img_cv.shape != (img_height, img_width):
-                        img_cv = cv2.resize(img_cv, (img_height, img_width))
+        total_samples = len(list_paths)
+        total_train = int(total_samples * 80 / 100)
 
-                    img_cv = np.resize(img_cv, (img_height, img_width, 1))
+        # Shuffle samples
+        random.Random(seed).shuffle(list_paths)
 
-                    if num_file < total_train:
-                        training_data.append(img_cv)
-                        training_labels.append(label)
-                        training_files.append(full_path)
-                    else:
-                        eval_data.append(img_cv)
-                        eval_labels.append(label)
-                        eval_files.append(full_path)
+        for full_path in list_paths:
+            img_cv = cv2.imread(full_path, cv2.IMREAD_GRAYSCALE)
 
-                    num_file += 1
+            if img_cv.shape != (img_height, img_width):
+                img_cv = cv2.resize(img_cv, (img_height, img_width))
+
+            img_cv = np.resize(img_cv, (img_height, img_width, 1))
+
+            if num_file < total_train:
+                training_data.append(img_cv)
+                training_labels.append(label)
+                training_files.append(full_path)
+            else:
+                eval_data.append(img_cv)
+                eval_labels.append(label)
+                eval_files.append(full_path)
+
+            num_file += 1
 
     # Convert data to numpy array
     training_data_np = np.asanyarray(training_data, dtype=np.float)
@@ -97,25 +111,34 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, suffix: st
         raise Exception('No files found for suffix: {0}'.format(suffix))
 
     print('Initializing main function')
-    res = input('Press 1 to train - 2 to eval: ')
+    res = input('Press 1 to train - 2 to eval - 3 to train nn - 4 to eval nn ')
 
     if res == '1':
         train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train)
     elif res == '2':
         eval_model(eval_data_np, eval_labels_np, instance_train)
+    elif res == '3':
+        print(training_data_np)
+        training_data_np = np.reshape(training_data_np, (training_data_np.shape[0], 28 * 28))
+        print(training_data_np)
+        eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
+        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train_nn, steps=20000)
+    elif res == '4':
+        eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
+        eval_model(eval_data_np, eval_labels_np, instance_train_nn)
     else:
         raise Exception('Option not implemented!')
 
 
 def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray,
                 eval_data_np: np.ndarray, eval_labels_np,
-                instance_train: ClassCNN):
+                instance_train, steps=20000):
 
     print('Training model into list')
 
     # Init training!
     # instance_train.update_batch_size(training_data_np.shape[0])
-    instance_train.train_model(training_data_np, training_labels_np)
+    instance_train.train_model(training_data_np, training_labels_np, steps=steps)
 
     # Performing data evaluation
     eval_model(eval_data_np, eval_labels_np, instance_train)
@@ -124,7 +147,9 @@ def train_model(training_data_np: np.ndarray, training_labels_np: np.ndarray,
     print('Done!')
 
 
-def eval_model(eval_data_np: np.ndarray, eval_labels_np: np.ndarray, instance_train: ClassCNN):
+def eval_model(eval_data_np: np.ndarray, eval_labels_np: np.ndarray, instance_train):
+    global suffix
+
     # Evaluate
     instance_train.eval_model(eval_data_np, eval_labels_np)
 
@@ -137,12 +162,13 @@ def eval_model(eval_data_np: np.ndarray, eval_labels_np: np.ndarray, instance_tr
         expected = eval_labels_np[i]
         obtained = instance_train.predict_model_fast(data)
         class_prediction = obtained['classes']
-        print('Class: {0}'.format(class_prediction))
 
         confusion_np[expected, class_prediction] += 1
 
     print('Confusion matrix')
     print(confusion_np)
+
+    print('Suffix: {0}'.format(suffix))
 
     print('Done!')
 
