@@ -114,7 +114,7 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_t
     res = input('Press 1 to train - 2 to eval - 3 to train nn - 4 to eval nn ')
 
     if res == '1':
-        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train)
+        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train, steps=15000)
     elif res == '2':
         eval_model(eval_data_np, eval_labels_np, instance_train)
     elif res == '3':
@@ -122,7 +122,7 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_t
         training_data_np = np.reshape(training_data_np, (training_data_np.shape[0], 28 * 28))
         print(training_data_np)
         eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
-        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train_nn, steps=15000)
+        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train_nn, steps=20000)
     elif res == '4':
         eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
         eval_model(eval_data_np, eval_labels_np, instance_train_nn)
