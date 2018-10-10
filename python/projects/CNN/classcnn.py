@@ -66,7 +66,7 @@ class ClassCNN:
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": train_data},
             y=train_labels,
-            batch_size=100,
+            batch_size=self.batch_size,
             num_epochs=None,
             shuffle=True)
 
