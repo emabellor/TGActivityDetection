@@ -82,6 +82,22 @@ def main():
 
                 print('Image saved: {0}'.format(data_path))
                 index += 1
+            elif key == 97:
+                # Loading image again
+                options = {'initialdir': init_dir}
+                filename = askopenfilename(**options)
+
+                if not filename:
+                    raise Exception('Filename not selected!')
+
+                print('Selected filename: {0}'.format(filename))
+
+                with open(filename, 'r') as f:
+                    json_str = f.read()
+
+                list_poses = json.loads(json_str)['listPoses']
+                index = 0
+                print('Loading folder: {0}')
 
     cv2.destroyAllWindows()
     print('Done!')
