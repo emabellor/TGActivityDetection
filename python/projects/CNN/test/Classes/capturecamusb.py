@@ -38,6 +38,12 @@ def main():
 
     # Initializing video instance
     cap = cv2.VideoCapture(cam_cv_index)
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+    val = cap.get(cv2.CAP_PROP_EXPOSURE)
+    cap.set(cv2.CAP_PROP_EXPOSURE, 0.12)
+    print(val)
+
+    # cap.set(cv2.CAP_PROP_EXPOSURE, -9.0)
 
     cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)
     while True:
