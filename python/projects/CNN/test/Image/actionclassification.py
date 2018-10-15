@@ -15,7 +15,7 @@ img_width = 28
 img_height = 28
 depth = 1
 classes = 0
-global_suffix = ''
+suffix = ''
 start = time.time()
 end = time.time()
 
@@ -59,7 +59,7 @@ def main():
 
 
 def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_train_nn: ClassNN):
-    global global_suffix
+    global suffix
     training_data = list()
     training_labels = list()
     training_files = list()
@@ -125,7 +125,7 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_t
     res = input('Press 1 to train - 2 to eval - 3 to train nn - 4 to eval nn: ')
 
     if res == '1':
-        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train, steps=15000)
+        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train, steps=1000)
     elif res == '2':
         eval_model(eval_data_np, eval_labels_np, instance_train)
     elif res == '3':

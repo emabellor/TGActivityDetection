@@ -9,9 +9,15 @@ import os
 from sklearn.externals import joblib
 from classutils import ClassUtils
 import json
+from sys import platform
+import copy
 
 
 class ClassHMM:
+    model_hmm_folder = '/home/mauricio/models/actions'
+    if platform == 'win32':
+        model_hmm_folder = 'C:\\SharedFTP\\hmm\\Actions'
+
     def __init__(self, model_path: str):
         self.model = None  # type: hmm.MultinomialHMM
 
@@ -44,7 +50,7 @@ class ClassHMM:
         self._get_list_mapping(train_data)
 
         # Generate mapped model
-        new_train_data = train_data.copy()
+        new_train_data = copy.deepcopy(train_data)
 
         for row in range(len(new_train_data)):
             for col in range(len(new_train_data[row])):
@@ -68,6 +74,9 @@ class ClassHMM:
         self.model.fit(list_data_np, lengths)
 
         # Saving model
+        self.save_model()
+
+    def save_model(self):
         dir_name = os.path.dirname(self.model_path)
         if not os.path.isdir(dir_name):
             os.makedirs(dir_name)
@@ -99,6 +108,7 @@ class ClassHMM:
                     state_hmm += 1
 
         self.list_mapping = list_mapping
+        print('List mapping: {0}'.format(self.list_mapping))
         # Done - return void
 
     def _get_mapped_data(self, data):
@@ -125,20 +135,22 @@ class ClassHMM:
         else:
             # Check mapped data
             # If there are a not mapped state, returns a very low probability
-            # -1000
+            # -inf
 
             all_mapped = True
+            data_not_mapped = 0
             for data in eval_data:
                 if not self._is_mapped(data):
                     all_mapped = False
+                    data_not_mapped = data
                     break
 
             if not all_mapped:
-                print('States not mapped in model - Returns Inf probability')
+                # State {0} not mapped in model {1} - Returns Inf probability
                 return -float('Inf')
             else:
                 # Prepare data
-                new_eval_data = eval_data.copy()
+                new_eval_data = copy.deepcopy(eval_data)
                 for index in range(len(new_eval_data)):
                     new_eval_data[index] = self._get_mapped_data(eval_data[index])
 

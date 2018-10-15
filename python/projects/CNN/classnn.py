@@ -73,7 +73,7 @@ class ClassNN:
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": train_data},
             y=train_labels,
-            batch_size=50,
+            batch_size=64,
             num_epochs=None,
             shuffle=True)
 

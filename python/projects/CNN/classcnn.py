@@ -16,9 +16,12 @@ from sys import platform
 
 class ClassCNN:
     model_dir_action = '/home/mauricio/models/cnn_classifier_action'
-
     if platform == 'win32':
         video_base_path = 'C:\\models\\cnn_classifier_action'
+
+    model_dir_ac_one_all = '/home/mauricio/models/cnn_act_one_all'
+    if platform == 'win32':
+        model_dir_ac_one_all = 'C:\\models\\cnn_act_one_all'
 
     def __init__(self,
                  model_dir,

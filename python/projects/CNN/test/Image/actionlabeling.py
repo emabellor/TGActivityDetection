@@ -10,6 +10,8 @@ import math
 
 cnn_image_width = 28
 cnn_image_height = 28
+classes_number = 10
+hidden_layers = 60
 
 
 def main():
@@ -17,12 +19,15 @@ def main():
 
     print('Initializing main function')
     res = input('Select option: 1 to test CNN image generation, '
-                '2 to CNN image generation folder: ')
+                '2 to CNN image generation folder, '
+                '3 to re_process folder images: ')
 
     if res == '1':
         cnn_image_generation()
     elif res == '2':
         cnn_image_generation_folder()
+    elif res == '3':
+        cnn_reprocess_images()
     else:
         raise Exception('Option not recognized')
 
@@ -31,7 +36,7 @@ def create_cnn_image_pose(param, instance_nn):
     list_poses = param['listPoses']
     max_confidence = 1
 
-    image_height = 8
+    image_height = cnn_image_height
     image_width = len(list_poses)
 
     image_np = np.zeros((image_height, image_width), dtype=np.uint8)
@@ -344,8 +349,6 @@ def cnn_image_generation():
 
 def cnn_image_generation_folder():
     # Initializing instance nn
-    classes_number = 8
-    hidden_layers = 40
 
     list_folders = list()
     list_folders.append(ClassUtils.cnn_class_folder)
@@ -403,6 +406,56 @@ def cnn_image_generation_folder():
                     cv2.imwrite(image_name_pos_black_rem, image_res_pos_black_rem)
 
     print('Done!')
+
+
+def cnn_reprocess_images():
+    print('Re processing images')
+    list_folders = list()
+    list_folders.append(ClassUtils.cnn_class_folder)
+
+    # Loading instances
+    instance_nn = ClassNN(ClassNN.model_dir_pose, classes_number, hidden_layers)
+
+    # File walk
+    count = 0
+    for folder in list_folders:
+        for root, _, files in os.walk(folder):
+            for file in files:
+                full_path = os.path.join(root, file)
+                extension = ClassUtils.get_filename_extension(full_path)
+
+                if extension == '.json':
+                    print('Processing file: {0}'.format(full_path))
+
+                    with open(full_path, 'r') as f:
+                        json_txt = f.read()
+
+                    json_data = json.loads(json_txt)
+                    list_poses = json_data['listPoses']
+
+                    for pose in list_poses:
+                        angles = pose['angles']
+                        transformed_points = pose['transformedPoints']
+
+                        list_desc = list()
+                        list_desc += angles
+                        list_desc += ClassUtils.get_flat_list(transformed_points)
+
+                        list_desc_np = np.asanyarray(list_desc, dtype=np.float)
+
+                        res = instance_nn.predict_model_fast(list_desc_np)
+                        pose['keyPose'] = int(res['classes'])
+                        pose['probability'] = 1
+
+                    # Writing data again
+                    data_txt = json.dumps(json_data, indent=2)
+                    with open(full_path, 'w') as f:
+                        f.write(data_txt)
+
+                    count += 1
+
+    print('Done')
+    print('Total files processed: {0}'.format(count))
 
 
 if __name__ == '__main__':

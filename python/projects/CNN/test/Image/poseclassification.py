@@ -51,11 +51,11 @@ def main():
         ('/home/mauricio/Pictures/PosesNew/Left', 0.05, 4),
         ('/home/mauricio/Pictures/PosesNew/Right', 0.05, 5),
         ('/home/mauricio/Pictures/PosesNew/Squat_Left', 0.05, 6),
-        ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 7)
+        ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 7),
+        ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 8),
+        ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 9),
         # ('/home/mauricio/Pictures/PosesNew/Chat_Left', 0.05, 8),
         # ('/home/mauricio/Pictures/PosesNew/Chat_Right', 0.05, 9),
-        # ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 10),
-        # ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 11),
     ]
 
     # Delete re calculate option - Enter directly to classify option
@@ -204,7 +204,7 @@ def classify_images(list_folder_data: list, type_desc: EnumDesc):
                 cont = True
                 break
 
-    hidden_number = 40
+    hidden_number = 60
     learning_rate = 0.04
     steps = 20000
 
@@ -349,7 +349,7 @@ def classify_images(list_folder_data: list, type_desc: EnumDesc):
         for i in range(eval_data_np.shape[0]):
             data = eval_data_np[i]
             expected = eval_labels_np[i]
-            obtained = nn_classifier.predict_model(data)
+            obtained = nn_classifier.predict_model_fast(data)
             class_prediction = obtained['classes']
             print('Class: {0}'.format(class_prediction))
 
