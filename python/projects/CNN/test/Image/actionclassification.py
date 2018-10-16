@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import random
 from classutils import ClassUtils
-from classnn import ClassNN
 import time
 import json
 
@@ -54,11 +53,10 @@ def main():
     instance_train = ClassCNN(ClassCNN.model_dir_action, classes, img_width, img_height, depth, batch_size=32)
 
     hidden_layers = 1000
-    instance_train_nn = ClassNN(ClassNN.model_dir_action, classes, hidden_layers, learning_rate=0.000005)
-    classify_images(list_folder_data, instance_train, instance_train_nn)
+    classify_images(list_folder_data, instance_train)
 
 
-def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_train_nn: ClassNN):
+def classify_images(list_folder_data: list, instance_train: ClassCNN):
     global suffix
     training_data = list()
     training_labels = list()
@@ -121,22 +119,12 @@ def classify_images(list_folder_data: list, instance_train: ClassCNN, instance_t
     if training_data_np.shape[0] == 0:
         raise Exception('No files found for suffix: {0}'.format(suffix))
 
-    print('Initializing main function')
-    res = input('Press 1 to train - 2 to eval - 3 to train nn - 4 to eval nn: ')
+    res = input('Press 1 to train - 2 to eval: ')
 
     if res == '1':
         train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train, steps=1000)
     elif res == '2':
         eval_model(eval_data_np, eval_labels_np, instance_train)
-    elif res == '3':
-        print(training_data_np)
-        training_data_np = np.reshape(training_data_np, (training_data_np.shape[0], 28 * 28))
-        print(training_data_np)
-        eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
-        train_model(training_data_np, training_labels_np, eval_data_np, eval_labels_np, instance_train_nn, steps=20000)
-    elif res == '4':
-        eval_data_np = np.reshape(eval_data_np, (eval_data_np.shape[0], 28 * 28))
-        eval_model(eval_data_np, eval_labels_np, instance_train_nn)
     else:
         raise Exception('Option not implemented!')
 
