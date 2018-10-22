@@ -56,7 +56,6 @@ def mouse_callback(event, x_image, y_image, flags, param):
         ok_params = False
 
         if use_default_pos:
-            image_points.append([x_image, y_image])
             x_object = default_positions[index][0]
             y_object = default_positions[index][1]
         else:
@@ -288,7 +287,10 @@ def calc_homo(cam_number: str):
 
     # Copying base calib image
     init_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calib.jpg'
-    copyfile(selected_file, init_dir)
+
+    # Avoid confusion
+    if selected_file != init_dir:
+        copyfile(selected_file, init_dir)
 
     # Print Done Message!
     print('Done!')

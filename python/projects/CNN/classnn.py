@@ -20,8 +20,8 @@ from sys import platform
 class ClassNN:
     model_dir_pose = '/home/mauricio/models/nn_classifier'
     model_dir_action = '/home/mauricio/models/nn_class_action'
-    classes_num_pose = 8
-    hidden_num_pose = 40
+    classes_num_pose = 10
+    hidden_num_pose = 60
 
     if platform == 'win32':
         model_dir_action = 'C:\\models\\nn_class_action'
