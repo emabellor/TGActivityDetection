@@ -116,6 +116,7 @@ class ClassUtils:
             newFile.write(bin_array)
 
     @staticmethod
+    # Get angle in radians
     def get_angle(point1, point2, point3):
         # P1 is the base point
         # P2 is where the two lines intersect

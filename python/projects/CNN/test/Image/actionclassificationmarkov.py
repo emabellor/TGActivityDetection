@@ -9,7 +9,7 @@ import numpy as np
 seed = 1234
 hmm_models = list()
 hidden_states = 10
-iterations = 20
+iterations = 10
 
 list_folder_data = [
     {
