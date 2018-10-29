@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="icon" href="images/img_517827.ico">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="javascripts/animation.js"></script>
@@ -15,6 +16,7 @@
   </head>
 
   <body id="myPage" data-spy="scroll" data-target=".navbar" data-offset="60">    
+    
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
           <div class="navbar-header">
@@ -27,8 +29,10 @@
           <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav navbar-right">
               <li><a href="#about">ACERCA DE</a></li>
+              <li><a href="#characteristics">CARACTERISTICAS</a></li>
               <li><a href="#objectives">OBJETIVOS</a></li>
               <li><a href="#documents">DOCUMENTOS</a></li>
+              <li><a href="#contact">CONTACTO</a></li>
             </ul>
           </div>
         </div>
@@ -38,11 +42,13 @@
       <h1>AC-CCTV</h1>
       <h2><b>Sistema de detección de actividades inusuales a partir de técnicas de procesamiento de imágenes</b></h2>
       <br><br>
-      <button class="btn btn-default btn-lg">Conoce más</button>
+      <a href="#about" class="btn btn-default btn-lg">Conoce más</a>
     </div>  
 
+
     <div id="about" class="container-fluid"> 
-        <div class="col-sm-7 text-justify">
+      <div class="row">
+        <div class="col-sm-7 text-justify slideanim">
           <h2>DESCRIPCIÓN</h2>
           <br>
           <h3>
@@ -65,15 +71,73 @@
         </div>
         <div class="col-sm-1"></div>
         <div class="col-sm-4">
-          <div class="thumbnail text-center slideanim">
-            <!--Adding image to text elements here-->
-            <img src="images/636453039350249984_1.jpg" />
-            <h3><strong>Actividad inusual</strong></h3>
+          <div class="thumbnail text-center">
+              <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                <!-- Indicators -->
+                <ol class="carousel-indicators">
+                  <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                  <li data-target="#myCarousel" data-slide-to="1"></li>
+                  <li data-target="#myCarousel" data-slide-to="2"></li>
+                </ol>
+              
+                <!-- Wrapper for slides -->
+                <div class="carousel-inner">
+                  <div class="item active">
+                    <img src="images/636453039350249984_1.jpg">
+                  </div>
+              
+                  <div class="item">
+                    <img src="images/636550808074640000_420.jpg">
+                  </div>
+              
+                  <div class="item">
+                    <img src="images/636683013018599936_428.jpg">
+                  </div>
+                </div>
+              
+                <!-- Left and right controls -->
+                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                  <span class="glyphicon glyphicon-chevron-left"></span>
+                  <span class="sr-only">Previous</span>
+                </a>
+                <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                  <span class="glyphicon glyphicon-chevron-right"></span>
+                  <span class="sr-only">Next</span>
+                </a>
+              </div>
+            <h3><strong>Actividades inusual</strong></h3>
           </div>
         </div>
+      </div>
     </div>
 
-    <div id="objectives" class="container-fluid bg-gray">
+    <div id="characteristics" class="container-fluid text-center bg-gray slideanim"> 
+      <h2>CARACTERÍSTICAS DEL MODELO</h2>
+      <br><br><br><br>
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="row">
+            <div class="col-sm-6"><i class="fa fa-video-camera logo-small"></i></div>
+            <div class="col-sm-6"><i class="fa fa-video-camera logo-small"></i></div>
+          </div>
+          <h3>PROCESAMIENTO MULTI-CÁMARA</h3>
+        </div>
+        <div class="col-sm-3">
+          <i class="fa fa-circle-o  logo-small"></i>
+          <h3>DISEÑO ORIENTADO A AGENTES</h3>
+        </div>
+        <div class="col-sm-3">
+          <i class="fa fa-exclamation-circle logo-small"></i>
+          <h3>GENERACIÓN DE ALERTAS</h3>
+        </div>
+        <div class="col-sm-3">
+          <i class="fa fa-car logo-small"></i>
+          <h3>VALIDADO EN MONITOREO DE VEHÍCULOS</h3>
+        </div>
+      </div>
+    </div>
+
+    <div id="objectives" class="container-fluid slideanim">
       <div class="row">
         <div class="col-sm-4 text-center">
           <span class="glyphicon glyphicon-check logo"></span>
@@ -111,7 +175,7 @@
       </div>
     </div>
 
-    <div id="documents" class="container-fluid text-center">
+    <div id="documents" class="container-fluid text-center bg-gray slideanim">
       <h2>DOCUMENTOS</h2>
       <br>
       <br>
@@ -120,13 +184,13 @@
       <br>
       <br>
       <div class="row">
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <div class="row">
             <div class="col-sm-6">
-              <i class="fa fa-file-word-o logo-small"></i>
+              <a href="documents/PropuestaCompleta_EA_V2.docx"<i class="fa fa-file-word-o logo-small"></i></a>
             </div>
             <div class="col-sm-6">
-              <i class="fa fa-file-pdf-o logo-small"></i>
+              <a href="documents/Propuesta Final - Mauricio Abello - Actividades Inusuales.pdf"><i class="fa fa-file-pdf-o logo-small"></i></a>
             </div>
           </div>
           <div class="row">
@@ -139,7 +203,7 @@
           </div>
           <h3>PROPUESTA DE TRABAJO DE GRADO</h3>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <div class="row">
             <div class="col-sm-6">
               <i class="fa fa-file-word-o logo-small"></i>
@@ -158,12 +222,46 @@
           </div>
           <h3>MEMORIA DE TRABAJO DE GRADO</h3>
         </div>
+        <div class="col-sm-4">
+            <div class="row">
+              <div class="col-sm-12">
+                <a href="https://github.com/emabellor/TGActivityDetection"><i class="fa fa-github logo-small"></i></a>
+              </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <H3>GITHUB</H3>
+                </div>
+            </div>
+            <h3>REPOSITORIO GITHUB</h3>
+          </div>
       </div>
 
       <!--<br><br>--> 
     </div>
+
+    <div id="contact" class="container-fluid slideanim">
+      <div class="row">
+        <div class="col-sm-4 text-center">
+            <img src="images/DSC_9398.JPG" class="img-circle img-photo" alt="Bird">
+        </div>
+        
+        <div class="col-sm-8">
+          <h2>ACERCA DEL AUTOR</h2>
+          <br>
+          <h4>Ing. Eder Mauricio Abello Rodríguez</h4>
+          <h4>Ingeniero Electrónico. Msc. Ingeniería de Sistemas y Computación</h4>
+          <h4>Área de Énfasis: Sistemas Inteligentes</h4>
+          <h4>Pontificia Universidad Javeriana</h4>
+          <br>
+          <h4><span class="glyphicon glyphicon-map-marker"></span> Bogotá D.C. Colombia</h4>
+          <h4><span class="glyphicon glyphicon-envelope"></span> edermauricioa@gmail.com</h4>
+        </div>
+      </div>
+    </div>
+
     <footer class="container-fluid bg-4 text-center">
-        <p>Página web basada en <a href="https://www.w3schools.com">www.w3schools.com</a></p>
+        <p>Página web basada en <a href="https://www.w3schools.com">www.w3schools.com</a>. Noviembre, 2018</p>
     </footer>
   </body>
 </html>

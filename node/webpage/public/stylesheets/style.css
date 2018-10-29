@@ -72,6 +72,11 @@ h2 {
   border-radius: 0;
 }
 
+.img-photo {
+  width: 50%;
+  height: auto
+}
+
 .navbar li a, .navbar .navbar-brand {
   color: #fff !important;
 }
