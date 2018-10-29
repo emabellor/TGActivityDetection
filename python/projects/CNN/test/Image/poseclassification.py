@@ -14,6 +14,7 @@ import numpy as np
 import random
 from tkinter import Tk
 from enum import Enum
+from classloaddescriptors import ClassLoadDescriptors, EnumDesc
 import math
 
 seed = 1234
@@ -22,14 +23,6 @@ csv_dir = '/home/mauricio/Pictures/PosesNew/data.csv'
 csv_train = '/home/mauricio/Pictures/PosesNew/training.csv'
 csv_eval = '/home/mauricio/Pictures/PosesNew/eval.csv'
 csv_dir_files = '/home/mauricio/Pictures/PosesNew/files.csv'
-
-
-class EnumDesc(Enum):
-    ANGLES = 0
-    ANGLES_TRANSFORMED = 1
-    POINTS = 2
-    ALL = 3
-    ALL_TRANSFORMED = 4
 
 
 def main():
@@ -185,13 +178,6 @@ def pre_process_images(list_folders_scores, recalculate):
 
 
 def classify_images(list_folder_data: list, type_desc: EnumDesc):
-    training_data = list()
-    training_labels = list()
-    training_files = list()
-    eval_data = list()
-    eval_labels = list()
-    eval_files = list()
-
     classes_number = 0
 
     cont = True
@@ -214,81 +200,15 @@ def classify_images(list_folder_data: list, type_desc: EnumDesc):
                             hidden_number=hidden_number,
                             learning_rate=learning_rate)
 
-    # Iterate folder
-    for index, item in enumerate(list_folder_data):
-        folder = item[0]
-        min_score = item[1]
-        label = item[2]
+    results = ClassLoadDescriptors.load_pose_descriptors(type_desc)
 
-        list_files = os.listdir(folder)
-        random.Random(seed).shuffle(list_files)
-
-        total_train = int(len(list_files)) * 70 / 100
-
-        for num_file, file in enumerate(list_files):
-            full_path = os.path.join(folder, file)
-
-            extension = ClassUtils.get_filename_extension(full_path)
-            if extension != '.json':
-                print('Ignoring file {0}'.format(full_path))
-                continue
-
-            with open(full_path, 'r') as text_file:
-                arr_json = text_file.read()
-
-            params = json.loads(arr_json)
-            vectors = params['vectors']
-            angles = params['angles']
-            transformed_points = params['transformedPoints']
-
-            valid = ClassUtils.check_vector_integrity_pos(vectors, min_score)
-            only_pos = ClassUtils.check_vector_only_pos(vectors, min_score)
-
-            if not valid:
-                raise Exception('Vector integrity not valid for file: {0}'.format(full_path))
-
-            if only_pos:
-                raise Exception('Invalid vector to perform detection')
-
-            # Fill training and eval list
-            # Use angles and position information
-            data_to_add = get_descriptor_list(angles, transformed_points, type_desc)
-            if num_file < total_train:
-                training_data.append(data_to_add)
-                training_labels.append(label)
-                training_files.append(full_path)
-            else:
-                eval_data.append(data_to_add)
-                eval_labels.append(label)
-                eval_files.append(full_path)
-
-    # Convert data to numpy array
-    training_data_np = np.asanyarray(training_data, dtype=np.float)
-    training_labels_np = np.asanyarray(training_labels, dtype=int)
-
-    eval_data_np = np.asanyarray(eval_data, dtype=np.float)
-    eval_labels_np = np.asanyarray(eval_labels, dtype=int)
-
-    training_files_np = np.asanyarray(training_files, dtype=np.str)
-    eval_files_np = np.asanyarray(eval_files, dtype=np.str)
-
-    # Getting label_names
-    label_names = []
-    for folder, _, label in list_folder_data:
-        names = folder.split('/')
-        label_name = names[-1]
-
-        # Check if last character is /
-        if len(label_name) == 0:
-            label_names = names[-2]
-
-        label_names.append((label_name, label))
-
-    print('Total training: {0}'.format(len(training_labels)))
-    print('Total eval: {0}'.format(len(eval_labels)))
-    print('Shape training: {0}'.format(training_data_np.shape))
-    print('Shape eval: {0}'.format(eval_data_np.shape))
-    print('Classes number: {0}'.format(classes_number))
+    training_data_np = results['trainingData']
+    training_labels_np = results['trainingLabels']
+    eval_data_np = results['evalData']
+    eval_labels_np = results['evalLabels']
+    training_files_np = results['trainingFiles']
+    eval_files_np = results['evalFiles']
+    label_names = results['labelNames']
 
     # Prompt for user input
     selection = input('Training selected {0}. '
@@ -360,43 +280,6 @@ def classify_images(list_folder_data: list, type_desc: EnumDesc):
         print('Labels: {0}'.format(label_names))
     else:
         raise Exception('Option not supported')
-
-
-def get_descriptor_list(angles, transformed_points, type_desc: EnumDesc):
-    if type_desc == EnumDesc.ANGLES:
-        return angles
-    elif type_desc == EnumDesc.POINTS:
-        return ClassUtils.get_flat_list(transformed_points)
-    elif type_desc == EnumDesc.ALL:
-        data_to_add = list()
-        data_to_add += angles
-        data_to_add += ClassUtils.get_flat_list(transformed_points)
-        return data_to_add
-    elif type_desc == EnumDesc.ANGLES_TRANSFORMED:
-        data_to_add = list()
-
-        for angle in angles:
-            sin_angle = math.sin(angle)
-            cos_angle = math.cos(angle)
-
-            data_to_add.append(sin_angle)
-            data_to_add.append(cos_angle)
-
-        return data_to_add
-    elif type_desc == EnumDesc.ALL_TRANSFORMED:
-        data_to_add = list()
-
-        for angle in angles:
-            sin_angle = math.sin(angle)
-            cos_angle = math.cos(angle)
-
-            data_to_add.append(sin_angle)
-            data_to_add.append(cos_angle)
-
-        data_to_add += ClassUtils.get_flat_list(transformed_points)
-        return data_to_add
-    else:
-        raise Exception('Invalid option: {0}'.format(type_desc))
 
 
 def reprocess_images(list_folder_data):
