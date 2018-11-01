@@ -41,6 +41,22 @@ class ClassLoadDescriptors:
     seed = 1234
 
     @classmethod
+    def load_file_descriptors(cls, full_path: str,  type_desc: EnumDesc):
+        with open(full_path, 'r') as text_file:
+            arr_json = text_file.read()
+
+        params = json.loads(arr_json)
+        angles = params['angles']
+        transformed_points = params['transformedPoints']
+
+        # Fill training and eval list
+        # Use angles and position information
+        data_to_add = cls._get_descriptor_list(angles, transformed_points, type_desc)
+
+        data_np = np.asanyarray(data_to_add, np.float)
+        return data_np
+
+    @classmethod
     def load_pose_descriptors(cls, type_desc: EnumDesc):
         training_data = list()
         training_labels = list()
@@ -144,7 +160,8 @@ class ClassLoadDescriptors:
             'evalLabels': eval_labels_np,
             'trainingFiles': training_files_np,
             'evalFiles': eval_files_np,
-            'labelNames': label_names
+            'labelNames': label_names,
+            'classesNumber': classes_number
         }
 
         return results

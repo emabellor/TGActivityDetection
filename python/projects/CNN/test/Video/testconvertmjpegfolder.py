@@ -6,6 +6,7 @@ import glob
 import os
 from classmjpegconverter import ClassMjpegConverter
 from classutils import ClassUtils
+from sys import platform
 
 
 def main():
@@ -27,6 +28,10 @@ def process_videos(reprocess):
     print('Warning! This routine will overwrite the selected files')
 
     init_dir = '/home/mauricio/Videos/Oviedo/'
+
+    if platform == 'win32':
+        init_dir = 'C:\\SharedFTP\\Videos\\'
+
     options = {'initialdir': init_dir}
 
     folder = filedialog.askdirectory(**options)
