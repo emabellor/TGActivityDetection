@@ -62,6 +62,8 @@ class ClassUtils:
     @staticmethod
     def load_cam_calib_params(camera_number: str):
         base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + camera_number + '/calibration.json'
+        if platform == 'win32':
+            base_dir = 'C:\\SharedFTP\\CameraCalibration\\' + camera_number + '\\calibration.json'
 
         if not os.path.exists(base_dir):
             raise Exception(base_dir + ' does not exist in system')
@@ -75,6 +77,9 @@ class ClassUtils:
     @staticmethod
     def cam_calib_exists(camera_number: str):
         base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + camera_number + '/calibration.json'
+        if platform == 'win32':
+            base_dir = 'C:\\SharedFTP\\CameraCalibration\\' + camera_number + '\\calibration.json'
+
         return os.path.exists(base_dir)
 
     @staticmethod

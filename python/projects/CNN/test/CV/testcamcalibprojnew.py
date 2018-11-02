@@ -11,6 +11,7 @@ import numpy as np
 import json
 from classutils import ClassUtils
 from timeit import default_timer as timer
+from sys import platform
 
 dict_config = {}
 
@@ -24,11 +25,16 @@ def main():
     dict_config = ClassUtils.load_cam_calib_params(text)
 
     print('Opening file')
-    Tk().withdraw()
+
+    # Problems in windows version
+    # Tk().withdraw()
 
     print('Generating elements in list')
 
     init_dir = '/home/mauricio/Oviedo/CameraCalibration/' + text
+    if platform == 'win32':
+        init_dir = 'C:\\SharedFTP\\CameraCalibration\\' + text
+
     options = {'initialdir': init_dir}
     filename = askopenfilename(**options)
 

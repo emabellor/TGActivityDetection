@@ -13,6 +13,7 @@ import tkinter as tk
 import json
 import os
 from shutil import copyfile
+from sys import platform
 
 image = None  # type:np.ndarray
 image_points = list()
@@ -48,16 +49,17 @@ def mouse_callback(event, x_image, y_image, flags, param):
         global x_object
         global y_object
 
-        # Index for adding object point
-        index = len(image_points) - 1
-
         x_object = 0
         y_object = 0
         ok_params = False
 
         if use_default_pos:
+            # Index for adding object points - Generation elements into list
+            index = len(image_points)
+
             x_object = default_positions[index][0]
             y_object = default_positions[index][1]
+            ok_params = True
         else:
             master = Tk()
             tk.Label(master, text="x object").grid(row=0)
@@ -117,7 +119,9 @@ def main():
 
     print('OpenCV calibration')
 
-    Tk().withdraw()
+    # Problem with windows!
+    # Tk().withdraw()
+
     cam_number = input('Insert camera number: ')
 
     base_dir = get_base_dir(cam_number)
@@ -161,9 +165,13 @@ def loading_image(cam_number: str):
 
     print('Loading image')
     init_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number
+    if platform == 'win32':
+        init_dir = 'C:\\SharedFTP\\CameraCalibration' + cam_number
 
     if not os.path.exists(init_dir):
         init_dir = '/home/mauricio/Pictures'
+        if platform == 'win32':
+            init_dir = 'C:\\SharedFTP\\Pictures'
 
     options = {'initialdir': init_dir}
     filename = askopenfilename(**options)
@@ -276,6 +284,8 @@ def calc_homo(cam_number: str):
 
     print('Writing in file')
     base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calibration.json'
+    if platform == 'win32':
+        base_dir = 'C:\\SharedFTP\\CameraCalibration\\' + cam_number + '\\calibration.json'
 
     dir_path = os.path.dirname(base_dir)
 
@@ -287,6 +297,8 @@ def calc_homo(cam_number: str):
 
     # Copying base calib image
     init_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calib.jpg'
+    if platform == 'win32':
+        init_dir = 'C:\\SharedFTP\\CameraCalibration\\' + cam_number + '\\calib.jpg'
 
     # Avoid confusion
     if selected_file != init_dir:
@@ -298,6 +310,9 @@ def calc_homo(cam_number: str):
 
 def get_base_dir(cam_number: str):
     base_dir = '/home/mauricio/Oviedo/CameraCalibration/' + cam_number + '/calibration.json'
+    if platform == 'win32':
+        base_dir = 'C:\\SharedFTP\\CameraCalibration\\' + cam_number + '\\calibration.json'
+
     return base_dir
 
 
