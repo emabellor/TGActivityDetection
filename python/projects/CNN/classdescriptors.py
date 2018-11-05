@@ -65,12 +65,11 @@ class ClassDescriptors:
         full_desc += list_angles
         full_desc += ClassUtils.get_flat_list(transformed_points)
 
-        info_upper = cls._process_upper_color(person_array, min_pose_score, image_np, integrity=integrity)
-        info_lower = cls._process_lower_color(person_array, min_pose_score, image_np, integrity=integrity)
-
         # Getting hist - BTF transformation
-        hists = cls.get_color_histograms(person_array, min_pose_score, image_np, decode_img=False,
-                                         cumulative=False, normalize=False, integrity=integrity)
+        hists, mean_color_upper, mean_color_lower = cls.get_color_histograms(person_array, min_pose_score,
+                                                                             image_np, decode_img=False,
+                                                                             cumulative=False, normalize=False,
+                                                                             integrity=integrity)
 
         hist_pose = cls.get_points_by_pose(image, person_array, min_pose_score)
         pose_guid = ClassUtils.generate_uuid()
@@ -103,8 +102,8 @@ class ClassDescriptors:
             'fullDesc': full_desc,
             'onlyPos': only_pos,
             'integrity': integrity,
-            'colorUpper': info_upper[1],
-            'colorLower': info_lower[1],
+            'colorUpper': mean_color_upper,
+            'colorLower': mean_color_lower,
             'hists': hists,
             'camNumber': cam_number,
             'localPosition': local_position,
@@ -220,6 +219,8 @@ class ClassDescriptors:
         green_hist = [0 for _ in range(256)]
         blue_hist = [0 for _ in range(256)]
         len_items = 0
+        mean_color_upper = [0, 0, 0]
+        mean_color_lower = [0, 0, 0]
 
         if not integrity or image is None:
             # Dummy command
@@ -236,8 +237,8 @@ class ClassDescriptors:
                 image_buffer = np.frombuffer(image, dtype="int32")
                 image_np = cv2.imdecode(image_buffer, cv2.IMREAD_ANYCOLOR)
 
-            upper_items = cls._process_upper_color(vector, min_percent, image_np)[0]
-            lower_items = cls._process_lower_color(vector, min_percent, image_np)[0]
+            upper_items, mean_color_upper = cls._process_upper_color(vector, min_percent, image_np)
+            lower_items, mean_color_lower = cls._process_lower_color(vector, min_percent, image_np)
 
             for item in upper_items:
                 red_hist[item[0]] += 1
@@ -272,7 +273,8 @@ class ClassDescriptors:
                 green_hist = green_hist_cum
                 blue_hist = blue_hist_cum
 
-        return red_hist, green_hist, blue_hist
+        hists = [red_hist, green_hist, blue_hist]
+        return hists, mean_color_upper, mean_color_lower
 
     @classmethod
     def get_cumulative_hists(cls, hists):
@@ -423,6 +425,7 @@ class ClassDescriptors:
     @classmethod
     def _process_upper_color(cls, vector: list, min_percent: float, image_np, integrity=True):
         # Process color between shoulders and middle of the skeleton
+        # Old method
         color_items = list()
         if not integrity or image_np is None:
             mean_colors = [0, 0, 0]
