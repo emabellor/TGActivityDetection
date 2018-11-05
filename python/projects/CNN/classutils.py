@@ -346,8 +346,8 @@ class ClassUtils:
         # Detect position elements
         return cls.check_vector_integrity_part(vector, min_pose_score, only_pos=True)
 
-    @staticmethod
-    def check_vector_integrity_part(vector, min_pose_score, only_pos=False):
+    @classmethod
+    def check_vector_integrity_part(cls, vector, min_pose_score, only_pos=False):
         # Checking vector integrity part
         # One part of the vector must exist
 
@@ -384,6 +384,18 @@ class ClassUtils:
             legs_valid = True
 
         if not legs_valid:
+            return False
+
+        # Check rectangle bounds
+        # If there are not enough rectangle bounds
+        # Ignore pose
+        pt1, pt2 = cls.get_rectangle_bounds(vector, min_pose_score)
+        delta_x = pt2[0] - pt1[0]
+
+        # If delta x is less than threshold, ignore pose!
+        # Avoid lum position bug
+        if delta_x < 5:
+            print('Avoid Frame by low deltaX!')
             return False
 
         # All check ok - return True
