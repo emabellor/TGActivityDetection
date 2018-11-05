@@ -128,9 +128,9 @@ class ClassMjpegDate:
             ticks = frame[1]
 
             date_frame = ClassUtils.ticks_to_datetime(ticks)
-            delta = math.fabs((date - date_frame).seconds)
+            delta = (date - date_frame).seconds
 
-            if delta < 0.5:
+            if 0 <= delta <= 0.5:
                 selected_frame = frame
                 found = True
 
@@ -140,17 +140,19 @@ class ClassMjpegDate:
                 ticks = frame[1]
 
                 date_frame = ClassUtils.ticks_to_datetime(ticks)
-                delta = date - date_frame
+                delta = (date - date_frame).total_seconds()
 
                 if min_delta == -1 or delta < min_delta:
-                    if delta.total_seconds() > 0:
+                    if 0 <= delta <= 0.5:
                         min_delta = delta
                         selected_frame = frame
                         self._last_index = index
+                        found = True
 
         # Get last if not found
         if selected_frame is None:
             selected_frame = self._last_frame
+            found = False
 
         # Add found variable to dir
         selected_frame[2]['found'] = found

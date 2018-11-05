@@ -3,6 +3,7 @@ from classutils import ClassUtils
 from classdescriptors import ClassDescriptors
 import uuid
 import math
+import copy
 
 
 class ClassPeopleReId:
@@ -87,14 +88,17 @@ class ClassPeopleReId:
         list_people = list()
 
         params = frame_info[2]['params']
+
+        # Deep copy params to avoid problems
+        params_cpy = copy.deepcopy(params)
+
         found = frame_info[2]['found']
 
         ticks = ClassUtils.datetime_to_ticks(date_ref)
         counter = 0
-        for param in params:
+        for param in params_cpy:
             cam_number = param['camNumber']
             integrity = param['integrity']
-            only_pos = param['onlyPos']
 
             # Add elements using valid skeletons
             # Ignore skeletons marked with only pos element

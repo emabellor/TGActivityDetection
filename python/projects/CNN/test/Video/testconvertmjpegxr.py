@@ -576,7 +576,7 @@ def check_files():
 
 
 def process_forward(key):
-    global forward_until_person
+    global forward_until_person, list_people
     if key == 102:
         # Forward until key
         if forward_until_person:
@@ -595,8 +595,9 @@ def check_people_available(frame_info_list):
         json_dict = frame_info[2]
 
         params = json_dict['params']
+        found = json_dict['found']
         for param in params:
-            if param['integrity']:
+            if param['integrity'] and found:
                 count_vectors += 1
 
     return count_vectors
@@ -944,6 +945,7 @@ def debug_reid():
                 count = check_people_available(frame_info_list)
                 if count != 0:
                     # Wait and stops
+                    print('Found {0} persons'.format(count))
                     forward_until_person = False
                     is_playing = False
 
@@ -989,6 +991,9 @@ def process_reid(frame_info_list, date_ref: datetime):
     for frame_info in frame_info_list:
         list_new_people += ClassPeopleReId.load_people_from_frame_info(frame_info, date_ref)
 
+    for person in list_new_people:
+        print('Loading people with global pos: {0}'.format(person.global_pos))
+
     # Function to merge people with overlapped cameras
     def merge_list():
         global done
@@ -1004,7 +1009,7 @@ def process_reid(frame_info_list, date_ref: datetime):
                 if person1.cam_number != person2.cam_number:
                     return_data = ClassPeopleReId.get_people_diff(person1, person2)
 
-                    if return_data['distance'] <= 120 and return_data['diffKMeans'] < 20:
+                    if return_data['distance'] <= 120 and return_data['diffKMeans'] < 30:
                         list_candidate_merge.append({
                             'person': person2,
                             'data': return_data
@@ -1081,9 +1086,14 @@ def process_reid(frame_info_list, date_ref: datetime):
 
             # If there is a person with only_pos flag
             # Take key pose from last position - Use position only
+            # Take angles and transformed points
+            # Dont take vectors for debbugging purposes
             if person.only_pos:
                 person.person_param['keyPose'] = selected_person.person_param['keyPose']
                 person.person_param['probability'] = selected_person.person_param['probability']
+                person.person_param['transformedPoints'] = selected_person.person_param['transformedPoints']
+                person.person_param['angles'] = selected_person.person_param['angles']
+                person.person_param['vectors'] = selected_person.person_param['vectors']
 
             # If there are gaps in pose list
             # An element must be added
@@ -1119,9 +1129,12 @@ def process_reid(frame_info_list, date_ref: datetime):
             updated_people.append(selected_person)
         else:
             # No person candidate - Must create one in list
-            print('Creating new person {0}'.format(person.global_pos))
-            list_people.append(person)
-            updated_people.append(person)
+            if person.only_pos:
+                print('Ignoring for only pos new person {0}'.format(person.global_pos))
+            else:
+                print('Creating new person {0}'.format(person.global_pos))
+                list_people.append(person)
+                updated_people.append(person)
 
     # Add not updated flag to people not in updated_people
     for person in list_people:
