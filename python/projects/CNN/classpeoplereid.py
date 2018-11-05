@@ -98,7 +98,7 @@ class ClassPeopleReId:
 
             # Add elements using valid skeletons
             # Ignore skeletons marked with only pos element
-            if integrity and not only_pos and found:
+            if integrity and found:
                 person_guid = '{0}_{1}_{2}'.format(cam_number, counter, ticks)
                 list_people.append(cls(param, date_ref, _person_guid=person_guid))
                 counter += 1

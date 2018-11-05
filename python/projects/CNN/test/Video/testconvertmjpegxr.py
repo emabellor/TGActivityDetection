@@ -37,6 +37,8 @@ resize_factor = 1.5
 image_width = 0
 image_height = 0
 saving_activity = False
+is_playing = True
+forward_until_person = False
 saving_person_guid = ''
 
 # Default camera values
@@ -513,7 +515,7 @@ def save_pose_global(path_folder, pose, color_back=(255, 255, 255)):
 
 
 def check_files():
-    global list_people
+    global list_people, is_playing, forward_until_person
     print('Initializing check files')
 
     date_video = date_init
@@ -563,27 +565,26 @@ def check_files():
             break
 
         # Process key commands
-        date_video = process_date_video(key, date_video, is_playing)
+        date_video = process_date_video(key, date_video)
         play_factor = process_play_factor(key, play_factor)
-        process_save_image(key, date_video, is_playing, frame_info_list)
-        is_playing = process_is_playing(key, is_playing)
-        forward_until_person = process_forward(key, forward_until_person)
+        process_save_image(key, date_video, frame_info_list)
+        process_is_playing(key)
+        process_forward(key)
 
     cv2.destroyAllWindows()
     print('Done!')
 
 
-def process_forward(key, forward_until_person: bool):
+def process_forward(key):
+    global forward_until_person
     if key == 102:
         # Forward until key
         if forward_until_person:
             print('Disabling forward_until_person')
-            return False
+            forward_until_person = False
         else:
             print('Enabling forward_until_person')
-            return True
-    else:
-        return forward_until_person
+            forward_until_person = True
 
 
 def check_people_available(frame_info_list):
@@ -601,44 +602,54 @@ def check_people_available(frame_info_list):
     return count_vectors
 
 
-def process_date_video(key, date_video, is_playing):
+def process_date_video(key, date_video):
+    global list_people, is_playing
     new_date_video = date_video
     if is_playing:
         if key == 52:
             # Left arrow
             # Seconds
+            list_people.clear()
             new_date_video = date_video - timedelta(milliseconds=1000 * 3)
             if new_date_video < date_init:
                 new_date_video = date_init
         elif key == 54:
             # Right arrow
             # Seconds
+            list_people.clear()
             new_date_video = date_video + timedelta(milliseconds=1000 * 3)
         elif key == 49:
             # Arrow 1
             # Minutes
+            list_people.clear()
             new_date_video = date_video - timedelta(milliseconds=1000 * 60)
             if new_date_video < date_init:
                 new_date_video = date_init
         elif key == 51:
             # Arrow 3
             # Minutes
+            list_people.clear()
             new_date_video = date_video + timedelta(milliseconds=1000 * 60)
         elif key == 55:
             # Arrow 7
             # Middle
+            list_people.clear()
             new_date_video = date_video - timedelta(milliseconds=1000 * 20)
             if new_date_video < date_init:
                 new_date_video = date_init
         elif key == 57:
+            list_people.clear()
             new_date_video = date_video + timedelta(milliseconds=1000 * 20)
         else:
+            # Normal game play
             new_date_video = date_video + timedelta(milliseconds=game_period_ms)
 
     return new_date_video
 
 
-def process_save_image(key, date_video: datetime, is_playing, frame_info_list: list):
+def process_save_image(key, date_video: datetime, frame_info_list: list):
+    global is_playing
+
     # Function to save silhouettes or poses
     if is_playing:
         # Ignore!
@@ -773,8 +784,8 @@ def process_save_pose(key, date_video):
     # Done writing elements
 
 
-def process_init_save_activity(key, is_playing):
-    global saving_activity, list_people, saving_person_guid
+def process_init_save_activity(key):
+    global saving_activity, list_people, saving_person_guid, is_playing
 
     if key != 97:
         # Ignore if key is not a
@@ -808,8 +819,8 @@ def process_init_save_activity(key, is_playing):
     print('Done!')
 
 
-def process_finish_save_activity(key, is_playing):
-    global saving_activity, saving_person_guid, list_people, list_people_reid
+def process_finish_save_activity(key):
+    global saving_activity, saving_person_guid, list_people, list_people_reid, is_playing
 
     if key != 122:
         # Ignore if key is not z
@@ -820,10 +831,11 @@ def process_finish_save_activity(key, is_playing):
         return
 
     saving_guid_activity()
+    return
 
 
 def saving_guid_activity():
-    global saving_activity, saving_person_guid
+    global saving_activity, saving_person_guid, list_people, list_people_reid, is_playing
 
     print('Saving person guid: {0}'.format(saving_person_guid))
 
@@ -843,7 +855,7 @@ def saving_guid_activity():
     for person in list_people_reid:
         person_guid = person.person_guid
         list_poses = person.list_poses
-        save_list_poses(person_guid, list_poses)
+        save_list_poses(person_guid, list_poses, save_example_global=True)
         path_folder, _, _ = get_base_folder_video(person.person_guid)
 
     # Processing partial list for re-identification
@@ -853,21 +865,27 @@ def saving_guid_activity():
     saving_activity = False
     saving_person_guid = ''
 
+    # Showing in explorer
     if platform == 'win32':
         subprocess.Popen(['explorer', path_folder])
     else:
         subprocess.Popen(['xdg-open', path_folder])
 
+    # Clearing to avoid action overlapping
+    list_people.clear()
 
-def process_is_playing(key, is_playing):
-    new_is_playing = is_playing
+    # Stop playing
+    is_playing = False
+
+
+def process_is_playing(key):
+    global is_playing
     if key == 53:
         # Don't change date video, but avoid processing
         if is_playing:
-            new_is_playing = False
+            is_playing = False
         else:
-            new_is_playing = True
-    return new_is_playing
+            is_playing = True
 
 
 def process_play_factor(key, play_factor):
@@ -887,6 +905,7 @@ def process_play_factor(key, play_factor):
 
 
 def debug_reid():
+    global is_playing, forward_until_person
     print('Initializing main function')
 
     date_video = date_init
@@ -902,6 +921,7 @@ def debug_reid():
     play_factor = 1
     while date_video < date_end:
         frame_info_list = list()
+        ticks_video = ClassUtils.datetime_to_ticks(date_video)
 
         # Generate frame_info_list always
         for i in range(len(list_cams)):
@@ -911,12 +931,12 @@ def debug_reid():
             # Generating blank person guids
             # Reid purposes
             for param in frame_info[2]['params']:
-                param['ticks'] = ClassUtils.datetime_to_ticks(date_video)
+                param['ticks'] = ticks_video
 
             frame_info_list.append(frame_info)
 
         if is_playing:
-            print(date_video)
+            print('DateVideo: {0} - ticks: {1}'.format(date_video, ticks_video))
 
             # Getting list frames first
             # Waiting for pressed key
@@ -937,7 +957,7 @@ def debug_reid():
 
         # Fast selection to forward
         if not forward_until_person:
-            key = cv2.waitKey(game_period_ms)
+            key = cv2.waitKey(int(game_period_ms / 2)) # Fast Test
         else:
             key = cv2.waitKey(1)
 
@@ -949,13 +969,13 @@ def debug_reid():
             break
 
         # Process elems
-        date_video = process_date_video(key, date_video, is_playing)
+        date_video = process_date_video(key, date_video)
         play_factor = process_play_factor(key, play_factor)
-        process_save_image(key, date_video, is_playing, frame_info_list)
-        is_playing = process_is_playing(key, is_playing)
-        forward_until_person = process_forward(key, forward_until_person)
-        process_init_save_activity(key, is_playing)
-        process_finish_save_activity(key, is_playing)
+        process_save_image(key, date_video, frame_info_list)
+        process_is_playing(key)
+        process_forward(key)
+        process_init_save_activity(key)
+        process_finish_save_activity(key)
 
     cv2.destroyAllWindows()
     print('Done!')
@@ -1059,6 +1079,12 @@ def process_reid(frame_info_list, date_ref: datetime):
 
             print('updating {0} with {1}'.format(person.global_pos, selected_person.global_pos))
 
+            # If there is a person with only_pos flag
+            # Take key pose from last position - Use position only
+            if person.only_pos:
+                person.person_param['keyPose'] = selected_person.person_param['keyPose']
+                person.person_param['probability'] = selected_person.person_param['probability']
+
             # If there are gaps in pose list
             # An element must be added
             counter = selected_person.update_counter
@@ -1115,10 +1141,12 @@ def process_reid(frame_info_list, date_ref: datetime):
         # If people is into list
         # Remove people
         if person.person_guid == saving_person_guid and saving_activity:
+            # Person gets auto removed here!
+            # Is playing also gets stopped!
             saving_guid_activity()
-
-        # Remove and save elements into reid list
-        list_people.remove(person)
+        else:
+            # Remove and save elements into reid list
+            list_people.remove(person)
 
         if len(person.list_poses) >= 4:
             list_people_reid.append(person)
