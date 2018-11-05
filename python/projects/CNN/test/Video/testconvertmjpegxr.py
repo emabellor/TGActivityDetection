@@ -65,79 +65,70 @@ def main():
         list_cams = [419, 420, 421, 428, 429, 430]
         date_init = datetime(2018, 2, 24, 14, 15, 0)
         date_end = datetime(2018, 2, 24, 15, 15, 0)
-        select_options()
     elif option == '2':
         list_cams = [419, 420, 421, 428, 429, 430]
         date_init = datetime(2018, 7, 27, 15, 0, 0)
         date_end = datetime(2018, 7, 27, 15, 14, 59)
-        select_options()
     elif option == '3':
         list_cams = [419, 420]
         date_init = datetime(2018, 9, 4, 3, 0, 0)
         date_end = datetime(2018, 9, 4, 3, 15, 0)
-        select_options()
     elif option == '4':
         list_cams = [419, 420, 421]
         date_init = datetime(2018, 9, 3, 12, 45, 0)
         date_end = datetime(2018, 9, 3, 12, 59, 59)
-        select_options()
     elif option == '5':
         list_cams = [419, 420, 421]
         date_init = datetime(2018, 9, 3, 12, 45, 0)
         date_end = datetime(2018, 9, 3, 12, 59, 59)
-        select_options()
     elif option == '6':
         list_cams = [597, 598, 599, 605, 606, 607]
         date_init = datetime(2018, 9, 10, 7, 15, 0)
         date_end = datetime(2018, 9, 10, 7, 30, 0)
-        select_options()
     elif option == '7':
         list_cams = [413, 414, 415, 416, 417, 418]
         date_init = datetime(2018, 9, 10, 13, 00, 0)
         date_end = datetime(2018, 9, 10, 13, 15, 0)
-        select_options()
     elif option == '8':
         list_cams = [1066, 1067, 1068, 1069, 1070]
         date_init = datetime(2018, 7, 27, 15, 15, 0)
         date_end = datetime(2018, 7, 27, 15, 44, 59)
-        select_options()
     elif option == '9':
         list_cams = [419, 420, 421, 428, 429]
         date_init = datetime(2018, 7, 27, 15, 15, 0)
         date_end = datetime(2018, 7, 27, 15, 29, 59)
-        select_options()
     elif option == '10':
         list_cams = [419, 420, 421, 428, 429, 430]
         date_init = datetime(2018, 9, 29, 12, 30, 0)
         date_end = datetime(2018, 9, 29, 12, 59, 59)
-        select_options()
     elif option == '11':
         list_cams = [419, 420, 421, 428, 429, 430]
         date_init = datetime(2018, 9, 28, 9, 0, 0)
         date_end = datetime(2018, 9, 28, 9, 59, 59)
-        select_options()
     elif option == '12':
         list_cams = [900]
         date_init = datetime(2017, 11, 3, 11, 0, 0)
         date_end = datetime(2017, 11, 3, 11, 14, 59)
-        select_options(),
     elif option == '13':
         list_cams = [99]
         date_init = datetime(2018, 10, 8, 17, 30, 0)
         date_end = datetime(2018, 10, 8, 17, 59, 59)
-        select_options()
     elif option == '14':
         list_cams = [98]
         date_init = datetime(2018, 10, 10, 21, 30, 0)
         date_end = datetime(2018, 10, 10, 21, 59, 59)
-        select_options()
     elif option == '15':
         list_cams = [411]
         date_init = datetime(2018, 9, 28, 10, 0, 0)
         date_end = datetime(2018, 9, 28, 10, 29, 59)
-        select_options()
+    elif option == '16':
+        list_cams = [419, 420, 421, 428, 429, 430]
+        date_init = datetime(2018, 10, 30, 8, 30, 0)
+        date_end = datetime(2018, 10, 30, 12, 59, 59)
     else:
-        print('Option not recognized')
+        raise Exception('Option not recognized')
+
+    select_options()
 
 
 def mouse_callback(event, x_image, y_image, flags, param):

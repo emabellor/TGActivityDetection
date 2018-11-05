@@ -12,7 +12,7 @@ def main():
     print('Select file to open')
     Tk().withdraw()
 
-    init_dir = '/home/mauricio/Videos/Oviedo/2018-09-04/'
+    init_dir = '/home/mauricio/Videos/Oviedo/2018-10-30/'
     filename, list_frames = load_video_info(init_dir)
 
     # Creating window to show frames
