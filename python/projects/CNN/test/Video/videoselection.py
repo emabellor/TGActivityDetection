@@ -1,6 +1,7 @@
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from classmjpegreader import ClassMjpegReader
+from classutils import ClassUtils
 import cv2
 import numpy as np
 import os
@@ -24,6 +25,10 @@ def main():
     while True:
         frame_info = list_frames[index]
         frame_bin = frame_info[0]
+        ticks = frame_info[1]
+
+        date_frame = ClassUtils.ticks_to_datetime(ticks)
+        print('Date Frame: {0}'.format(date_frame))
 
         image_np = np.frombuffer(frame_bin, dtype=np.uint8)
         frame = cv2.imdecode(image_np, cv2.IMREAD_ANYCOLOR)
