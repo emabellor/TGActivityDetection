@@ -921,6 +921,7 @@ def debug_reid():
     forward_until_person = False
     play_factor = 1
     while date_video < date_end:
+        find_forward = False
         frame_info_list = list()
         ticks_video = ClassUtils.datetime_to_ticks(date_video)
 
@@ -947,7 +948,7 @@ def debug_reid():
                     # Wait and stops
                     print('Found {0} persons'.format(count))
                     forward_until_person = False
-                    is_playing = False
+                    find_forward = True
 
             # Avoid reid and drawing
             if not forward_until_person:
@@ -961,7 +962,8 @@ def debug_reid():
         if not forward_until_person:
             key = cv2.waitKey(int(game_period_ms / 2)) # Fast Test
         else:
-            key = cv2.waitKey(1)
+            cv2.waitKey(1)
+            key = -1
 
         if key != -1:
             print('KeyPressed: {0}'.format(key))
@@ -972,6 +974,11 @@ def debug_reid():
 
         # Process elems
         date_video = process_date_video(key, date_video)
+
+        # Wait until date video is updated to change flag
+        if find_forward:
+            is_playing = False
+
         play_factor = process_play_factor(key, play_factor)
         process_save_image(key, date_video, frame_info_list)
         process_is_playing(key)
@@ -1065,8 +1072,8 @@ def process_reid(frame_info_list, date_ref: datetime):
                 print('Score: {0} - {1} - {2} Color: {3}'.format(person.global_pos, person_last.global_pos, score
                                                                  , person_last.get_rgb_color_str_int()))
 
-                upper, lower, dis = ClassPeopleReId.compare_people_items(person, person_last)
-                print('Upper: {0:.4f}, Lower: {1:.4f}, Distance: {2:.4f}'.format(upper, lower, dis))
+                upper, lower, vel = ClassPeopleReId.compare_people_items(person, person_last)
+                print('Upper: {0:.4f}, Lower: {1:.4f}, Distance: {2:.4f}'.format(upper, lower, vel))
 
                 if score <= 0.5:
                     list_candid.append(person_last)
@@ -1077,6 +1084,9 @@ def process_reid(frame_info_list, date_ref: datetime):
             selected_person = None
 
             for person_candidate in list_candid:
+                if (person.last_date - person_candidate.last_date).total_seconds() == 0:
+                    print('Alert!')
+
                 score = ClassPeopleReId.compare_people(person, person_candidate)
                 if minimum_score == -1 or score < minimum_score:
                     minimum_score = score

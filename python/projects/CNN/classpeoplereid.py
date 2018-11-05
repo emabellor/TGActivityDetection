@@ -182,18 +182,22 @@ class ClassPeopleReId:
             norm_lower = 50
         norm_lower /= 50
 
-        # Normalize distance between 0 and 500 - If greater, diff is one
-        norm_distance = distance
-        if norm_distance > 500:
-            norm_distance = 500
+        # Change distance for velocity
+        delta_time = math.fabs((person1.last_date - person2.last_date).total_seconds())
+        if delta_time == 0:
+            print('Hello!')
 
-        norm_distance /= 500
+        velocity = distance / delta_time
+        if velocity > 200:
+            velocity = 200
 
-        return norm_upper, norm_lower, norm_distance
+        velocity /= 200
+
+        return norm_upper, norm_lower, velocity
 
     @classmethod
     def compare_people(cls, person1: 'ClassPeopleReId', person2: 'ClassPeopleReId'):
-        norm_upper, norm_lower, norm_distance = cls.compare_people_items(person1, person2)
+        norm_upper, norm_lower, norm_velocity = cls.compare_people_items(person1, person2)
 
         # Get mean from distance
         color_person = (norm_upper + norm_lower) / 2
@@ -202,7 +206,7 @@ class ClassPeopleReId:
         # Inspired in Jang et al
         # Score is descending
         alpha = 0.7
-        score = alpha * color_person + (1 - alpha) * norm_distance
+        score = alpha * color_person + (1 - alpha) * norm_velocity
 
         return score
 
