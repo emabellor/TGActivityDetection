@@ -707,8 +707,13 @@ class ClassDescriptors:
 
         # Checking calib params
         angle_degrees = 0
+        mirror_orientation = 0
+
         if calib_params is not None:
             angle_degrees = calib_params['angleDegrees']
+
+            if 'mirrorOrientation' in calib_params:
+                mirror_orientation = calib_params['mirrorOrientation']
 
         if angle_degrees != 0 and angle_degrees != 180:
             raise Exception('Invalid angle degrees: {0}'.format(angle_degrees))
@@ -762,7 +767,7 @@ class ClassDescriptors:
             for point in list_points_right_leg:
                 list_points.append(ClassDescriptors._transform_point(point, neck_point, torso_dis))
 
-        if angle_degrees == 180:
+        if mirror_orientation == 1:
             # Mirror camera from list
             list_points = cls.mirror_pose_transformed(list_points)
 

@@ -19,7 +19,7 @@ def main():
     print('Select video from folder')
     Tk().withdraw()
 
-    init_dir = '/home/mauricio/Videos/Oviedo/2018-09-10/' + text
+    init_dir = '/home/mauricio/Videos/Oviedo/2018-10-30/' + text
     if not os.path.isdir(init_dir):
         init_dir = '/home/mauricio/Videos/Oviedo/'
 

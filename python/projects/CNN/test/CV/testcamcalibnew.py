@@ -7,7 +7,7 @@ The rotation angle must be clockwise - degrees
 
 import cv2
 from tkinter.filedialog import askopenfilename
-from tkinter import Tk
+from tkinter import Tk, IntVar
 import numpy as np
 import tkinter as tk
 import json
@@ -22,6 +22,7 @@ do_homo = False
 center = []
 ok_params = False
 angle_deg = 0
+mirror_orientation = True
 x_object = 0
 y_object = 0
 
@@ -211,10 +212,14 @@ def ask_position_angle(cam_number: str):
     e1 = tk.Entry(master)
     e2 = tk.Entry(master)
     e3 = tk.Entry(master)
+    mirror_var = IntVar()
+    mirror_var.set(1)
+    e4 = tk.Checkbutton(master, text="mirror ori", variable=mirror_var)
 
     e1.grid(row=0, column=1)
     e2.grid(row=1, column=1)
     e3.grid(row=2, column=1)
+    e4.grid(row=3, column=1)
 
     base_dir = get_base_dir(cam_number)
     if os.path.exists(base_dir):
@@ -227,22 +232,26 @@ def ask_position_angle(cam_number: str):
         e1.insert(0, str(obj_params['centerPoints'][0]))
         e2.insert(0, str(obj_params['centerPoints'][1]))
         e3.insert(0, str(obj_params['angleDegrees']))
+        if 'mirrorOrientation' in obj_params:
+            mirror_var.set(int(obj_params['mirrorOrientation']))
+        else:
+            mirror_var.set(1)
 
     def read_params():
-        global ok_params
-        global center
-        global angle_deg
+        global ok_params, center, angle_deg, mirror_orientation
 
         x_object = int(e1.get())
         y_object = int(e2.get())
         center = [x_object, y_object]
 
         angle_deg = int(e3.get())
+        mirror_orientation = int(mirror_var.get())
+
         ok_params = True
         master.quit()
 
-    tk.Button(master, text='Quit', command=master.quit).grid(row=3, column=0, pady=4)
-    tk.Button(master, text='OK', command=read_params).grid(row=3, column=1, pady=4)
+    tk.Button(master, text='Quit', command=master.quit).grid(row=4, column=0, pady=4)
+    tk.Button(master, text='OK', command=read_params).grid(row=4, column=1, pady=4)
 
     master.mainloop()
 
@@ -256,11 +265,7 @@ def ask_position_angle(cam_number: str):
 
 
 def calc_homo(cam_number: str):
-    global selected_file
-    global image_points
-    global object_points
-    global center
-    global angle_deg
+    global selected_file, image_points, object_points, center, angle_deg, mirror_orientation
 
     print('Training')
     print(image_points)
@@ -276,7 +281,8 @@ def calc_homo(cam_number: str):
                 'imagePoints': image_points,
                 'objectPoints': object_points,
                 'centerPoints': center,
-                'angleDegrees': angle_deg
+                'angleDegrees': angle_deg,
+                'mirrorOrientation': mirror_orientation
             }
 
     elem_str = json.dumps(elem)
