@@ -87,6 +87,7 @@ class ClassPeopleReId:
         list_people = list()
 
         params = frame_info[2]['params']
+        found = frame_info[2]['found']
 
         ticks = ClassUtils.datetime_to_ticks(date_ref)
         counter = 0
@@ -95,8 +96,9 @@ class ClassPeopleReId:
             integrity = param['integrity']
             only_pos = param['onlyPos']
 
-            # Add elements using only pos
-            if integrity and not only_pos:
+            # Add elements using valid skeletons
+            # Ignore skeletons marked with only pos element
+            if integrity and not only_pos and found:
                 person_guid = '{0}_{1}_{2}'.format(cam_number, counter, ticks)
                 list_people.append(cls(param, date_ref, _person_guid=person_guid))
                 counter += 1

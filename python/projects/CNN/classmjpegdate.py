@@ -117,6 +117,7 @@ class ClassMjpegDate:
         """
         min_delta = -1
         logger.debug('Loading frame by date')
+        found = False
 
         # Improves processing time
         self._last_index += 1
@@ -129,8 +130,9 @@ class ClassMjpegDate:
             date_frame = ClassUtils.ticks_to_datetime(ticks)
             delta = math.fabs((date - date_frame).seconds)
 
-            if delta < 0.05:
+            if delta < 0.5:
                 selected_frame = frame
+                found = True
 
         # Iterate over all elems
         if selected_frame is None:
@@ -149,6 +151,9 @@ class ClassMjpegDate:
         # Get last if not found
         if selected_frame is None:
             selected_frame = self._last_frame
+
+        # Add found variable to dir
+        selected_frame[2]['found'] = found
 
         self._last_frame = selected_frame
         return selected_frame

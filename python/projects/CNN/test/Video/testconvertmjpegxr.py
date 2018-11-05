@@ -21,6 +21,8 @@ import shutil
 import os
 import json
 from typing import List
+from sys import platform
+import subprocess
 
 
 game_period_ms = 500
@@ -34,6 +36,8 @@ count_person = 0
 resize_factor = 1.5
 image_width = 0
 image_height = 0
+saving_activity = False
+saving_person_guid = ''
 
 # Default camera values
 list_cams = [419, 420, 421, 428, 429, 430]
@@ -54,10 +58,7 @@ option = '0'
 
 
 def main():
-    global option
-    global list_cams
-    global date_init
-    global date_end
+    global option, list_cams, date_init, date_end
     print('Initializing main function')
 
     option = input('Selecting list cam option: ')
@@ -194,12 +195,11 @@ def select_options():
     elif selection == '5':
         debug_pose_generation()
     else:
-        print('Selection not identified')
+        raise Exception('Selection not identified')
 
 
 def generate_files():
-    global list_people
-    global list_people_reid
+    global list_people, list_people_reid
 
     result = input('Delete CNN Folder? (y/n): ')
     if result == 'y' or result == 'Y':
@@ -290,7 +290,7 @@ def generate_files():
     process_list_partial()
 
 
-def save_list_poses(person_guid, list_poses, save_example_global=False, moving=False, is_partial=False, count=0):
+def get_base_folder_video(person_guid, moving=False, is_partial=False, count=0):
     if not is_partial:
         new_guid = person_guid
         base_folder = os.path.join(ClassUtils.cnn_folder, option)
@@ -305,6 +305,11 @@ def save_list_poses(person_guid, list_poses, save_example_global=False, moving=F
             base_folder = os.path.join(ClassUtils.cnn_partial_folder_no_mov, option)
 
     path_folder = os.path.join(base_folder, new_guid)
+    return path_folder, color_back, new_guid
+
+
+def save_list_poses(person_guid, list_poses, save_example_global=False, moving=False, is_partial=False, count=0):
+    path_folder, color_back, new_guid = get_base_folder_video(person_guid, moving, is_partial, count)
     if not os.path.exists(path_folder):
         os.makedirs(path_folder)
 
@@ -318,23 +323,25 @@ def save_list_poses(person_guid, list_poses, save_example_global=False, moving=F
 
     if save_example_global:
         for pose in list_poses:
-            save_pose_global(base_folder, new_guid, pose, color_back=color_back)
+            save_pose_global(path_folder, pose, color_back=color_back)
 
         if is_partial:
             # Debugging purposes
             # Save pose partial - Debugging purposes
             new_base_folder = os.path.join(ClassUtils.cnn_folder, option, person_guid, 'partial')
+            new_path_folder = os.path.join(new_base_folder, new_guid)
             for pose in list_poses:
-                save_pose_global(new_base_folder, new_guid, pose, color_back=color_back)
+                save_pose_global(new_path_folder, pose, color_back=color_back)
 
             # Saving original pose folder
-            ori_folder = os.path.join(base_folder, new_guid, 'ori')
-            src_folder = os.path.join(ClassUtils.cnn_folder, option, person_guid)
+            ori_folder = os.path.join(path_folder, 'ori')
 
-            print('Copy files from dir {0} to dir {1}'.format(src_folder, ori_folder))
-            copy_tree(src_folder, ori_folder)
+            print('Copy files from dir {0} to dir {1}'.format(path_folder, ori_folder))
+            copy_tree(path_folder, ori_folder)
 
     # Done!
+    # Return path folder for reference purposes
+    return path_folder
 
 
 def save_pose_partial(person_guid, count, list_poses_partial, moving):
@@ -423,7 +430,7 @@ def process_list_partial():
     print('Done!')
 
 
-def save_pose_global(base_folder, person_guid, pose, color_back=(255, 255, 255)):
+def save_pose_global(path_folder, pose, color_back=(255, 255, 255)):
     transformed_points = pose['transformedPoints']
     global_position = pose['globalPosition']
     key_pose = pose['keyPose']
@@ -497,7 +504,6 @@ def save_pose_global(base_folder, person_guid, pose, color_back=(255, 255, 255))
                 font, font_scale, font_color, line_type)
 
     # Save image with guid
-    path_folder = os.path.join(base_folder, person_guid)
     if not os.path.exists(path_folder):
         os.makedirs(path_folder)
 
@@ -679,9 +685,7 @@ def process_save_image(key, date_video: datetime, is_playing, frame_info_list: l
 
 
 def process_save_pose(key, date_video):
-    global list_candidates
-    global label
-    global ok_params
+    global list_candidates, label, ok_params
 
     key_number = ClassUtils.cv_key_to_number(key)
 
@@ -704,8 +708,7 @@ def process_save_pose(key, date_video):
         ok_params = False
 
         def read_params():
-            global label
-            global ok_params
+            global label, ok_params
 
             label = int(e1.get())
             ok_params = True
@@ -768,6 +771,92 @@ def process_save_pose(key, date_video):
                     f.write(json.dumps(param, indent=2))
 
     # Done writing elements
+
+
+def process_init_save_activity(key, is_playing):
+    global saving_activity, list_people, saving_person_guid
+
+    if key != 97:
+        # Ignore if key is not a
+        return
+
+    if is_playing:
+        print('Video is playing - Must be stopped!')
+        return
+
+    # Select person
+    print('Select person in window')
+    key = cv2.waitKey()
+
+    key_number = ClassUtils.cv_key_to_number(key)
+    print('Key number: {0}'.format(key_number))
+
+    if key_number == -1:
+        print('Invalid key number')
+        return
+
+    if key_number >= len(list_people):
+        print('key_number greater than list_people len: {0}'.format(len(list_people)))
+        return
+
+    print('Key number selected: {0}'.format(key_number))
+    person = list_people[key_number]
+
+    saving_person_guid = person.person_guid
+    saving_activity = True
+    print('Person guid is: {0}'.format(saving_person_guid))
+    print('Done!')
+
+
+def process_finish_save_activity(key, is_playing):
+    global saving_activity, saving_person_guid, list_people, list_people_reid
+
+    if key != 122:
+        # Ignore if key is not z
+        return
+
+    if not saving_activity:
+        print('Saving activity is not active!')
+        return
+
+    saving_guid_activity()
+
+
+def saving_guid_activity():
+    global saving_activity, saving_person_guid
+
+    print('Saving person guid: {0}'.format(saving_person_guid))
+
+    # Finding person guid in list people
+    list_people_reid.clear()
+    for person in list_people:
+        if person.person_guid == saving_person_guid:
+            list_people_reid.append(person)
+            break
+
+    if len(list_people_reid) == 0:
+        print('Cant find person with guid: {0}'.format(saving_person_guid))
+        return
+
+    # Saving poses!
+    path_folder = ''
+    for person in list_people_reid:
+        person_guid = person.person_guid
+        list_poses = person.list_poses
+        save_list_poses(person_guid, list_poses)
+        path_folder, _, _ = get_base_folder_video(person.person_guid)
+
+    # Processing partial list for re-identification
+    process_list_partial()
+
+    # Reset flags and open window in explorer
+    saving_activity = False
+    saving_person_guid = ''
+
+    if platform == 'win32':
+        subprocess.Popen(['explorer', path_folder])
+    else:
+        subprocess.Popen(['xdg-open', path_folder])
 
 
 def process_is_playing(key, is_playing):
@@ -865,14 +954,15 @@ def debug_reid():
         process_save_image(key, date_video, is_playing, frame_info_list)
         is_playing = process_is_playing(key, is_playing)
         forward_until_person = process_forward(key, forward_until_person)
+        process_init_save_activity(key, is_playing)
+        process_finish_save_activity(key, is_playing)
 
     cv2.destroyAllWindows()
     print('Done!')
 
 
 def process_reid(frame_info_list, date_ref: datetime):
-    global list_people
-    global list_people_reid
+    global list_people, list_people_reid, saving_activity, saving_person_guid
     list_new_people: List[ClassPeopleReId] = list()
 
     # Load list people
@@ -943,7 +1033,7 @@ def process_reid(frame_info_list, date_ref: datetime):
     # Find candidates
     # Select less score
     for person in list_new_people:
-        list_can: List[ClassPeopleReId] = list()
+        list_candid: List[ClassPeopleReId] = list()
         for person_last in list_people:
             if person_last not in updated_people:
                 score = ClassPeopleReId.compare_people(person, person_last)
@@ -954,14 +1044,14 @@ def process_reid(frame_info_list, date_ref: datetime):
                 print('Upper: {0:.4f}, Lower: {1:.4f}, Distance: {2:.4f}'.format(upper, lower, dis))
 
                 if score <= 0.5:
-                    list_can.append(person_last)
+                    list_candid.append(person_last)
 
         # Evaluate candidates for selected elements
-        if len(list_can) > 0:
+        if len(list_candid) > 0:
             minimum_score = -1
             selected_person = None
 
-            for person_candidate in list_can:
+            for person_candidate in list_candid:
                 score = ClassPeopleReId.compare_people(person, person_candidate)
                 if minimum_score == -1 or score < minimum_score:
                     minimum_score = score
@@ -1022,6 +1112,11 @@ def process_reid(frame_info_list, date_ref: datetime):
             remove_people.append(person)
 
     for person in remove_people:
+        # If people is into list
+        # Remove people
+        if person.person_guid == saving_person_guid and saving_activity:
+            saving_guid_activity()
+
         # Remove and save elements into reid list
         list_people.remove(person)
 
@@ -1034,8 +1129,7 @@ def process_reid(frame_info_list, date_ref: datetime):
 
 
 def draw_images(frame_info_list):
-    global list_candidates
-    global count_person
+    global list_candidates, count_person
 
     list_candidates.clear()
     count_person = 0
@@ -1068,20 +1162,20 @@ def draw_images(frame_info_list):
 
 
 def draw_vectors(image: np.ndarray, image_ori: np.ndarray, frame_info):
-    global count_person
-    global list_candidates
+    global count_person, list_candidates
 
     # Drawing people into image
     dict_frame = frame_info[2]
     cam_number = dict_frame['camNumber']
     params = dict_frame['params']
+    found = dict_frame['found']
 
     # Draw all poses
     for i, param in enumerate(params):
         vectors = param['vectors']
         key_pose = param['keyPose']
 
-        if ClassUtils.check_vector_integrity_pos(vectors, min_score):
+        if ClassUtils.check_vector_integrity_pos(vectors, min_score) and found:
             # Draw valid poses in red and put number
             pt1, pt2 = ClassUtils.get_rectangle_bounds(vectors, min_score)
             # Avoid drawing red
@@ -1113,7 +1207,7 @@ def draw_vectors(image: np.ndarray, image_ori: np.ndarray, frame_info):
 def draw_people(list_images):
     global list_people
 
-    for person in list_people:
+    for idx, person in enumerate(list_people):
         image_cv = None
         cam_number = person.cam_number
 
@@ -1125,8 +1219,7 @@ def draw_people(list_images):
         if image_cv is None:
             raise Exception('Cant find image for camNumber: {0}'.format(cam_number))
 
-        global last_upper
-        global last_lower
+        global last_upper, last_lower
 
         # Draw elements into image
         pt1, pt2 = ClassUtils.get_rectangle_bounds(person.vectors, min_score)
@@ -1187,14 +1280,22 @@ def draw_people(list_images):
         cv2.putText(image_cv, 'DC {0:.0f}'.format(diff_colors), pos_txt,
                     font, font_scale, font_color, line_type)
 
+        pos_txt = (pos_txt[0], pos_txt[1] + delta_y)
+        cv2.putText(image_cv, 'idx {0:.0f}'.format(idx), pos_txt,
+                    font, font_scale, font_color, line_type)
+
+        guid = person.person_guid
+        last_guid = guid.split('-')[-1]
+        pos_txt = (pos_txt[0], pos_txt[1] + delta_y)
+        cv2.putText(image_cv, 'p.guid {0}'.format(last_guid), pos_txt,
+                    font, font_scale, font_color, line_type)
+
         last_upper = person.color_upper
         last_lower = person.color_lower
 
 
 def show_images(list_images):
-    global resize_factor
-    global image_width
-    global image_height
+    global resize_factor, image_width, image_height
 
     if len(list_images) == 0:
         raise Exception('Invalid len for list_images')
