@@ -162,6 +162,38 @@ class ClassPeopleReId:
         return return_data
 
     @classmethod
+    def compare_people_kmeans(cls, person1: 'ClassPeopleReId', person2: 'ClassPeopleReId'):
+        return_data = cls.get_people_diff(person1, person2)
+
+        diff_kmeans = return_data['diffKMeans']
+        distance = return_data['distance']
+
+        # Change distance for velocity
+        print('Comparing elements with stamps {0} - {1}'.format(person1.last_date, person2.last_date))
+        delta_time = math.fabs((person1.last_date - person2.last_date).total_seconds())
+        if delta_time == 0:
+            print('Hello!')
+
+        norm_k = diff_kmeans
+        if norm_k > 50:
+            norm_k = 50
+        norm_k /= 50
+
+        velocity = distance / delta_time
+
+        # Delta time for noise
+        if delta_time < 0.51:
+            if velocity > 350:
+                velocity = 350
+            velocity /= 350
+        else:
+            if velocity > 250:
+                velocity = 250
+            velocity /= 250
+
+        return norm_k, velocity
+
+    @classmethod
     def compare_people_items(cls, person1: 'ClassPeopleReId', person2: 'ClassPeopleReId'):
         # Comparing people between list
         diff_upper = ClassUtils.get_color_diff_rgb(person1.color_upper, person2.color_upper)

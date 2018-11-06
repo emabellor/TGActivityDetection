@@ -1068,14 +1068,20 @@ def process_reid(frame_info_list, date_ref: datetime):
         list_candid: List[ClassPeopleReId] = list()
         for person_last in list_people:
             if person_last not in updated_people:
-                score = ClassPeopleReId.compare_people(person, person_last)
-                print('Score: {0} - {1} - {2} Color: {3}'.format(person.global_pos, person_last.global_pos, score
-                                                                 , person_last.get_rgb_color_str_int()))
+                norm_k, velocity = ClassPeopleReId.compare_people_kmeans(person, person_last)
 
-                upper, lower, vel = ClassPeopleReId.compare_people_items(person, person_last)
-                print('Upper: {0:.4f}, Lower: {1:.4f}, Distance: {2:.4f}'.format(upper, lower, vel))
+                # Generating color descriptor from list
+                # Inspired in Jang et al
+                # Score is descending
+                alpha = 0.3
+                score = alpha * norm_k + (1 - alpha) * velocity
 
-                if score <= 0.5:
+                print('Score: {0} - {1} - {2} Color: {3} Distance: {4}'.format(person.global_pos,
+                                                                               person_last.global_pos,
+                                                                               score,
+                                                                               norm_k,
+                                                                               velocity))
+                if score <= 0.7:
                     list_candid.append(person_last)
 
         # Evaluate candidates for selected elements
