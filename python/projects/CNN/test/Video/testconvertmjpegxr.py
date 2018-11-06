@@ -127,7 +127,11 @@ def main():
     elif option == '16':
         list_cams = [419, 420, 421, 428, 429, 430]
         date_init = datetime(2018, 10, 30, 8, 30, 0)
-        date_end = datetime(2018, 10, 30, 12, 59, 59)
+        date_end = datetime(2018, 10, 30, 10, 29, 59)
+    elif option == '17':
+        list_cams = [419, 420, 421]
+        date_init = datetime(2018, 10, 30, 10, 35, 45)
+        date_end = datetime(2018, 10, 30, 12, 29, 59)
     else:
         raise Exception('Option not recognized')
 
@@ -611,14 +615,14 @@ def process_date_video(key, date_video):
             # Left arrow
             # Seconds
             list_people.clear()
-            new_date_video = date_video - timedelta(milliseconds=1000 * 3)
+            new_date_video = date_video - timedelta(milliseconds=500)
             if new_date_video < date_init:
                 new_date_video = date_init
         elif key == 54:
             # Right arrow
             # Seconds
             list_people.clear()
-            new_date_video = date_video + timedelta(milliseconds=1000 * 3)
+            new_date_video = date_video + timedelta(milliseconds=500)
         elif key == 49:
             # Arrow 1
             # Minutes
@@ -635,12 +639,12 @@ def process_date_video(key, date_video):
             # Arrow 7
             # Middle
             list_people.clear()
-            new_date_video = date_video - timedelta(milliseconds=1000 * 20)
+            new_date_video = date_video - timedelta(milliseconds=1000 * 3)
             if new_date_video < date_init:
                 new_date_video = date_init
         elif key == 57:
             list_people.clear()
-            new_date_video = date_video + timedelta(milliseconds=1000 * 20)
+            new_date_video = date_video + timedelta(milliseconds=1000 * 3)
         else:
             # Normal game play
             new_date_video = date_video + timedelta(milliseconds=game_period_ms)
@@ -1060,12 +1064,14 @@ def process_reid(frame_info_list, date_ref: datetime):
 
     # Compare vectors with previous elements
     updated_people: List[ClassPeopleReId] = list()
+    updated_people_new: List[ClassPeopleReId] = list()
 
     # Re identification part
     # Find candidates
     # Select less score
+    person_list_cand = list()
+
     for person in list_new_people:
-        list_candid: List[ClassPeopleReId] = list()
         for person_last in list_people:
             if person_last not in updated_people:
                 norm_k, velocity = ClassPeopleReId.compare_people_kmeans(person, person_last)
@@ -1082,68 +1088,83 @@ def process_reid(frame_info_list, date_ref: datetime):
                                                                                norm_k,
                                                                                velocity))
                 if score <= 0.7:
-                    list_candid.append(person_last)
+                    person_list_cand.append((person, person_last, score))
 
-        # Evaluate candidates for selected elements
-        if len(list_candid) > 0:
-            minimum_score = -1
-            selected_person = None
+    person_list_cand = sorted(person_list_cand, key=lambda elem: elem[2])
 
-            for person_candidate in list_candid:
-                if (person.last_date - person_candidate.last_date).total_seconds() == 0:
-                    print('Alert!')
+    while True:
+        if len(person_list_cand) == 0:
+            break
 
-                score = ClassPeopleReId.compare_people(person, person_candidate)
-                if minimum_score == -1 or score < minimum_score:
-                    minimum_score = score
-                    selected_person = person_candidate
+        selection = person_list_cand[0]
 
-            print('updating {0} with {1}'.format(person.global_pos, selected_person.global_pos))
+        selected_person = selection[1]
+        person = selection[0]
 
-            # If there is a person with only_pos flag
-            # Take key pose from last position - Use position only
-            # Take angles and transformed points
-            # Dont take vectors for debbugging purposes
-            if person.only_pos:
-                person.person_param['keyPose'] = selected_person.person_param['keyPose']
-                person.person_param['probability'] = selected_person.person_param['probability']
-                person.person_param['transformedPoints'] = selected_person.person_param['transformedPoints']
-                person.person_param['angles'] = selected_person.person_param['angles']
-                person.person_param['vectors'] = selected_person.person_param['vectors']
+        if selected_person in updated_people:
+            person_list_cand.remove(selection)
+            continue
 
-            # If there are gaps in pose list
-            # An element must be added
-            counter = selected_person.update_counter
-            if counter != 0:
-                new_position = [person.global_pos[0], person.global_pos[1]]
-                old_position = [selected_person.global_pos[0], selected_person.global_pos[1]]
+        print('updating {0} with {1}'.format(person.global_pos, selected_person.global_pos))
 
-                delta_x = (new_position[0] - old_position[0]) / (counter + 1)
-                delta_y = (new_position[1] - old_position[1]) / (counter + 1)
+        # If there is a person with only_pos flag
+        # Take key pose from last position - Use position only
+        # Take angles and transformed points
+        # Dont take vectors for debbugging purposes
+        if person.only_pos:
+            print('Updating only pos!')
+            person.person_param['keyPose'] = selected_person.person_param['keyPose']
+            person.person_param['probability'] = selected_person.person_param['probability']
+            person.person_param['transformedPoints'] = selected_person.person_param['transformedPoints']
+            person.person_param['angles'] = selected_person.person_param['angles']
+            person.person_param['vectors'] = selected_person.person_param['vectors']
 
-                delta_date = (date_ref - selected_person.last_date).total_seconds() / (counter + 1)
-                current_pos = [old_position[0], old_position[1]]
-                date = selected_person.last_date
+        # If there are gaps in pose list
+        # An element must be added
+        counter = selected_person.update_counter
+        if counter != 0:
+            new_position = [person.global_pos[0], person.global_pos[1]]
+            old_position = [selected_person.global_pos[0], selected_person.global_pos[1]]
 
-                # Guess positions - Hand and half
-                # Iterate over list
-                for i in range(counter):
-                    if i >= counter / 2:
-                        selected_person.person_param['transformedPoints'] = person.person_param['transformedPoints']
+            delta_x = (new_position[0] - old_position[0]) / (counter + 1)
+            delta_y = (new_position[1] - old_position[1]) / (counter + 1)
 
-                    current_pos[0] += delta_x
-                    current_pos[1] += delta_y
-                    date += timedelta(seconds=delta_date)
+            delta_date = (date_ref - selected_person.last_date).total_seconds() / (counter + 1)
+            current_pos = [old_position[0], old_position[1]]
+            date = selected_person.last_date
 
-                    # Blank pose guid - Avoid conflicts with mjpegx frames
-                    selected_person.person_param['globalPosition'] = [current_pos[0], current_pos[1], 1]
-                    selected_person.person_param['poseGuid'] = ''
-                    selected_person.update_values_from_person(selected_person, date)
+            # Guess positions - Hand and half
+            # Iterate over list
+            for i in range(counter):
+                if i >= counter / 2:
+                    selected_person.person_param['transformedPoints'] = person.person_param['transformedPoints']
 
-            # Update last frame to person
-            selected_person.update_values_from_person(person, date_ref)
-            updated_people.append(selected_person)
-        else:
+                current_pos[0] += delta_x
+                current_pos[1] += delta_y
+                date += timedelta(seconds=delta_date)
+
+                # Blank pose guid - Avoid conflicts with mjpegx frames
+                selected_person.person_param['globalPosition'] = [current_pos[0], current_pos[1], 1]
+                selected_person.person_param['poseGuid'] = ''
+                selected_person.update_values_from_person(selected_person, date)
+
+        # Update last frame to person
+        selected_person.update_values_from_person(person, date_ref)
+        updated_people.append(selected_person)
+        updated_people_new.append(person)
+
+        # Removing items from list
+        list_remove = list()
+        for item in person_list_cand:
+            if item[0] == person:
+                list_remove.append(item)
+
+        for item_remove in list_remove:
+            person_list_cand.remove(item_remove)
+
+    # Check not updated candidates
+    for person in list_new_people:
+        if person not in updated_people_new:
             # No person candidate - Must create one in list
             if person.only_pos:
                 print('Ignoring for only pos new person {0}'.format(person.global_pos))

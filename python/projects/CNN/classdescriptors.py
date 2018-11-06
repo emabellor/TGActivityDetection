@@ -985,7 +985,6 @@ class ClassDescriptors:
         min_distance = -1
         for color in clt2.cluster_centers_:
             dist = ClassUtils.get_color_diff_rgb(max_color, color)
-            print('Distance: {0}'.format(dist))
 
             if min_distance == -1 or dist < min_distance:
                 min_distance = dist

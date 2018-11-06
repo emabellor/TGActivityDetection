@@ -13,6 +13,7 @@ class ClassPeopleReId:
 
         self.last_date = _date_ref
         self.list_poses = list()
+        self.candidates = list()
 
         if _person_guid == '':
             self.person_guid = str(uuid.uuid4())
@@ -71,16 +72,17 @@ class ClassPeopleReId:
         }
 
     def _add_pose_to_list(self, ticks, param):
+        param_cpy = copy.deepcopy(param)
         self.list_poses.append({
-            'transformedPoints': param['transformedPoints'],
+            'transformedPoints': param_cpy['transformedPoints'],
             'ticks': ticks,
-            'keyPose': param['keyPose'],
-            'probability': param['probability'],
-            'poseGuid': param['poseGuid'],
-            'globalPosition': param['globalPosition'],
-            'localPosition': param['localPosition'],
-            'vectors': param['vectors'],
-            'angles': param['angles']
+            'keyPose': param_cpy['keyPose'],
+            'probability': param_cpy['probability'],
+            'poseGuid': param_cpy['poseGuid'],
+            'globalPosition': param_cpy['globalPosition'],
+            'localPosition': param_cpy['localPosition'],
+            'vectors': param_cpy['vectors'],
+            'angles': param_cpy['angles']
         })
 
     @classmethod
