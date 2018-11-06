@@ -38,6 +38,8 @@ class ClassDescriptors:
         else:
             # Get color
             # Lum average from person must be greater than certain value
+            # Ignore for video seq
+            """
             mean_y_pose = cls._get_mean_lum_pose(image_np, person_array, min_pose_score)
             if mean_y_pose < 50 and image_np is not None:
                 integrity = False
@@ -46,6 +48,10 @@ class ClassDescriptors:
                 # Ingnore mean_y_pose if image_np does not exist
                 integrity = True
                 only_pos = ClassUtils.check_vector_only_pos(person_array, min_pose_score)
+            """
+            # Ingnore mean_y_pose if image_np does not exist
+            integrity = True
+            only_pos = ClassUtils.check_vector_only_pos(person_array, min_pose_score)
 
         # Getting relation torso
         relation = cls._get_torso_shoulders_relation(person_array, min_pose_score,

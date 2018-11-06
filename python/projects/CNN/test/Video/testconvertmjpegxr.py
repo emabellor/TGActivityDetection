@@ -130,7 +130,7 @@ def main():
         date_end = datetime(2018, 10, 30, 10, 29, 59)
     elif option == '17':
         list_cams = [419, 420, 421]
-        date_init = datetime(2018, 10, 30, 10, 35, 45)
+        date_init = datetime(2018, 10, 30, 11, 7, 30)
         date_end = datetime(2018, 10, 30, 12, 29, 59)
     else:
         raise Exception('Option not recognized')
@@ -572,7 +572,7 @@ def check_files():
         date_video = process_date_video(key, date_video)
         play_factor = process_play_factor(key, play_factor)
         process_save_image(key, date_video, frame_info_list)
-        process_is_playing(key)
+        process_is_playing(key, forward_until_person)
         process_forward(key)
 
     cv2.destroyAllWindows()
@@ -580,7 +580,12 @@ def check_files():
 
 
 def process_forward(key):
-    global forward_until_person, list_people
+    global forward_until_person, list_people, is_playing
+
+    # Avoid conflicts with is_playing
+    if not is_playing:
+        return
+
     if key == 102:
         # Forward until key
         if forward_until_person:
@@ -883,8 +888,12 @@ def saving_guid_activity():
     is_playing = False
 
 
-def process_is_playing(key):
+def process_is_playing(key, forward_until_person):
     global is_playing
+
+    if forward_until_person:
+        return
+
     if key == 53:
         # Don't change date video, but avoid processing
         if is_playing:
@@ -985,7 +994,7 @@ def debug_reid():
 
         play_factor = process_play_factor(key, play_factor)
         process_save_image(key, date_video, frame_info_list)
-        process_is_playing(key)
+        process_is_playing(key, forward_until_person)
         process_forward(key)
         process_init_save_activity(key)
         process_finish_save_activity(key)
