@@ -127,9 +127,10 @@ def main():
         date_init = datetime(2018, 9, 28, 10, 0, 0)
         date_end = datetime(2018, 9, 28, 10, 29, 59)
     # Video activities
+    # Walk
     elif option == '16':
         list_cams = [419, 420, 421, 428, 429, 430]
-        date_init = datetime(2018, 10, 30, 8, 30, 0)
+        date_init = datetime(2018, 10, 30, 9, 18, 0)
         date_end = datetime(2018, 10, 30, 10, 29, 59)
     # Up - Down activities
     elif option == '17':
@@ -150,7 +151,7 @@ def main():
     # Squat activities
     elif option == '20':
         list_cams = [419, 420, 421]
-        date_init = datetime(2018, 10, 30, 12, 22, 14)
+        date_init = datetime(2018, 10, 30, 12, 22, 20)
         date_end = datetime(2018, 10, 30, 12, 59, 59)
     else:
         raise Exception('Option not recognized')

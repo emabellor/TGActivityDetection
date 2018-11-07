@@ -4,7 +4,7 @@ from classutils import ClassUtils
 def main():
     print('Initializing main function')
 
-    ticks = 636764921880000000
+    ticks = 636764878330000000
     print('Converting ticks: {0}'.format(ticks))
 
     converted_date = ClassUtils.ticks_to_datetime(ticks)
