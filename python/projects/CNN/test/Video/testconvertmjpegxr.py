@@ -40,6 +40,8 @@ saving_activity = False
 is_playing = True
 forward_until_person = False
 saving_person_guid = ''
+timeout_reid_sec = 5
+debug_reid_flag = False
 
 # Default camera values
 list_cams = [419, 420, 421, 428, 429, 430]
@@ -60,7 +62,7 @@ option = '0'
 
 
 def main():
-    global option, list_cams, date_init, date_end
+    global option, list_cams, date_init, date_end, timeout_reid_sec
     print('Initializing main function')
 
     option = input('Selecting list cam option: ')
@@ -124,14 +126,32 @@ def main():
         list_cams = [411]
         date_init = datetime(2018, 9, 28, 10, 0, 0)
         date_end = datetime(2018, 9, 28, 10, 29, 59)
+    # Video activities
     elif option == '16':
         list_cams = [419, 420, 421, 428, 429, 430]
         date_init = datetime(2018, 10, 30, 8, 30, 0)
         date_end = datetime(2018, 10, 30, 10, 29, 59)
+    # Up - Down activities
     elif option == '17':
         list_cams = [419, 420, 421]
-        date_init = datetime(2018, 10, 30, 11, 7, 30)
-        date_end = datetime(2018, 10, 30, 12, 29, 59)
+        date_init = datetime(2018, 10, 30, 10, 15, 0)
+        date_end = datetime(2018, 10, 30, 11, 10, 00)
+    # Door activities
+    elif option == '18':
+        list_cams = [419, 420, 421]
+        date_init = datetime(2018, 10, 30, 11, 10, 00)
+        date_end = datetime(2018, 10, 30, 11, 55, 22)
+        timeout_reid_sec = 8
+    # Plumb activities
+    elif option == '19':
+        list_cams = [419, 420, 421]
+        date_init = datetime(2018, 10, 30, 11, 55, 22)
+        date_end = datetime(2018, 10, 30, 12, 22, 14)
+    # Squat activities
+    elif option == '20':
+        list_cams = [419, 420, 421]
+        date_init = datetime(2018, 10, 30, 12, 22, 14)
+        date_end = datetime(2018, 10, 30, 12, 59, 59)
     else:
         raise Exception('Option not recognized')
 
@@ -919,7 +939,8 @@ def process_play_factor(key, play_factor):
 
 
 def debug_reid():
-    global is_playing, forward_until_person
+    global is_playing, forward_until_person, debug_reid_flag
+    debug_reid_flag = True
     print('Initializing main function')
 
     date_video = date_init
@@ -973,7 +994,7 @@ def debug_reid():
 
         # Fast selection to forward
         if not forward_until_person:
-            key = cv2.waitKey(int(game_period_ms / 2)) # Fast Test
+            key = cv2.waitKey(int(game_period_ms / 2))  # Fast Test
         else:
             cv2.waitKey(1)
             key = -1
@@ -1004,7 +1025,7 @@ def debug_reid():
 
 
 def process_reid(frame_info_list, date_ref: datetime):
-    global list_people, list_people_reid, saving_activity, saving_person_guid
+    global list_people, list_people_reid, saving_activity, saving_person_guid, timeout_reid_sec, debug_reid_flag
     list_new_people: List[ClassPeopleReId] = list()
 
     # Load list people
@@ -1193,7 +1214,7 @@ def process_reid(frame_info_list, date_ref: datetime):
     for person in list_people:
         delta = date_ref - person.last_date
 
-        if delta.seconds > 5:
+        if delta.seconds > timeout_reid_sec:
             remove_people.append(person)
 
     for person in remove_people:
@@ -1207,10 +1228,11 @@ def process_reid(frame_info_list, date_ref: datetime):
             # Remove and save elements into reid list
             list_people.remove(person)
 
-        if len(person.list_poses) >= 4:
-            list_people_reid.append(person)
-        else:
-            print('List poses less than 4 for person with guid: {0}'.format(person.person_guid))
+        if not debug_reid_flag:
+            if len(person.list_poses) >= 4:
+                list_people_reid.append(person)
+            else:
+                print('List poses less than 4 for person with guid: {0}'.format(person.person_guid))
 
     # Done
 
