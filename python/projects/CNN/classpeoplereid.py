@@ -101,10 +101,12 @@ class ClassPeopleReId:
         for param in params_cpy:
             cam_number = param['camNumber']
             integrity = param['integrity']
+            gpx = param['globalPosition'][0]
+            gpy = param['globalPosition'][1]
 
             # Add elements using valid skeletons
             # Ignore skeletons marked with only pos element
-            if integrity and found:
+            if integrity and found and 600 >= gpx >= 0 and 698 >= gpy >= -450:
                 person_guid = '{0}_{1}_{2}'.format(cam_number, counter, ticks)
                 list_people.append(cls(param, date_ref, _person_guid=person_guid))
                 counter += 1
@@ -247,8 +249,9 @@ class ClassPeopleReId:
     @staticmethod
     def get_person_distance(person1: 'ClassPeopleReId', person2: 'ClassPeopleReId'):
         # Comparing person distance
-        distance = ClassUtils.get_euclidean_distance(person1.global_pos[0], person1.global_pos[1],
-                                                     person2.global_pos[0], person2.global_pos[1])
+        # x factor penalty
+        distance = ClassUtils.get_euclidean_distance(person1.global_pos[0] * 1.3, person1.global_pos[1],
+                                                     person2.global_pos[0] * 1.3, person2.global_pos[1])
         return distance
 
     def get_rgb_color(self):

@@ -130,8 +130,9 @@ def main():
     # Walk
     elif option == '16':
         list_cams = [419, 420, 421, 428, 429, 430]
-        date_init = datetime(2018, 10, 30, 9, 18, 0)
-        date_end = datetime(2018, 10, 30, 10, 29, 59)
+        date_init = datetime(2018, 10, 30, 8, 50, 0)
+        date_end = datetime(2018, 10, 30, 9, 24, 16)
+        timeout_reid_sec = 6
     # Up - Down activities
     elif option == '17':
         list_cams = [419, 420, 421]
@@ -153,6 +154,13 @@ def main():
         list_cams = [419, 420, 421]
         date_init = datetime(2018, 10, 30, 12, 22, 20)
         date_end = datetime(2018, 10, 30, 12, 59, 59)
+    # Video activities
+    # loitering
+    elif option == '21':
+        list_cams = [419, 420, 421, 428, 429, 430]
+        date_init = datetime(2018, 10, 30, 9, 24, 16)
+        date_end = datetime(2018, 10, 30, 10, 15, 0)
+        timeout_reid_sec = 6
     else:
         raise Exception('Option not recognized')
 
