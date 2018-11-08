@@ -23,6 +23,8 @@ class ClassUtils:
     cnn_base_path = '/home/mauricio/Pictures/CNN'
     no_img_path = '/home/mauricio/Pictures/novideo.jpg'
     cnn_folder_mov = '/home/mauricio/Mov/Images'
+    activity_base_path = '/home/mauricio/Pictures/CNN/ClassesActivity'
+    zone_calib_path = '/home/mauricio/Oviedo/CameraCalibration/ZonePoints/calibration.json'
 
     # Variable changing - If platform is not same
     if platform == 'win32':
@@ -30,6 +32,8 @@ class ClassUtils:
         cnn_folder_mov = 'C:\\CNN\\Images'
         cnn_base_path = 'C:\\SharedFTP'
         no_img_path = 'C:\\novideo.jpg'
+        activity_base_path = 'C:\\SharedFTP\\ClassesActivity'
+        zone_calib_path = 'C:\\SharedFTP\\CameraCalibration\\ZonePoints\\calibration.json'
 
     cnn_folder = os.path.join(cnn_base_path, 'Images/')
     cnn_partial_folder_mov = os.path.join(cnn_base_path, 'Images_Partial/Mov')

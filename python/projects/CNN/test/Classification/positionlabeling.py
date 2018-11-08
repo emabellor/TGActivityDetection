@@ -57,6 +57,7 @@ def main():
         else:
             raise Exception('Angle deg not implemented: {0}'.format(angle_degrees))
 
+        print('Object points for cam: {0} - {1}'.format(cam, object_points))
         list_object_points.append({
             'camNumber': cam,
             'objectPoints': object_points
@@ -111,10 +112,7 @@ def save_points():
     global list_point_rect_obj
 
     print('Saving into list')
-    path = '/home/mauricio/Oviedo/CameraCalibration/ZonePoints/calibration.json'
-
-    if platform == 'win32':
-        path = 'C:\\SharedFTP\\CameraCalibration\\ZonePoints\\calibration.json'
+    path = ClassUtils.zone_calib_path
 
     base_dir = os.path.dirname(path)
     if not os.path.exists(base_dir):
