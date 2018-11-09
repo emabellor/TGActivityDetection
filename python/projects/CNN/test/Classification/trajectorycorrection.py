@@ -4,10 +4,12 @@ import cv2
 import json
 import numpy as np
 from classutils import ClassUtils
+from classdescriptors import ClassDescriptors
 import math
 
 threshold_angle = 45
 threshold_rp = 100
+
 
 def main():
     print('Initializing main function')
@@ -16,7 +18,7 @@ def main():
     Tk().withdraw()
 
     # Loading elements from list
-    init_dir = '/home/mauricio/Pictures/CNN/Images'
+    init_dir = ClassUtils.activity_base_path
 
     options = {
         'initialdir': init_dir,
@@ -32,8 +34,8 @@ def main():
 
     # Redrawing trajectory
     # Re-scale trajectory to known points
-    min_x = -200
-    max_x = 1000
+    min_x = -900
+    max_x = 1200
 
     min_y = -900
     max_y = 1200
@@ -41,8 +43,8 @@ def main():
     delta_x = max_x - min_x
     delta_y = max_y - min_y
 
-    width_plane = 1000
-    height_plane = 500
+    width_plane = 800
+    height_plane = 800
 
     img_plane = np.zeros((height_plane, width_plane, 3), np.uint8)
 
@@ -57,8 +59,9 @@ def main():
 
     # Iterating over data selection - list poses
     list_poses = json_data["listPoses"]
+    list_rp, list_action_poses = ClassDescriptors.get_moving_action_poses(list_poses)
 
-    list_rp = list()
+    # Only for drawing!
     for i in range(1, len(list_poses)):
         pose1 = list_poses[i - 1]
         pose2 = list_poses[i]
@@ -79,43 +82,35 @@ def main():
         # Link: http://ijssst.info/Vol-15/No-2/data/3251a254.pdf
 
         # Calculating distance
-        rect_rad = 6
-        if len(list_rp) == 0:
+        if i == 0:
+            rect_rad = 6
             # Draw RP point into image
             pt1 = pt_plane1[0] - rect_rad, pt_plane1[1] - rect_rad
             pt2 = pt_plane1[0] + rect_rad, pt_plane1[1] + rect_rad
             cv2.rectangle(img_plane, pt1, pt2, (0, 0, 255), -1)
 
-            list_rp.append(global_pos1)
+        # Check if index is in point_rp
+        is_rp = False
+        for rp in list_rp:
+            if 'index' not in rp:
+                print('Hello!')
 
-        # Get last RP
-        point_rp = list_rp[-1]
+            if rp['index'] == i:
+                is_rp = True
+                break
 
-        dis = ClassUtils.get_euclidean_distance_pt(point_rp, global_pos2)
-        if dis > threshold_rp:
+        if is_rp:
+            rect_rad = 6
             pt1 = pt_plane2[0] - rect_rad, pt_plane2[1] - rect_rad
             pt2 = pt_plane2[0] + rect_rad, pt_plane2[1] + rect_rad
             cv2.rectangle(img_plane, pt1, pt2, (0, 0, 255), -1)
+        else:
+            rect_rad = 3
+            pt1 = pt_plane2[0] - rect_rad, pt_plane2[1] - rect_rad
+            pt2 = pt_plane2[0] + rect_rad, pt_plane2[1] + rect_rad
+            cv2.rectangle(img_plane, pt1, pt2, (0, 255, 0), -1)
 
-            list_rp.append(global_pos2)
-
-    # Calculate angle between rp points
-    print('Total rp points: {0}'.format(len(list_rp)))
-    count_variations = 0
-    for i in range(2, len(list_rp)):
-        point0 = list_rp[i - 2]
-        point1 = list_rp[i - 1]
-        point2 = list_rp[i]
-
-        angle_points = ClassUtils.get_angle(point0, point1, point2)
-
-        angle_deg = angle_points * 180 / math.pi
-        angle_change = 180 - angle_deg
-
-        if angle_change > threshold_angle:
-            count_variations += 1
-
-    print('Trajectory changes: {0}'.format(count_variations))
+    print('Total trajectories: {0}'.format(len(list_action_poses)))
 
     # Showing image result
     cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)

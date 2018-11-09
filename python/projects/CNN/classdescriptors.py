@@ -8,6 +8,7 @@ import os
 import json
 from sklearn.cluster import KMeans
 from classnn import ClassNN
+import copy
 import time
 
 
@@ -1444,3 +1445,97 @@ class ClassDescriptors:
         cls.draw_pose(image, new_list_points, min_score, key_pose)
 
         return image
+
+    @classmethod
+    def get_moving_action_poses(cls, list_poses):
+        list_action_poses = list()
+
+        # Generating action descriptors
+        threshold_angle = 45
+        threshold_rp = 100
+
+        list_rp = list()
+        for i in range(1, len(list_poses)):
+            pose1 = list_poses[i - 1]
+            pose2 = list_poses[i]
+
+            # Extracting position from pose
+            global_pos1 = pose1['globalPosition']
+            global_pos2 = pose2['globalPosition']
+
+            # Now that works, detect loitering using Ko Method
+            # Link: http://ijssst.info/Vol-15/No-2/data/3251a254.pdf
+
+            # Calculating distance
+            if len(list_rp) == 0:
+                list_rp.append({
+                    'point': global_pos1,
+                    'index': i - 1
+                })
+
+            # Get last RP
+            point_rp = list_rp[-1]
+
+            dis = ClassUtils.get_euclidean_distance_pt(point_rp['point'], global_pos2)
+            if dis > threshold_rp:
+                list_rp.append({
+                    'point': global_pos2,
+                    'index': i
+                })
+
+        # Calculate angle between rp points
+        print('Total rp points: {0}'.format(len(list_rp)))
+
+        point1_l1 = [0, 0]
+        point2_l1 = [0, 0]
+        if len(list_rp) >= 2:
+            point1_l1 = copy.deepcopy(list_rp[0])
+            point2_l1 = copy.deepcopy(list_rp[1])
+
+        last_index = 0
+        for i in range(2, len(list_rp)):
+            point1_l2 = copy.deepcopy(list_rp[i - 1])
+            point2_l2 = copy.deepcopy(list_rp[i])
+
+            angle_points = ClassUtils.get_angle_lines(point1_l1['point'], point2_l1['point'],
+                                                      point1_l2['point'], point2_l2['point'])
+
+            angle_deg = angle_points * 180 / math.pi
+            angle_change = 180 - angle_deg
+
+            print('Angle change i {0}: {1} index: {2}'.format(i, angle_change, point1_l2['index']))
+            if angle_change > threshold_angle:
+                # Add count variation into list
+                list_poses_partial = list()
+                for j in range(last_index, point1_l2['index'] + 1):
+                    list_poses_partial.append(list_poses[j])
+
+                list_action_poses.append(list_poses_partial)
+                last_index = point1_l2['index'] + 1
+                print('Updating last index: {0}'.format(last_index))
+
+                # Update line 1 points
+                point1_l1 = copy.deepcopy(point1_l2)
+                point2_l1 = copy.deepcopy(point2_l2)
+
+        # add last poses
+        if last_index != len(list_poses) - 1:
+            list_poses_partial = list()
+            for j in range(last_index, point1_l2['index'] + 1):
+                list_poses_partial.append(list_poses[j])
+
+            list_action_poses.append(list_poses_partial)
+
+        print('Total actions {0}'.format(len(list_action_poses)))
+        for index, item in enumerate(list_action_poses):
+            print('Len for action {0}: {1}'.format(index, len(item)))
+
+        # Done!
+        return list_rp, list_action_poses
+
+    @classmethod
+    def transform_point(cls, point, min_x, min_y, width_plane, height_plane, delta_x, delta_y):
+        # Draw line into list
+        pt_plane_x = int((point[0] - min_x) * width_plane / delta_x)
+        pt_plane_y = height_plane - int((point[1] - min_y) * height_plane / delta_y)
+        return pt_plane_x, pt_plane_y

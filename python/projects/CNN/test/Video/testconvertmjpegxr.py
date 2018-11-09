@@ -321,9 +321,6 @@ def generate_files():
         list_poses = person.list_poses
         save_list_poses(person_guid, list_poses)
 
-    # Processing partial list for re-identification
-    process_list_partial()
-
 
 def get_base_folder_video(person_guid, moving=False, is_partial=False, count=0):
     if not is_partial:
@@ -377,92 +374,6 @@ def save_list_poses(person_guid, list_poses, save_example_global=False, moving=F
     # Done!
     # Return path folder for reference purposes
     return path_folder
-
-
-def save_pose_partial(person_guid, count, list_poses_partial, moving):
-    print('Saving pose partial for guid: {0} count: {1}'.format(person_guid, count))
-    save_list_poses(person_guid, list_poses_partial, save_example_global=True,
-                    moving=moving, is_partial=True, count=count)
-
-
-def process_list_partial():
-    # Create partial list of elems
-    for person in list_people_reid:
-        moving = True
-
-        index = 0
-        num_poses_future = 6
-        min_distance_x = 80
-        min_distance_y = 160
-        list_poses_partial = list()
-        count = 0
-
-        while index < len(person.list_poses):
-            pose = person.list_poses[index]
-            remaining = len(person.list_poses) - index - 1
-
-            pos = pose['globalPosition']
-
-            if moving:
-                valid = True
-                if remaining >= num_poses_future:
-                    for i in range(index + 1, index + num_poses_future):
-                        pos_future = person.list_poses[index + num_poses_future]['globalPosition']
-
-                        distance_x = math.fabs(pos[0] - pos_future[0])
-                        distance_y = math.fabs(pos[1] - pos_future[1])
-                        if distance_x < min_distance_x and distance_y < min_distance_y:
-                            valid = False
-                            break
-
-                if not valid:
-                    # Saving current list and create a new one
-                    if len(list_poses_partial) != 0:
-                        save_pose_partial(person.person_guid, count, list_poses_partial, moving)
-                        list_poses_partial.clear()
-                        count += 1
-
-                    moving = False
-
-                list_poses_partial.append(pose)
-            else:
-                # Generating elements into list
-                valid = True
-                if remaining >= num_poses_future:
-                    for i in range(index + 1, index + num_poses_future):
-                        pos_future = person.list_poses[index + num_poses_future]['globalPosition']
-
-                        distance_x = math.fabs(pos[0] - pos_future[0])
-                        distance_y = math.fabs(pos[1] - pos_future[1])
-
-                        # Inverse
-                        if distance_x >= min_distance_x or distance_y >= min_distance_y:
-                            valid = False
-                            break
-
-                list_poses_partial.append(pose)
-                if not valid:
-                    # New pose list
-                    for i in range(num_poses_future):
-                        list_poses_partial.append(person.list_poses[index + i])
-
-                    save_pose_partial(person.person_guid, count, list_poses_partial, moving)
-                    list_poses_partial.clear()
-                    count += 1
-
-                    index += num_poses_future
-                    moving = True
-
-            # Iterator!
-            index += 1
-
-        if len(list_poses_partial) != 0:
-            # Saving elements in partial format
-            save_pose_partial(person.person_guid, count, list_poses_partial, moving)
-            list_poses_partial.clear()
-            count += 1
-
-    print('Done!')
 
 
 def save_pose_global(path_folder, pose, color_back=(255, 255, 255)):
@@ -897,9 +808,6 @@ def saving_guid_activity():
         save_list_poses(person_guid, list_poses, save_example_global=True)
         path_folder, _, _ = get_base_folder_video(person.person_guid)
 
-    # Processing partial list for re-identification
-    process_list_partial()
-
     # Reset flags and open window in explorer
     saving_activity = False
     saving_person_guid = ''
@@ -917,8 +825,8 @@ def saving_guid_activity():
     is_playing = False
 
 
-def process_is_playing(key, forward_until_person):
-    global is_playing
+def process_is_playing(key):
+    global is_playing, forward_until_person
 
     if forward_until_person:
         return
