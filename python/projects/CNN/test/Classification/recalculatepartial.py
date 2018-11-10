@@ -46,12 +46,36 @@ list_classes = [
 def main():
     print('Initializing main function')
 
-    res = input('Press 1 to reprocess list partial: ')
+    res = input('Press 1 to reprocess list partial - 2 to do cleaning: ')
 
     if res == '1':
         reprocess_list_partial()
+    elif res == '2':
+        do_cleaning()
     else:
         raise Exception('Option not recognized')
+
+
+def do_cleaning():
+    # Cleaning partial poses - Step mjpegxr
+    for classInfo in list_classes:
+        folder = classInfo['folderPath']
+        for root, _, files in os.walk(folder):
+            if 'partial' in root and os.path.exists(root):
+                print('Removing dir: {0}'.format(root))
+                rmtree(root)
+
+            if 'action_' in root and os.path.exists(root):
+                print('Removing dir: {0}'.format(root))
+                rmtree(root)
+
+            for file in files:
+                full_path = os.path.join(root, file)
+
+                if '_posedata' in full_path or '_actiondata' in full_path:
+                    os.remove(full_path)
+
+    print('Done do cleaning!')
 
 
 def reprocess_list_partial():
@@ -60,7 +84,7 @@ def reprocess_list_partial():
     # Cleaning partial poses - Step mjpegxr
     for classInfo in list_classes:
         folder = classInfo['folderPath']
-        for root, _, _ in os.walk(folder):
+        for root, _, files in os.walk(folder):
             if 'partial' in root and os.path.exists(root):
                 print('Removing dir: {0}'.format(root))
                 rmtree(root)
@@ -83,7 +107,7 @@ def reprocess_list_partial():
                 full_path = os.path.join(root, file)
 
                 ext = ClassUtils.get_filename_extension(full_path)
-                if ext == '.json' and '_actiondata' not in file:
+                if ext == '.json' and '_posedata' in file:
                     print('Processing file: {0}'.format(full_path))
                     process_list_partial(full_path, zone_data)
 
@@ -103,8 +127,8 @@ def process_list_partial(filename, zone_data):
 
     index = 0
     num_poses_future = 5
-    min_distance_x = 80
-    min_distance_y = 80
+    min_distance_x = 100
+    min_distance_y = 100
     list_poses_action = list()
     list_poses_partial = list()
 
@@ -134,22 +158,30 @@ def process_list_partial(filename, zone_data):
                     valid = False
 
             if not valid:
-                # Saving current list and create a new one
-                # Get position
-
-                final_pos = list_poses[index + num_poses_future]['globalPosition']
-                in_zone = is_point_in_zone(final_pos, zone_data)
-
                 if len(list_poses_partial) != 0:
+                    # Check total moving changes
+                    _, list_action_mov = ClassDescriptors.get_moving_action_poses(list_poses_partial)
+                    print('Total action moving: {0}'.format(len(list_action_mov)))
 
-                    # Saving
-                    list_poses_action.append({
-                        'moving': moving,
-                        'listPoses': copy.deepcopy(list_poses_partial),
-                        'finalPos': final_pos,
-                        'inZone': in_zone
-                    })
-                    list_poses_partial.clear()
+                    for idx_act, action_mov in enumerate(list_action_mov):
+                        if idx_act == len(action_mov) - 1:
+                            # Take last action as num_pose_future position
+                            final_pos = list_poses[index + num_poses_future]['globalPosition']
+                        else:
+                            # Take final pos as last item
+                            final_pos = action_mov[-1]['globalPosition']
+
+                        # Get if action ends in zone
+                        in_zone = is_point_in_zone(final_pos, zone_data)
+
+                        # Saving
+                        list_poses_action.append({
+                            'moving': moving,
+                            'listPoses': copy.deepcopy(action_mov),
+                            'finalPos': final_pos,
+                            'inZone': in_zone
+                        })
+                        list_poses_partial.clear()
 
                 moving = False
 
@@ -197,13 +229,23 @@ def process_list_partial(filename, zone_data):
         final_pos = list_poses_partial[-1]['globalPosition']
         in_zone = is_point_in_zone(final_pos, zone_data)
 
-        # Saving elements in partial format
-        list_poses_action.append({
-            'moving': moving,
-            'listPoses': copy.deepcopy(list_poses_partial),
-            'finalPos': final_pos,
-            'inZone': in_zone
-        })
+        if moving:
+            _, list_action_mov = ClassDescriptors.get_moving_action_poses(list_poses_partial)
+            for action_mov in list_action_mov:
+                list_poses_action.append({
+                    'moving': moving,
+                    'listPoses': copy.deepcopy(action_mov),
+                    'finalPos': final_pos,
+                    'inZone': in_zone
+                })
+        else:
+            # Saving elements in partial format
+            list_poses_action.append({
+                'moving': moving,
+                'listPoses': copy.deepcopy(list_poses_partial),
+                'finalPos': final_pos,
+                'inZone': in_zone
+            })
         list_poses_partial.clear()
 
     # Generating elements into list
@@ -222,7 +264,7 @@ def process_list_partial(filename, zone_data):
         f.write(action_txt)
 
     # Saving list poses action for debugging
-    save_list_poses_action(filename, list_poses_action)
+    save_list_poses_action(filename, list_poses_action, zone_data)
 
     print('Done!')
 
@@ -233,17 +275,20 @@ def is_point_in_zone(point, zone_data):
 
     result = False
     for pts_rect in list_rectangles:
-        pt1 = pts_rect[0]
-        pt2 = pts_rect[1]
+        min_x = min([pts_rect[0][0], pts_rect[1][0]])
+        min_y = min([pts_rect[0][1], pts_rect[1][1]])
 
-        if pt1[0] <= point[0] <= pt2[0] and  pt1[0] <= point[1] <= pt2[1]:
+        max_x = max([pts_rect[0][0], pts_rect[1][0]])
+        max_y = max([pts_rect[0][1], pts_rect[1][1]])
+
+        if min_x <= point[0] <= max_x and min_y <= point[1] <= max_y:
             result = True
             break
 
     return result
 
 
-def save_list_poses_action(filename, list_poses_action):
+def save_list_poses_action(filename, list_poses_action, zone_data):
     folder = os.path.dirname(filename)
 
     for index, list_poses in enumerate(list_poses_action):
@@ -326,6 +371,17 @@ def save_list_poses_action(filename, list_poses_action):
 
             # Draw pose
             ClassDescriptors.draw_pose(img_plane, new_person_array, min_score, key_pose)
+
+            # Draw points zone
+            list_rect_points = zone_data['listRectanglePoints']
+            for point in list_rect_points:
+                pt1_x = int((point[0][0] - min_x) * width_plane / delta_x)
+                pt1_y = height_plane - int((point[0][1] - min_y) * height_plane / delta_y)
+
+                pt2_x = int((point[1][0] - min_x) * width_plane / delta_x)
+                pt2_y = height_plane - int((point[1][1] - min_y) * height_plane / delta_y)
+
+                cv2.rectangle(img_plane, (pt1_x, pt1_y), (pt2_x, pt2_y), (0, 0, 255), thickness=3)
 
             # Fill rectangle
             cv2.rectangle(img_plane, pt1, pt2, (255, 0, 255), thickness=-1)

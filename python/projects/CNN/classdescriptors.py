@@ -1484,7 +1484,7 @@ class ClassDescriptors:
                 })
 
         # Calculate angle between rp points
-        print('Total rp points: {0}'.format(len(list_rp)))
+        # print('Total rp points: {0}'.format(len(list_rp)))
 
         point1_l1 = [0, 0]
         point2_l1 = [0, 0]
@@ -1503,7 +1503,7 @@ class ClassDescriptors:
             angle_deg = angle_points * 180 / math.pi
             angle_change = 180 - angle_deg
 
-            print('Angle change i {0}: {1} index: {2}'.format(i, angle_change, point1_l2['index']))
+            # print('Angle change i {0}: {1} index: {2}'.format(i, angle_change, point1_l2['index']))
             if angle_change > threshold_angle:
                 # Add count variation into list
                 list_poses_partial = list()
@@ -1512,7 +1512,7 @@ class ClassDescriptors:
 
                 list_action_poses.append(list_poses_partial)
                 last_index = point1_l2['index'] + 1
-                print('Updating last index: {0}'.format(last_index))
+                # print('Updating last index: {0}'.format(last_index))
 
                 # Update line 1 points
                 point1_l1 = copy.deepcopy(point1_l2)
@@ -1521,14 +1521,14 @@ class ClassDescriptors:
         # add last poses
         if last_index != len(list_poses) - 1:
             list_poses_partial = list()
-            for j in range(last_index, point1_l2['index'] + 1):
+            for j in range(last_index, len(list_poses)):
                 list_poses_partial.append(list_poses[j])
 
             list_action_poses.append(list_poses_partial)
 
-        print('Total actions {0}'.format(len(list_action_poses)))
-        for index, item in enumerate(list_action_poses):
-            print('Len for action {0}: {1}'.format(index, len(item)))
+        # print('Total actions {0}'.format(len(list_action_poses)))
+        # for index, item in enumerate(list_action_poses):
+        #     print('Len for action {0}: {1}'.format(index, len(item)))
 
         # Done!
         return list_rp, list_action_poses

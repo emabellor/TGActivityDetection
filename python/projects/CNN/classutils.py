@@ -961,3 +961,22 @@ class ClassUtils:
 
         dst = cv2.filter2D(image, -1, kernel)
         return dst
+
+    @classmethod
+    def change_ext_training(cls, file_name: str, new_ext_train: str):
+        list_elem = file_name.split('_')
+        ext = cls.get_filename_extension(file_name)
+
+        new_file_name = ''
+        for i in range(len(list_elem) - 1):
+            if i == 0:
+                new_file_name = list_elem[i]
+            else:
+                new_file_name += '_'
+                new_file_name += list_elem[i]
+
+        new_file_name += '_'
+        new_file_name += new_ext_train
+        new_file_name += ext
+
+        return new_file_name

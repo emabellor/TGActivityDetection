@@ -147,7 +147,14 @@ def mouse_callback(event, x_image, y_image, flags, param):
         flag_down = False
         point_end_img = (x_image, y_image)
 
-        list_point_rect_obj.append([point_init_img, point_end_img])
+        # Convert points from local to global
+        pt1_x = int(point_init_img[0] * (max_x - min_x) / image_width + min_x)
+        pt1_y = int((image_height - point_init_img[1]) * (max_y - min_y) / image_height + min_y)
+
+        pt2_x = int(point_end_img[0] * (max_x - min_x) / image_width + min_x)
+        pt2_y = int((image_height - point_end_img[1]) * (max_y - min_y) / image_height + min_y)
+
+        list_point_rect_obj.append([(pt1_x, pt1_y), (pt2_x, pt2_y)])
         draw_image()
 
 
@@ -172,8 +179,15 @@ def draw_image():
             list_drawn_points.append([pos_x, pos_y])
 
     # Drawing list points
-    for points in list_point_rect_obj:
-        cv2.rectangle(image, points[0], points[1], (0, 0, 255), 3)
+    # Convert points from global to local
+    for point in list_point_rect_obj:
+        pt1_x = int((point[0][0] - min_x) * image_width / (max_x - min_x))
+        pt1_y = image_height - int((point[0][1] - min_y) * image_height / (max_y - min_y))
+
+        pt2_x = int((point[1][0] - min_x) * image_width / (max_x - min_x))
+        pt2_y = image_height - int((point[1][1] - min_y) * image_height / (max_y - min_y))
+
+        cv2.rectangle(image, (pt1_x, pt1_y), (pt2_x, pt2_y), (0, 0, 255), 3)
 
     if flag_down:
         print('Drawing rectangle points {0} {1}'.format(point_init_img, point_end_img))
