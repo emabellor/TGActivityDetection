@@ -11,7 +11,7 @@ list_classes = [
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Door'),
     },
     {
-        # Cls1
+        # Cls 1
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Down'),
     },
     {
@@ -27,11 +27,11 @@ list_classes = [
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Squat'),
     },
     {
-        # Cls 4
+        # Cls 5
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Up'),
     },
     {
-        # Cls 4
+        # Cls 6
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Walk'),
     }
 ]

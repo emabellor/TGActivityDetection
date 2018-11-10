@@ -14,9 +14,12 @@ import copy
 
 
 class ClassHMM:
-    model_hmm_folder = '/home/mauricio/models/actions'
+    model_hmm_folder_action = '/home/mauricio/models/actions'
+    model_hmm_folder_activities = '/home/mauricio/models/activities'
+
     if platform == 'win32':
-        model_hmm_folder = 'C:\\SharedFTP\\hmm\\Actions'
+        model_hmm_folder_action = 'C:\\SharedFTP\\hmm\\Actions'
+        model_hmm_folder_activities = 'C:\\SharedFTP\\hmm\\Activities'
 
     def __init__(self, model_path: str):
         self.model = None  # type: hmm.MultinomialHMM

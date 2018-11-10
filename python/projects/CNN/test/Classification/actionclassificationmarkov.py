@@ -107,7 +107,7 @@ def classify_markov():
     elif res == '2':
         # Pre-loading models
         for i in range(len(list_folder_data)):
-            model_path = os.path.join(ClassHMM.model_hmm_folder, 'model{0}.pkl'.format(i))
+            model_path = os.path.join(ClassHMM.model_hmm_folder_action, 'model{0}.pkl'.format(i))
             hmm_model = ClassHMM(model_path)
             hmm_models.append(hmm_model)
 
@@ -139,7 +139,7 @@ def train_markov(training_data, training_labels, training_files, eval_data, eval
         if len(list_data) == 0:
             break
         else:
-            model_path = os.path.join(ClassHMM.model_hmm_folder, 'model{0}.pkl'.format(cls))
+            model_path = os.path.join(ClassHMM.model_hmm_folder_action, 'model{0}.pkl'.format(cls))
             hmm_model = ClassHMM(model_path)
 
             print('Training model {0}'.format(cls))
@@ -179,7 +179,7 @@ def train_markov_iter(training_data, training_labels, training_files, eval_data,
             if len(list_data) == 0:
                 break
             else:
-                model_path = os.path.join(ClassHMM.model_hmm_folder, 'model{0}.pkl'.format(cls))
+                model_path = os.path.join(ClassHMM.model_hmm_folder_action, 'model{0}.pkl'.format(cls))
                 hmm_model = ClassHMM(model_path)
 
                 print('Training model {0}'.format(cls))

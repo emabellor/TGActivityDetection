@@ -81,18 +81,6 @@ def do_cleaning():
 def reprocess_list_partial():
     print('Reprocess list partial')
 
-    # Cleaning partial poses - Step mjpegxr
-    for classInfo in list_classes:
-        folder = classInfo['folderPath']
-        for root, _, files in os.walk(folder):
-            if 'partial' in root and os.path.exists(root):
-                print('Removing dir: {0}'.format(root))
-                rmtree(root)
-
-            if 'action_' in root and os.path.exists(root):
-                print('Removing dir: {0}'.format(root))
-                rmtree(root)
-
     # Loading zone calib info
     with open(ClassUtils.zone_calib_path, 'r') as f:
         zone_txt = f.read()
@@ -254,10 +242,7 @@ def process_list_partial(filename, zone_data):
         'listPosesAction': list_poses_action
     }
 
-    new_filename = ClassUtils.get_filename_no_extension(filename)
-    ext = ClassUtils.get_filename_extension(filename)
-
-    new_filename += '_actiondata' + ext
+    new_filename = ClassUtils.change_ext_training(filename, 'partialdata')
 
     action_txt = json.dumps(person_action, indent=4)
     with open(new_filename, 'w') as f:
@@ -293,6 +278,10 @@ def save_list_poses_action(filename, list_poses_action, zone_data):
 
     for index, list_poses in enumerate(list_poses_action):
         path_actions = os.path.join(folder, 'action_' + str(index))
+
+        if os.path.exists(path_actions):
+            print('Path action exists. Taking next: {0}'.format(path_actions))
+            continue
 
         if not os.path.exists(path_actions):
             os.makedirs(path_actions)
