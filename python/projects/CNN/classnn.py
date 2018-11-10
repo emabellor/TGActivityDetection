@@ -20,12 +20,14 @@ from sys import platform
 class ClassNN:
     model_dir_pose = '/home/mauricio/models/nn_classifier'
     model_dir_action = '/home/mauricio/models/nn_class_action'
+    model_dir_activity = '/home/mauricio/models/nn_class_activity'
     classes_num_pose = 10
     hidden_num_pose = 60
 
     if platform == 'win32':
-        model_dir_action = 'C:\\models\\nn_class_action'
         model_dir_pose = 'C:\\models\\nn_classifier'
+        model_dir_action = 'C:\\models\\nn_class_action'
+        model_dir_activity = 'C:\\models\\nn_class_activity'
 
     def __init__(self, model_dir, classes, hidden_number, label_names=list(), learning_rate=0.001):
         self.model_dir = model_dir

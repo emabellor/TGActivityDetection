@@ -33,11 +33,11 @@ list_classes = [
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Squat'),
     },
     {
-        # Cls 4
+        # Cls 5
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Up'),
     },
     {
-        # Cls 4
+        # Cls 6
         'folderPath': os.path.join(ClassUtils.activity_base_path, 'Walk'),
     }
 ]
@@ -88,7 +88,7 @@ def reprocess_list_partial():
     zone_data = json.loads(zone_txt)
     
     # Checking for data in all folders and reprocess
-    for classInfo in list_classes:
+    for idx_cls, classInfo in enumerate(list_classes):
         folder = classInfo['folderPath']
         for root, _, files in os.walk(folder):
             for file in files:
@@ -97,12 +97,12 @@ def reprocess_list_partial():
                 ext = ClassUtils.get_filename_extension(full_path)
                 if ext == '.json' and '_posedata' in file:
                     print('Processing file: {0}'.format(full_path))
-                    process_list_partial(full_path, zone_data)
+                    process_list_partial(full_path, zone_data, idx_cls)
 
     # Done
 
 
-def process_list_partial(filename, zone_data):
+def process_list_partial(filename, zone_data, idx_cls):
     # Loading json data from filename
     with open(filename, 'r') as f:
         person_txt = f.read()
@@ -110,7 +110,7 @@ def process_list_partial(filename, zone_data):
     person = json.loads(person_txt)
     list_poses = person['listPoses']
 
-    # Create partial list of elems
+    # Create partial list of ele
     moving = True
 
     index = 0
@@ -148,6 +148,7 @@ def process_list_partial(filename, zone_data):
             if not valid:
                 if len(list_poses_partial) != 0:
                     # Check total moving changes
+                    # Using movement variations
                     _, list_action_mov = ClassDescriptors.get_moving_action_poses(list_poses_partial)
                     print('Total action moving: {0}'.format(len(list_action_mov)))
 
@@ -159,15 +160,25 @@ def process_list_partial(filename, zone_data):
                             # Take final pos as last item
                             final_pos = action_mov[-1]['globalPosition']
 
+                        initial_pos = action_mov[0]['globalPosition']
+
                         # Get if action ends in zone
-                        in_zone = is_point_in_zone(final_pos, zone_data)
+                        # Except for walk, loitering actions
+                        if idx_cls == 2 or idx_cls == 6:
+                            in_zone = False
+                            in_zone_before = False
+                        else:
+                            in_zone = is_point_in_zone(final_pos, zone_data)
+                            # Get if action init in zone
+                            in_zone_before = is_point_in_zone(initial_pos, zone_data)
 
                         # Saving
                         list_poses_action.append({
                             'moving': moving,
                             'listPoses': copy.deepcopy(action_mov),
                             'finalPos': final_pos,
-                            'inZone': in_zone
+                            'inZone': in_zone,
+                            'inZoneBefore': in_zone_before
                         })
                         list_poses_partial.clear()
 
@@ -203,7 +214,8 @@ def process_list_partial(filename, zone_data):
                     'moving': moving,
                     'listPoses': copy.deepcopy(list_poses_partial),
                     'finalPos': final_pos,
-                    'inZone': in_zone
+                    'inZone': in_zone,
+                    'inZoneBefore': False  # In zone before does not apply
                 })
                 list_poses_partial.clear()
 
@@ -215,24 +227,34 @@ def process_list_partial(filename, zone_data):
 
     if len(list_poses_partial) != 0:
         final_pos = list_poses_partial[-1]['globalPosition']
-        in_zone = is_point_in_zone(final_pos, zone_data)
+        initial_pos = list_poses_partial[0]['globalPosition']
 
         if moving:
+            if idx_cls == 2 or idx_cls == 6:
+                in_zone = False
+                in_zone_before = False
+            else:
+                in_zone = is_point_in_zone(final_pos, zone_data)
+                in_zone_before = is_point_in_zone(initial_pos, zone_data)
+
             _, list_action_mov = ClassDescriptors.get_moving_action_poses(list_poses_partial)
             for action_mov in list_action_mov:
                 list_poses_action.append({
                     'moving': moving,
                     'listPoses': copy.deepcopy(action_mov),
                     'finalPos': final_pos,
-                    'inZone': in_zone
+                    'inZone': in_zone,
+                    'inZoneBefore': in_zone_before
                 })
         else:
+            in_zone = is_point_in_zone(final_pos, zone_data)
             # Saving elements in partial format
             list_poses_action.append({
                 'moving': moving,
                 'listPoses': copy.deepcopy(list_poses_partial),
                 'finalPos': final_pos,
-                'inZone': in_zone
+                'inZone': in_zone,
+                'inZoneBefore': False  # In zone before does not apply
             })
         list_poses_partial.clear()
 

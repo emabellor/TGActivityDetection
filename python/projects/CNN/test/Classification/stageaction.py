@@ -62,7 +62,10 @@ list_classes_classify = [
 ]
 
 # Cls 4 - 7: Same with zone
-# Cls 8 - 9: Moving - Finish in zone, or out zone
+# Cls 8: Moving - Init and finish out of zone
+# Cls 9: Moving - Init in zone, finish out of zone
+# Cls 10: Moving - Init out of zone, finish in zone
+# Cls 11: Moving - Init and finish in zone
 
 
 def main():
@@ -193,6 +196,7 @@ def process_file_nn(full_path, instance_nn: ClassNN):
         list_poses = list_poses_data['listPoses']
         moving = list_poses_data['moving']
         in_zone = list_poses_data['inZone']
+        in_zone_before = list_poses_data['inZoneBefore']
 
         # Descriptor not moving
         if not moving:
@@ -217,7 +221,7 @@ def process_file_nn(full_path, instance_nn: ClassNN):
                 for i in range(4):
                     list_prob.append(0)
 
-            for i in range(2):
+            for i in range(4):
                 list_prob.append(0)
 
             data_action = {
@@ -226,13 +230,17 @@ def process_file_nn(full_path, instance_nn: ClassNN):
                 'count': len(list_poses)
             }
         else:
-            if not in_zone:
+            if not in_zone and not in_zone_before:
                 cls = 8
-            else:
+            elif in_zone and not in_zone_before:
                 cls = 9
+            elif not in_zone and in_zone_before:
+                cls = 10
+            else:
+                cls = 11
 
             probabilities = list()
-            for i in range(10):
+            for i in range(12):
                 if i == cls:
                     probabilities.append(1)
                 else:

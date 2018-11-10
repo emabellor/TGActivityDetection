@@ -4,6 +4,7 @@ import os
 import random
 from classhmm import ClassHMM
 import numpy as np
+from classnn import ClassNN
 
 seed = 1234
 
@@ -73,20 +74,22 @@ def main():
         random.Random(seed).shuffle(list_list_actions)
 
         num_file = 0
-        for list_poses in list_list_actions:
+        for list_actions in list_list_actions:
             if num_file < total_train:
-                training_list_actions.append(list_poses)
+                training_list_actions.append(list_actions)
                 training_labels.append(label)
             else:
-                eval_list_actions.append(list_poses)
+                eval_list_actions.append(list_actions)
                 eval_labels.append(label)
 
             num_file += 1
 
-    res = input('Press 1 to train HMM: ')
+    res = input('Press 1 to train HMM - 2 to train bow: ')
 
     if res == '1':
         train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels)
+    elif res == '2':
+        train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels)
     else:
         raise Exception('Raise Exception!')
 
@@ -94,7 +97,7 @@ def main():
 def train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels):
     print('Initializing training HMM')
     hmm_models = list()
-    hidden_states = 4
+    hidden_states = 7
 
     for index in range(len(list_classes)):
         # Creating model for each class
@@ -109,7 +112,16 @@ def train_hmm(training_list_actions, training_labels, eval_list_actions, eval_la
 
                 seq = list()
                 for action in list_actions:
-                    seq.append(action['class'])
+                    count = action['count']
+                    cls = action['class']
+
+                    if cls == 8 or cls == 9 or cls == 10 or cls == 11:
+                        # Ignore time
+                        seq.append(cls)
+                    else:
+                        # Add time information
+                        for _ in range(count):
+                            seq.append(cls)
 
                 list_data.append(seq)
 
@@ -173,5 +185,53 @@ def predict_data(list_poses, hmm_models):
     return cls
 
 
+def train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels):
+    print('Training BoW')
+
+    action = list()
+
+    # Generating BoW descriptors
+    descriptors = list()
+    for list_actions in training_list_actions:
+        words = [0 for _ in range(12)]
+        for action in list_actions:
+            count = action['count']
+            cls = action['class']
+
+            for _ in range(count):
+                words[cls] += 1
+
+        descriptors.append(words)
+
+    descriptors_np = np.asanyarray(descriptors, dtype=np.float)
+    training_labels_np = np.asanyarray(training_labels, dtype=np.int)
+
+    # Generating instance_nn
+    cls_number = len(list_classes)
+    hidden_neurons = 20
+    instance_nn = ClassNN(ClassNN.model_dir_activity, cls_number, hidden_neurons)
+    instance_nn.train_model(descriptors_np, training_labels_np)
+
+    # Evaluating model
+    descriptors = list()
+    for list_actions in eval_list_actions:
+        words = [0 for _ in range(12)]
+        for action in list_actions:
+            count = action['count']
+            cls = action['class']
+
+            for _ in range(count):
+                words[cls] += 1
+
+        descriptors.append(words)
+
+    eval_descriptors_np = np.asanyarray(descriptors, dtype=np.float)
+    eval_labels_np = np.asanyarray(eval_labels, dtype=np.int)
+
+    instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
+    print('Done!')
+
+
 if __name__ == '__main__':
     main()
+
