@@ -68,8 +68,16 @@ def load_and_train(option: Option):
         # Loading elements into list
         training_list_actions = list()
         training_labels = list()
+
         eval_list_actions = list()
         eval_labels = list()
+
+        training_list_cls = list()
+        training_cls_labels = list()
+
+        validate_list_cls = list()
+        validate_cls_labels = list()
+
         found_2 = False
 
         for index, item in enumerate(list_classes):
@@ -101,6 +109,7 @@ def load_and_train(option: Option):
 
             total_samples = len(list_list_actions)
             total_train = int(total_samples * 80 / 100)
+            total_train_cls = int(total_samples * 60 / 100)
             print('Total samples: {0}'.format(total_samples))
 
             num_file = 0
@@ -108,6 +117,14 @@ def load_and_train(option: Option):
                 if num_file < total_train:
                     training_list_actions.append(list_actions)
                     training_labels.append(label)
+
+                    # Add cls list for markov models
+                    if num_file < total_train_cls:
+                        training_list_cls.append(list_actions)
+                        training_cls_labels.append(label)
+                    else:
+                        validate_list_cls.append(list_actions)
+                        validate_cls_labels.append(label)
                 else:
                     eval_list_actions.append(list_actions)
                     eval_labels.append(label)
@@ -128,7 +145,10 @@ def load_and_train(option: Option):
         if option == Option.HMM:
             train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels, option)
         elif option == Option.BOW:
-            train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels, option)
+            train_bow(training_list_cls, training_cls_labels,
+                      validate_list_cls, validate_cls_labels,
+                      eval_list_actions, eval_labels,
+                      option)
         else:
             raise Exception('Raise Exception!')
 
@@ -229,34 +249,50 @@ def predict_data(list_poses, hmm_models):
     return cls
 
 
-def train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels, option: Option):
+def train_bow(training_list_cls, training_cls_labels,
+              validate_list_cls, validate_cls_labels,
+              eval_list_actions, eval_labels,
+              option: Option):
     print('Training BoW')
 
     # Generating BoW descriptors
-    descriptors = list()
-    for list_actions in training_list_actions:
+    train_descriptors = list()
+    for list_actions in training_list_cls:
         words = get_bow_descriptors(list_actions)
-        descriptors.append(words)
+        train_descriptors.append(words)
 
-    descriptors_np = np.asanyarray(descriptors, dtype=np.float)
-    training_labels_np = np.asanyarray(training_labels, dtype=np.int)
+    descriptors_np = np.asanyarray(train_descriptors, dtype=np.float)
+    training_labels_np = np.asanyarray(training_cls_labels, dtype=np.int)
 
-    # Generating instance_nn
+    # Generating instance_nn and train model
     cls_number = len(list_classes)
     hidden_neurons = 20
     instance_nn = ClassNN(ClassNN.model_dir_activity, cls_number, hidden_neurons)
     instance_nn.train_model(descriptors_np, training_labels_np)
 
-    # Evaluating model
-    descriptors = list()
+    # Validating model
+    validate_descriptors = list()
+    for list_actions in validate_list_cls:
+        words = get_bow_descriptors(list_actions)
+        validate_descriptors.append(words)
+
+    validate_descriptors_np = np.asanyarray(validate_descriptors, dtype=np.float)
+    validate_labels_np = np.asanyarray(validate_cls_labels, dtype=np.int)
+
+    accuracy = instance_nn.eval_model(validate_descriptors_np, validate_labels_np)
+    print('Local accuracy: {0}'.format(accuracy))
+
+    # Evaluating
+    eval_descriptors = list()
     for list_actions in eval_list_actions:
         words = get_bow_descriptors(list_actions)
-        descriptors.append(words)
+        eval_descriptors.append(words)
 
-    eval_descriptors_np = np.asanyarray(descriptors, dtype=np.float)
+    eval_descriptors_np = np.asanyarray(eval_descriptors, dtype=np.float)
     eval_labels_np = np.asanyarray(eval_labels, dtype=np.int)
 
     accuracy = instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
+    print('Real accuracy: {0}'.format(accuracy))
 
     # Apply classification for each item!
     for item in list_classes:
