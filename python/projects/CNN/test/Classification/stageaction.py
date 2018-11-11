@@ -5,6 +5,7 @@ import json
 import numpy as np
 from classnn import ClassNN
 from classcnn import ClassCNN
+from classhmm import ClassHMM
 from enum import Enum
 import cv2
 
@@ -20,6 +21,7 @@ class Option(Enum):
 cnn_image_width = 28
 cnn_image_height = 28
 depth = 1
+hidden_states = 4
 
 list_classes = [
     {
@@ -110,50 +112,64 @@ def load_and_train(option: Option):
         training_labels = list()
         eval_list_poses = list()
         eval_labels = list()
+        found = False
 
         for index, item in enumerate(list_classes_classify):
             folders = item['folderPaths']
             label = index
 
-            list_list_poses = list()
             for folder in folders:
+                # Check data by folder
+                # Keeps separate training and validation
+                list_list_poses = list()
+                list_files = list()
+
                 for root, _, files in os.walk(folder):
                     for file in files:
                         full_path = os.path.join(root, file)
-                        extension = ClassUtils.get_filename_extension(full_path)
 
-                        if extension == '.json' and '_{0}_partialdata'.format(base_data) in full_path:
-                            with open(full_path, 'r') as f:
-                                json_txt = f.read()
+                        if '_{0}_partialdata'.format(base_data) in full_path:
+                            list_files.append(full_path)
+                            found = True
 
-                            json_data = json.loads(json_txt)
+                # Sort by name to ensure same order
+                list_files.sort()
 
-                            for pose_action in json_data['listPosesAction']:
-                                # Take all pose action
-                                if not pose_action['moving']:
-                                    list_list_poses.append(pose_action['listPoses'])
+                # Use static seed to ensure same order
+                random.Random(seed).shuffle(list_files)
 
-            total_samples = len(list_list_poses)
-            if total_samples == 0:
-                # There is no data for base_cls - Breaking
-                break
+                for full_path in list_files:
+                    with open(full_path, 'r') as f:
+                        json_txt = f.read()
 
-            total_train = int(total_samples * 80 / 100)
-            print('Total samples: {0}'.format(total_samples))
+                    json_data = json.loads(json_txt)
 
-            # Shuffle samples
-            random.Random(seed).shuffle(list_list_poses)
+                    for pose_action in json_data['listPosesAction']:
+                        # Take all pose action
+                        if not pose_action['moving']:
+                            list_list_poses.append(pose_action['listPoses'])
 
-            num_file = 0
-            for list_poses in list_list_poses:
-                if num_file < total_train:
-                    training_list_poses.append(list_poses)
-                    training_labels.append(label)
-                else:
-                    eval_list_poses.append(list_poses)
-                    eval_labels.append(label)
+                total_samples = len(list_list_poses)
 
-                num_file += 1
+                total_train = int(total_samples * 80 / 100)
+                print('Total samples: {0}'.format(total_samples))
+
+                num_file = 0
+                for list_poses in list_list_poses:
+                    if num_file < total_train:
+                        training_list_poses.append(list_poses)
+                        training_labels.append(label)
+                    else:
+                        eval_list_poses.append(list_poses)
+                        eval_labels.append(label)
+
+                    num_file += 1
+
+        if not found:
+            # There is no data for base_cls - Breaking!
+            break
+
+        print('Total train: {0}'.format(len(training_list_poses)))
 
         if option == Option.NN:
             print('Train nn for base data: {0}'.format(base_data))
@@ -163,9 +179,11 @@ def load_and_train(option: Option):
             train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
         elif option == Option.HMM:
             print('Train hmm for base data: {0}'.format(base_data))
-            train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels)
+            train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
         else:
             raise Exception('Option not recognized')
+
+        base_data += 1
 
 
 def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option):
@@ -218,7 +236,7 @@ def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_lab
     instance_model.train_model(training_descriptors_np, training_labels_np)
 
     print('Model trained - Evaluating')
-    instance_model.eval_model(eval_descriptors_np, eval_labels_np)
+    accuracy = instance_model.eval_model(eval_descriptors_np, eval_labels_np)
 
     # Evaluating all elements
     for folder_info in list_classes:
@@ -227,7 +245,7 @@ def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_lab
             for file in files:
                 full_path = os.path.join(root, file)
                 if '_partialdata' in full_path:
-                    process_file_nn_cnn(full_path, instance_model, option)
+                    process_file_action(full_path, option, instance_model=instance_model, accuracy=accuracy)
 
 
 def get_nn_descriptor(list_poses):
@@ -267,7 +285,7 @@ def get_cnn_descriptor(list_poses):
     return image_res
 
 
-def process_file_nn_cnn(full_path, instance_model, option: Option):
+def process_file_action(full_path, option: Option, instance_model=None, hmm_models=None, accuracy=0):
     with open(full_path, 'r') as f:
         json_txt = f.read()
 
@@ -283,10 +301,13 @@ def process_file_nn_cnn(full_path, instance_model, option: Option):
 
         # Descriptor not moving
         if not moving:
-            descriptor = get_nn_descriptor(list_poses)
-            descriptor_nn = np.asanyarray(descriptor, dtype=np.float)
+            if option == Option.NN or option == Option.CNN:
+                descriptor = get_nn_descriptor(list_poses)
+                descriptor_nn = np.asanyarray(descriptor, dtype=np.float)
+                res = instance_model.predict_model_fast(descriptor_nn)
+            else:
+                res = predict_data(hmm_models, list_poses)
 
-            res = instance_model.predict_model_fast(descriptor_nn)
             cls = int(res['classes'])
 
             if in_zone:
@@ -338,7 +359,8 @@ def process_file_nn_cnn(full_path, instance_model, option: Option):
         list_actions.append(data_action)
 
     json_data = {
-        'listActions': list_actions
+        'listActions': list_actions,
+        'accuracy': accuracy
     }
 
     # Saving full action info into list
@@ -351,8 +373,126 @@ def process_file_nn_cnn(full_path, instance_model, option: Option):
     # Done!
 
 
-def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels):
+def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels, option):
     print('Train HMM')
+    # Iterating approach
+    iterations = 10
+    selected_models = list()
+
+    max_precision = 0
+    for _ in range(iterations):
+        cls = 0
+        hmm_models = list()
+        while True:
+            list_data = list()
+
+            for index in range(len(training_list_poses)):
+                if training_labels[index] == cls:
+                    list_poses = training_list_poses[index]
+
+                    list_cls = list()
+                    for pose in list_poses:
+                        list_cls.append(pose['class'])
+
+                    list_data.append(list_cls)
+
+            if len(list_data) == 0:
+                break
+            else:
+                model_path = os.path.join(ClassHMM.model_hmm_folder_action, 'model_{0}.pkl'.format(cls))
+                hmm_model = ClassHMM(model_path)
+
+                print('Training model {0}'.format(cls))
+                hmm_model.train(list_data, hidden_states)
+                hmm_models.append(hmm_model)
+                cls += 1
+
+        # Eval Markov
+        precision = eval_markov(eval_list_poses, eval_labels, hmm_models)
+
+        if precision > max_precision:
+            selected_models.clear()
+            for model in hmm_models:
+                selected_models.append(model)
+
+            max_precision = precision
+
+    # Saving selected models
+    hmm_models = selected_models
+    for model in selected_models:
+        model.save_model()
+
+    precision = eval_markov(eval_list_poses, eval_labels, hmm_models)
+    print('Precision: {0}'.format(precision))
+    print('Max precision: {0}'.format(max_precision))
+
+    # Evaluating current actions
+    for folder_info in list_classes:
+        folder = folder_info['folderPath']
+        for root, _, files in os.walk(folder):
+            for file in files:
+                full_path = os.path.join(root, file)
+                if '_partialdata' in full_path:
+                    process_file_action(full_path, option, hmm_models=hmm_models, accuracy=max_precision)
+
+
+def eval_markov(eval_list_poses, eval_labels, hmm_models):
+    print('Init eval markov')
+
+    count = 0
+
+    # Getting confusion matrix
+    print('Getting confusion matrix')
+    classes = len(list_classes_classify)
+
+    confusion_np = np.zeros((classes, classes))
+    for index in range(len(eval_labels)):
+        list_poses = eval_list_poses[index]
+        label = eval_labels[index]
+
+        res = predict_data(hmm_models, list_poses)
+        predict = res['classes']
+
+        if label == predict:
+            count += 1
+
+        confusion_np[label, predict] += 1
+
+    precision = count / len(eval_labels)
+
+    print('Precision: {0}'.format(precision))
+    print('Confusion Matrix')
+    print(confusion_np)
+    return precision
+
+
+def predict_data(hmm_models, list_poses):
+    data = list()
+    for pose in list_poses:
+        data.append(pose['class'])
+
+    max_score = 0
+    cls = 0
+    first = True
+    for index, model in enumerate(hmm_models):
+        score = model.get_score(data)
+        if first:
+            max_score = score
+            cls = index
+            first = False
+        else:
+            if score > max_score:
+                max_score = score
+                cls = index
+
+    # Getting probabilities matrix
+    probabilities = [0 for _ in range(len(hmm_models))]
+    probabilities[cls] += 1
+
+    return {
+        'classes': cls,
+        'probabilities': np.asanyarray(probabilities, dtype=np.float)
+    }
 
 
 if __name__ == '__main__':

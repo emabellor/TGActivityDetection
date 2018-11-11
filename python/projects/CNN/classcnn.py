@@ -92,6 +92,7 @@ class ClassCNN:
         print(eval_results)
 
         print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_results))
+        return eval_results['accuracy']
 
     def predict_model(self, predict_data: np.ndarray):
         # Check dimensionality first

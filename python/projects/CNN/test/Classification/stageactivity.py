@@ -5,6 +5,13 @@ import random
 from classhmm import ClassHMM
 import numpy as np
 from classnn import ClassNN
+from enum import Enum
+
+
+class Option(Enum):
+    HMM = 1
+    BOW = 2
+
 
 seed = 1234
 
@@ -42,59 +49,96 @@ list_classes = [
 
 def main():
     print('Initializing main function')
-
-    # Loading elements into list
-    training_list_actions = list()
-    training_labels = list()
-    eval_list_actions = list()
-    eval_labels = list()
-
-    for index, item in enumerate(list_classes):
-        folder = item['folderPath']
-        label = index
-
-        list_list_actions = list()
-        for root, _, files in os.walk(folder):
-            for file in files:
-                full_path = os.path.join(root, file)
-                extension = ClassUtils.get_filename_extension(full_path)
-
-                if extension == '.json' and '_actiondata' in full_path:
-                    with open(full_path, 'r') as f:
-                        json_txt = f.read()
-
-                    json_data = json.loads(json_txt)
-                    list_list_actions.append(json_data['listActions'])
-
-        total_samples = len(list_list_actions)
-        total_train = int(total_samples * 80 / 100)
-        print('Total samples: {0}'.format(total_samples))
-
-        # Shuffle samples
-        random.Random(seed).shuffle(list_list_actions)
-
-        num_file = 0
-        for list_actions in list_list_actions:
-            if num_file < total_train:
-                training_list_actions.append(list_actions)
-                training_labels.append(label)
-            else:
-                eval_list_actions.append(list_actions)
-                eval_labels.append(label)
-
-            num_file += 1
-
     res = input('Press 1 to train HMM - 2 to train bow: ')
 
     if res == '1':
-        train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels)
+        load_and_train(Option.HMM)
     elif res == '2':
-        train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels)
+        load_and_train(Option.BOW)
     else:
-        raise Exception('Raise Exception!')
+        raise Exception('Option not recognized: {0}'.format(res))
 
 
-def train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels):
+def load_and_train(option: Option):
+    base_data_1 = 1
+    base_data_2 = 1
+
+    found_1 = False
+    while True:
+        # Loading elements into list
+        training_list_actions = list()
+        training_labels = list()
+        eval_list_actions = list()
+        eval_labels = list()
+        found_2 = False
+
+        for index, item in enumerate(list_classes):
+            folder = item['folderPath']
+            label = index
+
+            list_list_actions = list()
+            list_files = list()
+            for root, _, files in os.walk(folder):
+                for file in files:
+                    full_path = os.path.join(root, file)
+
+                    if '{0}_{1}_actiondata'.format(base_data_1, base_data_2) in full_path:
+                        list_files.append(full_path)
+                        found_1 = True
+                        found_2 = True
+
+            # Avoid mis_order
+            list_files.sort()
+            # Use static seed to ensure same order
+            random.Random(seed).shuffle(list_files)
+
+            for full_path in list_files:
+                with open(full_path, 'r') as f:
+                    json_txt = f.read()
+
+                json_data = json.loads(json_txt)
+                list_list_actions.append(json_data['listActions'])
+
+            total_samples = len(list_list_actions)
+            total_train = int(total_samples * 80 / 100)
+            print('Total samples: {0}'.format(total_samples))
+
+            num_file = 0
+            for list_actions in list_list_actions:
+                if num_file < total_train:
+                    training_list_actions.append(list_actions)
+                    training_labels.append(label)
+                else:
+                    eval_list_actions.append(list_actions)
+                    eval_labels.append(label)
+
+                num_file += 1
+
+        if not found_2:
+            if found_1:
+                base_data_1 += 1
+                base_data_2 = 1
+                found_1 = False
+                continue
+            else:
+                # There is no data for base_cls - Breaking!
+                break
+
+        print('Processing data for {0}_{1}'.format(base_data_1, base_data_2))
+        if option == Option.HMM:
+            train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels, option)
+        elif option == Option.BOW:
+            train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels, option)
+        else:
+            raise Exception('Raise Exception!')
+
+        base_data_2 += 1
+
+    print('No found more elements!')
+    print('Done!')
+
+
+def train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels, option: Option):
     print('Initializing training HMM')
     hmm_models = list()
     hidden_states = 7
@@ -185,22 +229,13 @@ def predict_data(list_poses, hmm_models):
     return cls
 
 
-def train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels):
+def train_bow(training_list_actions, training_labels, eval_list_actions, eval_labels, option: Option):
     print('Training BoW')
-
-    action = list()
 
     # Generating BoW descriptors
     descriptors = list()
     for list_actions in training_list_actions:
-        words = [0 for _ in range(12)]
-        for action in list_actions:
-            count = action['count']
-            cls = action['class']
-
-            for _ in range(count):
-                words[cls] += 1
-
+        words = get_bow_descriptors(list_actions)
         descriptors.append(words)
 
     descriptors_np = np.asanyarray(descriptors, dtype=np.float)
@@ -215,21 +250,59 @@ def train_bow(training_list_actions, training_labels, eval_list_actions, eval_la
     # Evaluating model
     descriptors = list()
     for list_actions in eval_list_actions:
-        words = [0 for _ in range(12)]
-        for action in list_actions:
-            count = action['count']
-            cls = action['class']
-
-            for _ in range(count):
-                words[cls] += 1
-
+        words = get_bow_descriptors(list_actions)
         descriptors.append(words)
 
     eval_descriptors_np = np.asanyarray(descriptors, dtype=np.float)
     eval_labels_np = np.asanyarray(eval_labels, dtype=np.int)
 
-    instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
+    accuracy = instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
+
+    # Apply classification for each item!
+    for item in list_classes:
+        folder = item['folderPath']
+        for root, _, files in os.walk(folder):
+            for file in files:
+                full_path = os.path.join(root, file)
+
+                if '_actiondata' in full_path:
+                    with open(full_path, 'r') as f:
+                        json_txt = f.read()
+
+                    json_data = json.loads(json_txt)
+
+                    list_actions = json_data['listActions']
+                    words = get_bow_descriptors(list_actions)
+
+                    res = instance_nn.predict_model_fast(words)
+
+                    obj_to_write = {
+                        'class': int(res['classes']),
+                        'probabilities': res['probabilities'].tolist(),
+                        'modelAccuracy': accuracy
+                    }
+
+                    obj_txt = json.dumps(obj_to_write)
+                    new_filename = ClassUtils.change_ext_training(full_path, '{0}_ensembledata'.format(option.value))
+
+                    with open(new_filename, 'w') as f:
+                        f.write(obj_txt)
+
+                    # Done Writing
+
     print('Done!')
+
+
+def get_bow_descriptors(list_actions):
+    words = [0 for _ in range(12)]
+    for action in list_actions:
+        count = action['count']
+        cls = action['class']
+
+        for _ in range(count):
+            words[cls] += 1
+
+    return np.asanyarray(words, np.float)
 
 
 if __name__ == '__main__':
