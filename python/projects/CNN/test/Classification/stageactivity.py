@@ -282,7 +282,7 @@ def train_bow(training_list_actions, training_labels, eval_list_actions, eval_la
                         'modelAccuracy': accuracy
                     }
 
-                    obj_txt = json.dumps(obj_to_write)
+                    obj_txt = json.dumps(obj_to_write, indent=4)
                     new_filename = ClassUtils.change_ext_training(full_path, '{0}_ensembledata'.format(option.value))
 
                     with open(new_filename, 'w') as f:

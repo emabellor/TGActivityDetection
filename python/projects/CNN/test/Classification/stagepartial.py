@@ -72,7 +72,8 @@ def do_cleaning():
             for file in files:
                 full_path = os.path.join(root, file)
 
-                if '_posedata' in full_path or '_actiondata' in full_path or '_partialdata' in full_path:
+                if '_posedata' in full_path or '_actiondata' in full_path \
+                        or '_partialdata' in full_path or '_ensembledata' in full_path:
                     os.remove(full_path)
 
     print('Done do cleaning!')

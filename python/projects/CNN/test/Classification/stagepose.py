@@ -81,8 +81,9 @@ def calculate_poses(option: Option, nn_classifier: ClassNN, svm_classifier: Clas
         for root, _, files in os.walk(folder):
             for file in files:
                 full_path = os.path.join(root, file)
+                ext = ClassUtils.get_filename_extension(full_path)
 
-                if '_rawdata' in file:
+                if '_rawdata' in file and ext == '.json':
                     print('Processing file: {0}'.format(full_path))
 
                     with open(full_path, 'r') as f:
@@ -122,7 +123,6 @@ def calculate_poses(option: Option, nn_classifier: ClassNN, svm_classifier: Clas
                     # Done
 
     print('Done processing elements')
-
 
 
 if __name__ == '__main__':

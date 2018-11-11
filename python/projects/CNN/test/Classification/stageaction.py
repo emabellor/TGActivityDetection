@@ -110,8 +110,16 @@ def load_and_train(option: Option):
         # Loading elements into list
         training_list_poses = list()
         training_labels = list()
+
         eval_list_poses = list()
         eval_labels = list()
+
+        training_list_cls = list()
+        training_cls_labels = list()
+
+        validate_list_cls = list()
+        validate_cls_labels = list()
+
         found = False
 
         for index, item in enumerate(list_classes_classify):
@@ -137,31 +145,44 @@ def load_and_train(option: Option):
 
                 # Use static seed to ensure same order
                 random.Random(seed).shuffle(list_files)
+                total_samples = len(list_files)
 
+                total_train = int(total_samples * 80 / 100)
+                total_train_cls = int(total_samples * 60 / 100)
+
+                print('Total samples: {0}'.format(total_samples))
+
+                num_file = 0
                 for full_path in list_files:
                     with open(full_path, 'r') as f:
                         json_txt = f.read()
 
                     json_data = json.loads(json_txt)
 
+                    list_list_poses = list()
                     for pose_action in json_data['listPosesAction']:
                         # Take all pose action
                         if not pose_action['moving']:
                             list_list_poses.append(pose_action['listPoses'])
 
-                total_samples = len(list_list_poses)
-
-                total_train = int(total_samples * 80 / 100)
-                print('Total samples: {0}'.format(total_samples))
-
-                num_file = 0
-                for list_poses in list_list_poses:
                     if num_file < total_train:
-                        training_list_poses.append(list_poses)
-                        training_labels.append(label)
+                        for list_poses in list_list_poses:
+                            training_list_poses.append(list_poses)
+                            training_labels.append(label)
+
+                        # Add cls list for markov models
+                        if num_file < total_train_cls:
+                            for list_poses in list_list_poses:
+                                training_list_cls.append(list_poses)
+                                training_cls_labels.append(label)
+                        else:
+                            for list_poses in list_list_poses:
+                                validate_list_cls.append(list_poses)
+                                validate_cls_labels.append(label)
                     else:
-                        eval_list_poses.append(list_poses)
-                        eval_labels.append(label)
+                        for list_poses in list_list_poses:
+                            eval_list_poses.append(list_poses)
+                            eval_labels.append(label)
 
                     num_file += 1
 
@@ -170,6 +191,9 @@ def load_and_train(option: Option):
             break
 
         print('Total train: {0}'.format(len(training_list_poses)))
+        print('Total eval: {0}'.format(len(eval_list_poses)))
+        print('Total train cls: {0}'.format(len(training_list_cls)))
+        print('Total validate cls: {0}'.format(len(validate_list_cls)))
 
         if option == Option.NN:
             print('Train nn for base data: {0}'.format(base_data))
@@ -179,7 +203,10 @@ def load_and_train(option: Option):
             train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
         elif option == Option.HMM:
             print('Train hmm for base data: {0}'.format(base_data))
-            train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
+            train_hmm(training_list_cls, training_cls_labels,
+                      validate_list_cls, validate_cls_labels,
+                      eval_list_poses, eval_labels,
+                      option)
         else:
             raise Exception('Option not recognized')
 
@@ -373,7 +400,11 @@ def process_file_action(full_path, option: Option, instance_model=None, hmm_mode
     # Done!
 
 
-def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels, option):
+def train_hmm(training_list_cls, training_cls_labels,
+              validate_list_cls, validate_cls_labels,
+              eval_list_poses, eval_labels,
+              option):
+
     print('Train HMM')
     # Iterating approach
     iterations = 10
@@ -386,9 +417,9 @@ def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels
         while True:
             list_data = list()
 
-            for index in range(len(training_list_poses)):
-                if training_labels[index] == cls:
-                    list_poses = training_list_poses[index]
+            for index in range(len(training_list_cls)):
+                if training_cls_labels[index] == cls:
+                    list_poses = training_list_cls[index]
 
                     list_cls = list()
                     for pose in list_poses:
@@ -408,7 +439,7 @@ def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels
                 cls += 1
 
         # Eval Markov
-        precision = eval_markov(eval_list_poses, eval_labels, hmm_models)
+        precision = eval_markov(validate_list_cls, validate_cls_labels, hmm_models)
 
         if precision > max_precision:
             selected_models.clear()
@@ -422,9 +453,11 @@ def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels
     for model in selected_models:
         model.save_model()
 
-    precision = eval_markov(eval_list_poses, eval_labels, hmm_models)
+    precision = eval_markov(validate_list_cls, validate_cls_labels, hmm_models)
+    real_precision = eval_markov(eval_list_poses, eval_labels, hmm_models)
     print('Precision: {0}'.format(precision))
     print('Max precision: {0}'.format(max_precision))
+    print('Real Precision: {0}'.format(real_precision))
 
     # Evaluating current actions
     for folder_info in list_classes:
@@ -433,7 +466,7 @@ def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels
             for file in files:
                 full_path = os.path.join(root, file)
                 if '_partialdata' in full_path:
-                    process_file_action(full_path, option, hmm_models=hmm_models, accuracy=max_precision)
+                    process_file_action(full_path, option, hmm_models=hmm_models, accuracy=real_precision)
 
 
 def eval_markov(eval_list_poses, eval_labels, hmm_models):
