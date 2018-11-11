@@ -3,6 +3,13 @@ from classnn import ClassNN
 import os
 import json
 import numpy as np
+from enum import Enum
+from classsvm import ClassSVM
+
+
+class Option(Enum):
+    NN = 1
+    SVM = 2
 
 
 list_classes = [
@@ -40,23 +47,33 @@ list_classes = [
 def main():
     print('Initializing Main Function')
 
-    res = input('Press 1 to train using NN: ')
-    if res == '1':
-        calculate_poses_nn()
-
-
-def calculate_poses_nn():
-    print('Calculating poses using nn')
-
+    # Initialize classifier instance - NN
     classes_number = 10
     hidden_number = 60
     learning_rate = 0.04
-
-    # Initialize classifier instance
     nn_classifier = ClassNN(model_dir=ClassNN.model_dir_pose,
                             classes=classes_number,
                             hidden_number=hidden_number,
                             learning_rate=learning_rate)
+
+    # Initialize classifier instance - SVM
+    svm_classifier = ClassSVM(ClassSVM.path_model_pose)
+
+    res = input('Press 1 to train using NN - 2 to train using SVM - 3 to train all: ')
+    if res == '1':
+        calculate_poses(Option.NN, nn_classifier, svm_classifier)
+    elif res == '2':
+        calculate_poses(Option.SVM, nn_classifier, svm_classifier)
+    elif res == '3':
+        # Train all
+        calculate_poses(Option.NN, nn_classifier, svm_classifier)
+        calculate_poses(Option.SVM, nn_classifier, svm_classifier)
+    else:
+        raise Exception('Option not recognized: {0}'.format(res))
+
+
+def calculate_poses(option: Option, nn_classifier: ClassNN, svm_classifier: ClassSVM):
+    print('Calculating poses using nn')
 
     # Recalculate all poses and get confidence
     for classInfo in list_classes:
@@ -86,14 +103,19 @@ def calculate_poses_nn():
 
                         # Convert to numpy
                         list_desc_np = np.asanyarray(list_desc, np.float)
-                        result = nn_classifier.predict_model_fast(list_desc_np)
+
+                        if option == Option.NN:
+                            result = nn_classifier.predict_model_fast(list_desc_np)
+                        else:
+                            result = svm_classifier.predict_model(list_desc_np)
 
                         pose['class'] = int(result['classes'])
                         pose['probabilities'] = result['probabilities'].tolist()
 
                     # Writing again into file
                     file_txt = json.dumps(file_json, indent=4)
-                    new_full_path = ClassUtils.change_ext_training(full_path, 'posedata')
+                    new_full_path = ClassUtils.change_ext_training(full_path,
+                                                                   '{0}_posedata'.format(option.value))
 
                     with open(new_full_path, 'w') as f:
                         f.write(file_txt)
@@ -101,6 +123,7 @@ def calculate_poses_nn():
                     # Done
 
     print('Done processing elements')
+
 
 
 if __name__ == '__main__':

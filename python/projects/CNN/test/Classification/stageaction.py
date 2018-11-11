@@ -4,8 +4,22 @@ import random
 import json
 import numpy as np
 from classnn import ClassNN
+from classcnn import ClassCNN
+from enum import Enum
+import cv2
 
 seed = 1234
+
+
+class Option(Enum):
+    NN = 1
+    CNN = 2
+    HMM = 3
+
+
+cnn_image_width = 28
+cnn_image_height = 28
+depth = 1
 
 list_classes = [
     {
@@ -71,69 +85,105 @@ list_classes_classify = [
 def main():
     print('Initializing main function')
 
-    # Loading elements into list
-    training_list_poses = list()
-    training_labels = list()
-    eval_list_poses = list()
-    eval_labels = list()
-
-    for index, item in enumerate(list_classes_classify):
-        folders = item['folderPaths']
-        label = index
-
-        list_list_poses = list()
-        for folder in folders:
-            for root, _, files in os.walk(folder):
-                for file in files:
-                    full_path = os.path.join(root, file)
-                    extension = ClassUtils.get_filename_extension(full_path)
-
-                    if extension == '.json' and '_partialdata' in full_path:
-                        with open(full_path, 'r') as f:
-                            json_txt = f.read()
-
-                        json_data = json.loads(json_txt)
-
-                        for pose_action in json_data['listPosesAction']:
-                            # Take all pose action
-                            if not pose_action['moving']:
-                                list_list_poses.append(pose_action['listPoses'])
-
-        total_samples = len(list_list_poses)
-        total_train = int(total_samples * 80 / 100)
-        print('Total samples: {0}'.format(total_samples))
-
-        # Shuffle samples
-        random.Random(seed).shuffle(list_list_poses)
-
-        num_file = 0
-        for list_poses in list_list_poses:
-            if num_file < total_train:
-                training_list_poses.append(list_poses)
-                training_labels.append(label)
-            else:
-                eval_list_poses.append(list_poses)
-                eval_labels.append(label)
-
-            num_file += 1
-
-    res = input('Press 1 to train NN: ')
-
+    res = input('Press 1 to train NN - 2 to train CNN - 3 to train HMM - 4 to Train All: ')
     if res == '1':
-        train_nn(training_list_poses, training_labels, eval_list_poses, eval_labels)
+        load_and_train(Option.NN)
+    elif res == '2':
+        load_and_train(Option.CNN)
+    elif res == '3':
+        load_and_train(Option.HMM)
+    elif res == '4':
+        load_and_train(Option.NN)
+        load_and_train(Option.CNN)
+        load_and_train(Option.HMM)
     else:
         raise Exception('Option not recognized: {0}'.format(res))
 
 
-def train_nn(training_list_poses, training_labels, eval_list_poses, eval_labels):
+def load_and_train(option: Option):
+    # Dataset is in form of _x_partialdata.json
+    # Iterate until there is no more elems
+    base_data = 1
+    while True:
+        # Loading elements into list
+        training_list_poses = list()
+        training_labels = list()
+        eval_list_poses = list()
+        eval_labels = list()
+
+        for index, item in enumerate(list_classes_classify):
+            folders = item['folderPaths']
+            label = index
+
+            list_list_poses = list()
+            for folder in folders:
+                for root, _, files in os.walk(folder):
+                    for file in files:
+                        full_path = os.path.join(root, file)
+                        extension = ClassUtils.get_filename_extension(full_path)
+
+                        if extension == '.json' and '_{0}_partialdata'.format(base_data) in full_path:
+                            with open(full_path, 'r') as f:
+                                json_txt = f.read()
+
+                            json_data = json.loads(json_txt)
+
+                            for pose_action in json_data['listPosesAction']:
+                                # Take all pose action
+                                if not pose_action['moving']:
+                                    list_list_poses.append(pose_action['listPoses'])
+
+            total_samples = len(list_list_poses)
+            if total_samples == 0:
+                # There is no data for base_cls - Breaking
+                break
+
+            total_train = int(total_samples * 80 / 100)
+            print('Total samples: {0}'.format(total_samples))
+
+            # Shuffle samples
+            random.Random(seed).shuffle(list_list_poses)
+
+            num_file = 0
+            for list_poses in list_list_poses:
+                if num_file < total_train:
+                    training_list_poses.append(list_poses)
+                    training_labels.append(label)
+                else:
+                    eval_list_poses.append(list_poses)
+                    eval_labels.append(label)
+
+                num_file += 1
+
+        if option == Option.NN:
+            print('Train nn for base data: {0}'.format(base_data))
+            train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
+        elif option == Option.CNN:
+            print('Train cnn for base data: {0}'.format(base_data))
+            train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
+        elif option == Option.HMM:
+            print('Train hmm for base data: {0}'.format(base_data))
+            train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels)
+        else:
+            raise Exception('Option not recognized')
+
+
+def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option):
     print('Init NN Training')
+
+    if option != Option.NN and option != option.CNN:
+        raise Exception('Option not valid: {0}'.format(option))
 
     # Training labels
     list_descriptors = list()
     for index_pose in range(len(training_list_poses)):
         list_poses = training_list_poses[index_pose]
 
-        descriptor = get_nn_descriptor(list_poses)
+        if option == Option.NN:
+            descriptor = get_nn_descriptor(list_poses)
+        else:
+            descriptor = get_cnn_descriptor(list_poses)
+
         list_descriptors.append(descriptor)
 
     training_descriptors_np = np.asanyarray(list_descriptors, dtype=np.float)
@@ -143,7 +193,12 @@ def train_nn(training_list_poses, training_labels, eval_list_poses, eval_labels)
     list_descriptors = list()
     for index_pose in range(len(eval_list_poses)):
         list_poses = eval_list_poses[index_pose]
-        descriptor = get_nn_descriptor(list_poses)
+
+        if option == Option.NN:
+            descriptor = get_nn_descriptor(list_poses)
+        else:
+            descriptor = get_cnn_descriptor(list_poses)
+
         list_descriptors.append(descriptor)
 
     eval_descriptors_np = np.asanyarray(list_descriptors, dtype=np.float)
@@ -151,14 +206,19 @@ def train_nn(training_list_poses, training_labels, eval_list_poses, eval_labels)
 
     # Initializing training instance
     classes = len(list_classes_classify)
-    hidden_number = 50
-    instance_nn = ClassNN(ClassNN.model_dir_action, classes, hidden_number)
+
+    if option == Option.NN:
+        hidden_number = 50
+        instance_model = ClassNN(ClassNN.model_dir_action, classes, hidden_number)
+    else:
+        instance_model = ClassCNN(ClassCNN.model_dir_action, classes, cnn_image_height, cnn_image_height,
+                                  depth, batch_size=32)
 
     print('Training nn model')
-    instance_nn.train_model(training_descriptors_np, training_labels_np)
+    instance_model.train_model(training_descriptors_np, training_labels_np)
 
     print('Model trained - Evaluating')
-    instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
+    instance_model.eval_model(eval_descriptors_np, eval_labels_np)
 
     # Evaluating all elements
     for folder_info in list_classes:
@@ -167,7 +227,7 @@ def train_nn(training_list_poses, training_labels, eval_list_poses, eval_labels)
             for file in files:
                 full_path = os.path.join(root, file)
                 if '_partialdata' in full_path:
-                    process_file_nn(full_path, instance_nn)
+                    process_file_nn_cnn(full_path, instance_model, option)
 
 
 def get_nn_descriptor(list_poses):
@@ -184,7 +244,30 @@ def get_nn_descriptor(list_poses):
     return descriptor
 
 
-def process_file_nn(full_path, instance_nn: ClassNN):
+def get_cnn_descriptor(list_poses):
+    samples_size = 28
+
+    max_confidence = 1
+
+    image_height = cnn_image_height
+    image_width = len(list_poses)
+
+    image_np = np.zeros((image_height, image_width), dtype=np.uint8)
+
+    for index_size in range(samples_size):
+        index_pose = int(len(list_poses) * index_size / samples_size)
+        pose = list_poses[index_pose]
+
+        for index, value in enumerate(pose['probabilities']):
+            pixel_value = int(value * 255 / max_confidence)
+            image_np[index, index_pose] = pixel_value
+
+    image_res = cv2.resize(image_np, (cnn_image_height, cnn_image_width))
+    image_res = np.resize(image_res, (cnn_image_height, cnn_image_width, 1))
+    return image_res
+
+
+def process_file_nn_cnn(full_path, instance_model, option: Option):
     with open(full_path, 'r') as f:
         json_txt = f.read()
 
@@ -203,7 +286,7 @@ def process_file_nn(full_path, instance_nn: ClassNN):
             descriptor = get_nn_descriptor(list_poses)
             descriptor_nn = np.asanyarray(descriptor, dtype=np.float)
 
-            res = instance_nn.predict_model_fast(descriptor_nn)
+            res = instance_model.predict_model_fast(descriptor_nn)
             cls = int(res['classes'])
 
             if in_zone:
@@ -260,12 +343,16 @@ def process_file_nn(full_path, instance_nn: ClassNN):
 
     # Saving full action info into list
     json_txt = json.dumps(json_data, indent=4)
-    new_file_path = ClassUtils.change_ext_training(full_path, 'actiondata')
+    new_file_path = ClassUtils.change_ext_training(full_path, '{0}_actiondata'.format(option.value))
 
     with open(new_file_path, 'w') as f:
         f.write(json_txt)
 
     # Done!
+
+
+def train_hmm(training_list_poses, training_labels, eval_list_poses, eval_labels):
+    print('Train HMM')
 
 
 if __name__ == '__main__':

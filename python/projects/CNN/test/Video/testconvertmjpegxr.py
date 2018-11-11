@@ -512,7 +512,7 @@ def check_files():
         date_video = process_date_video(key, date_video)
         play_factor = process_play_factor(key, play_factor)
         process_save_image(key, date_video, frame_info_list)
-        process_is_playing(key, forward_until_person)
+        process_is_playing(key)
         process_forward(key)
 
     cv2.destroyAllWindows()
@@ -932,7 +932,7 @@ def debug_reid():
 
         play_factor = process_play_factor(key, play_factor)
         process_save_image(key, date_video, frame_info_list)
-        process_is_playing(key, forward_until_person)
+        process_is_playing(key)
         process_forward(key)
         process_init_save_activity(key)
         process_finish_save_activity(key)

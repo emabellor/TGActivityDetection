@@ -1,3 +1,10 @@
+"""
+Deprecated
+Only used to train one vs all method
+For training SVM - Use:
+posesvmtraining
+"""
+
 from classloaddescriptors import ClassLoadDescriptors, EnumDesc
 import numpy as np
 import time

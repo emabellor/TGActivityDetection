@@ -34,8 +34,6 @@ class ClassLoadDescriptors:
         ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 7),
         ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 8),
         ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 9),
-        # ('/home/mauricio/Pictures/PosesNew/Chat_Left', 0.05, 8),
-        # ('/home/mauricio/Pictures/PosesNew/Chat_Right', 0.05, 9),
     ]
 
     seed = 1234
