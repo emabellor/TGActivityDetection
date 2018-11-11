@@ -49,11 +49,14 @@ list_classes = [
 
 def main():
     print('Initializing main function')
-    res = input('Press 1 to train HMM - 2 to train bow: ')
+    res = input('Press 1 to train HMM - 2 to train bow - 3 to train all: ')
 
     if res == '1':
         load_and_train(Option.HMM)
     elif res == '2':
+        load_and_train(Option.BOW)
+    elif res == '3':
+        load_and_train(Option.HMM)
         load_and_train(Option.BOW)
     else:
         raise Exception('Option not recognized: {0}'.format(res))
@@ -143,7 +146,10 @@ def load_and_train(option: Option):
 
         print('Processing data for {0}_{1}'.format(base_data_1, base_data_2))
         if option == Option.HMM:
-            train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels, option)
+            train_hmm(training_list_actions, training_labels,
+                      validate_list_cls, validate_cls_labels,
+                      eval_list_actions, eval_labels,
+                      option)
         elif option == Option.BOW:
             train_bow(training_list_cls, training_cls_labels,
                       validate_list_cls, validate_cls_labels,
@@ -158,43 +164,78 @@ def load_and_train(option: Option):
     print('Done!')
 
 
-def train_hmm(training_list_actions, training_labels, eval_list_actions, eval_labels, option: Option):
+def train_hmm(training_list_cls, training_cls_labels,
+              validate_list_cls, validate_cls_labels,
+              eval_list_actions, eval_labels,
+              option: Option):
     print('Initializing training HMM')
     hmm_models = list()
-    hidden_states = 7
+    hidden_states = 6
 
-    for index in range(len(list_classes)):
-        # Creating model for each class
-        model_path = os.path.join(ClassHMM.model_hmm_folder_activities, 'model{0}.pkl'.format(index))
-        hmm_model = ClassHMM(model_path)
+    # Training using iterations
+    iterations = 10
+    selected_models = list()
 
-        # Get sequences for class:
-        list_data = list()
-        for idx_label, label in enumerate(training_labels):
-            if label == index:
-                list_actions = training_list_actions[idx_label]
+    max_precision = 0
 
-                seq = list()
-                for action in list_actions:
-                    count = action['count']
-                    cls = action['class']
+    for _ in range(iterations):
+        hmm_models.clear()
+        for index in range(len(list_classes)):
+            # Creating model for each class
+            model_path = os.path.join(ClassHMM.model_hmm_folder_activities, 'model{0}.pkl'.format(index))
+            hmm_model = ClassHMM(model_path)
 
-                    if cls == 8 or cls == 9 or cls == 10 or cls == 11:
-                        # Ignore time
-                        seq.append(cls)
-                    else:
-                        # Add time information
-                        for _ in range(count):
-                            seq.append(cls)
+            # Get sequences for class:
+            list_data = list()
+            for idx_label, label in enumerate(training_cls_labels):
+                if label == index:
+                    list_actions = training_list_cls[idx_label]
+                    seq = get_seq_hmm(list_actions)
+                    list_data.append(seq)
 
-                list_data.append(seq)
+            print('Training model {0}'.format(index))
+            hmm_model.train(list_data, hidden_states)
+            hmm_models.append(hmm_model)
 
-        print('Training model {0}'.format(index))
-        hmm_model.train(list_data, hidden_states)
-        hmm_models.append(hmm_model)
+        res = eval_markov(validate_list_cls, validate_cls_labels, hmm_models)
+        print('Precision for model. {0}'.format(res['precision']))
 
-    print('Evaluating Markov!')
-    eval_markov(eval_list_actions, eval_labels, hmm_models)
+        if res['precision'] > max_precision:
+            selected_models.clear()
+            for model in hmm_models:
+                selected_models.append(model)
+
+            max_precision = res['precision']
+
+    # Saving selected models
+    hmm_models = selected_models
+    for model in selected_models:
+        model.save_model()
+
+    precision = eval_markov(validate_list_cls, validate_cls_labels, hmm_models)['precision']
+    real_precision = eval_markov(eval_list_actions, eval_labels, hmm_models)['precision']
+
+    print('Precision: {0}'.format(precision))
+    print('Max precision: {0}'.format(max_precision))
+    print('Real Precision: {0}'.format(real_precision))
+
+    apply_classifier(option, hmm_models=hmm_models, accuracy=precision, real_accuracy=real_precision)
+
+
+def get_seq_hmm(list_actions):
+    seq = list()
+    for action in list_actions:
+        count = action['count']
+        cls = action['class']
+
+        if cls == 8 or cls == 9 or cls == 10 or cls == 11:
+            # Ignore time
+            seq.append(cls)
+        else:
+            # Add time information
+            for _ in range(count):
+                seq.append(cls)
+    return seq
 
 
 def eval_markov(eval_list_actions, eval_labels, hmm_models):
@@ -210,33 +251,31 @@ def eval_markov(eval_list_actions, eval_labels, hmm_models):
     for index in range(len(eval_labels)):
         list_actions = eval_list_actions[index]
 
-        seq = list()
-        for action in list_actions:
-            seq.append(action['class'])
-
         label = eval_labels[index]
+        predict = predict_data_hmm(list_actions, hmm_models)
 
-        predict = predict_data(seq, hmm_models)
-
-        if label == predict:
+        cls = predict['classes']
+        if label == cls:
             count += 1
 
-        confusion_np[label, predict] += 1
+        confusion_np[label, cls] += 1
 
     precision = count / len(eval_labels)
 
-    print('Precision: {0}'.format(precision))
-    print('Confussion Matrix')
-    print(confusion_np)
-    return precision
+    return {
+        'precision': precision,
+        'confusion': confusion_np
+    }
 
 
-def predict_data(list_poses, hmm_models):
+def predict_data_hmm(list_actions, hmm_models):
     max_score = 0
     cls = 0
     first = True
+
+    seq = get_seq_hmm(list_actions)
     for index, model in enumerate(hmm_models):
-        score = model.get_score(list_poses)
+        score = model.get_score(seq)
         if first:
             max_score = score
             cls = index
@@ -246,7 +285,14 @@ def predict_data(list_poses, hmm_models):
                 max_score = score
                 cls = index
 
-    return cls
+    # Getting probabilities matrix
+    probabilities = [0 for _ in range(len(hmm_models))]
+    probabilities[cls] += 1
+
+    return {
+        'classes': cls,
+        'probabilities': np.asanyarray(probabilities, dtype=np.float)
+    }
 
 
 def train_bow(training_list_cls, training_cls_labels,
@@ -291,9 +337,13 @@ def train_bow(training_list_cls, training_cls_labels,
     eval_descriptors_np = np.asanyarray(eval_descriptors, dtype=np.float)
     eval_labels_np = np.asanyarray(eval_labels, dtype=np.int)
 
-    accuracy = instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
-    print('Real accuracy: {0}'.format(accuracy))
+    real_accuracy = instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
+    print('Real accuracy: {0}'.format(real_accuracy))
 
+    apply_classifier(option, instance_nn=instance_nn, accuracy=accuracy, real_accuracy=real_accuracy)
+
+
+def apply_classifier(option: Option, instance_nn=None, hmm_models=None, accuracy=0, real_accuracy=0):
     # Apply classification for each item!
     for item in list_classes:
         folder = item['folderPath']
@@ -306,16 +356,19 @@ def train_bow(training_list_cls, training_cls_labels,
                         json_txt = f.read()
 
                     json_data = json.loads(json_txt)
-
                     list_actions = json_data['listActions']
-                    words = get_bow_descriptors(list_actions)
 
-                    res = instance_nn.predict_model_fast(words)
+                    if option == Option.HMM:
+                        res = predict_data_hmm(list_actions, hmm_models)
+                    else:
+                        words = get_bow_descriptors(list_actions)
+                        res = instance_nn.predict_model_fast(words)
 
                     obj_to_write = {
                         'class': int(res['classes']),
                         'probabilities': res['probabilities'].tolist(),
-                        'modelAccuracy': accuracy
+                        'modelAccuracy': accuracy,
+                        'realAccuracy': real_accuracy
                     }
 
                     obj_txt = json.dumps(obj_to_write, indent=4)
