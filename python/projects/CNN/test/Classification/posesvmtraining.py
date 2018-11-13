@@ -32,7 +32,7 @@ def train_svm_pose():
     print('Training SVM pose')
 
     # Loading elements
-    results = ClassLoadDescriptors.load_pose_descriptors(EnumDesc.ALL)
+    results = ClassLoadDescriptors.load_pose_descriptors(EnumDesc.POINTS)
 
     training_data_np = results['trainingData']
     training_labels_np = results['trainingLabels']

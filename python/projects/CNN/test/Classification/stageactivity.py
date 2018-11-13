@@ -149,12 +149,12 @@ def load_and_train(option: Option):
             train_hmm(training_list_actions, training_labels,
                       validate_list_cls, validate_cls_labels,
                       eval_list_actions, eval_labels,
-                      option)
+                      option, base_data_1, base_data_2)
         elif option == Option.BOW:
             train_bow(training_list_cls, training_cls_labels,
                       validate_list_cls, validate_cls_labels,
                       eval_list_actions, eval_labels,
-                      option)
+                      option, base_data_1, base_data_2)
         else:
             raise Exception('Raise Exception!')
 
@@ -167,13 +167,13 @@ def load_and_train(option: Option):
 def train_hmm(training_list_cls, training_cls_labels,
               validate_list_cls, validate_cls_labels,
               eval_list_actions, eval_labels,
-              option: Option):
+              option: Option, base_data_1, base_data_2):
     print('Initializing training HMM')
     hmm_models = list()
     hidden_states = 6
 
     # Training using iterations
-    iterations = 10
+    iterations = 5
     selected_models = list()
 
     max_precision = 0
@@ -219,7 +219,8 @@ def train_hmm(training_list_cls, training_cls_labels,
     print('Max precision: {0}'.format(max_precision))
     print('Real Precision: {0}'.format(real_precision))
 
-    apply_classifier(option, hmm_models=hmm_models, accuracy=precision, real_accuracy=real_precision)
+    apply_classifier(option, base_data_1, base_data_2,
+                     hmm_models=hmm_models, accuracy=precision, real_accuracy=real_precision)
 
 
 def get_seq_hmm(list_actions):
@@ -298,7 +299,7 @@ def predict_data_hmm(list_actions, hmm_models):
 def train_bow(training_list_cls, training_cls_labels,
               validate_list_cls, validate_cls_labels,
               eval_list_actions, eval_labels,
-              option: Option):
+              option: Option, base_data_1, base_data_2):
     print('Training BoW')
 
     # Generating BoW descriptors
@@ -340,10 +341,26 @@ def train_bow(training_list_cls, training_cls_labels,
     real_accuracy = instance_nn.eval_model(eval_descriptors_np, eval_labels_np)
     print('Real accuracy: {0}'.format(real_accuracy))
 
-    apply_classifier(option, instance_nn=instance_nn, accuracy=accuracy, real_accuracy=real_accuracy)
+    classes_number = len(list_classes)
+    confusion_np = np.zeros((classes_number, classes_number))
+    for i in range(eval_descriptors_np.shape[0]):
+        data = eval_descriptors_np[i]
+        expected = eval_labels_np[i]
+        obtained = instance_nn.predict_model_fast(data)
+        class_prediction = obtained['classes']
+        print('Class: {0}'.format(class_prediction))
+
+        confusion_np[expected, class_prediction] += 1
+
+    print('Confusion matrix')
+    print(confusion_np)
+
+    apply_classifier(option, base_data_1, base_data_2,
+                     instance_nn=instance_nn, accuracy=accuracy, real_accuracy=real_accuracy)
 
 
-def apply_classifier(option: Option, instance_nn=None, hmm_models=None, accuracy=0, real_accuracy=0):
+def apply_classifier(option: Option, base_data_1, base_data_2,
+                     instance_nn=None, hmm_models=None, accuracy=0, real_accuracy=0):
     # Apply classification for each item!
     for item in list_classes:
         folder = item['folderPath']
@@ -351,7 +368,7 @@ def apply_classifier(option: Option, instance_nn=None, hmm_models=None, accuracy
             for file in files:
                 full_path = os.path.join(root, file)
 
-                if '_actiondata' in full_path:
+                if '{0}_{1}_actiondata'.format(base_data_1, base_data_2) in full_path:
                     with open(full_path, 'r') as f:
                         json_txt = f.read()
 

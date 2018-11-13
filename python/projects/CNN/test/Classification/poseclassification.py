@@ -58,8 +58,8 @@ def main():
         res = input('Press 1 to classify images using angles, '
                     '2 to classify images using angles transformed, '
                     '3 to classify images using points, '
-                    '4 to classify images using all points, '
-                    '5 to classify images using all points transformed: ')
+                    '4 to classify images using all points and angles, '
+                    '5 to classify images using all points and angles transformed: ')
 
         if res == '1' or res == '2':
             # No pose variant descriptors
@@ -72,7 +72,9 @@ def main():
                 ('/home/mauricio/Pictures/PosesNew/Left', 0.05, 2),
                 ('/home/mauricio/Pictures/PosesNew/Right', 0.05, 2),
                 ('/home/mauricio/Pictures/PosesNew/Squat_Left', 0.05, 3),
-                ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 3)
+                ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 3),
+                ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 4),
+                ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 4)
             ]
 
             if res == '1':
@@ -189,7 +191,7 @@ def classify_images(list_folder_data: list, type_desc: EnumDesc):
                 break
 
     hidden_number = 60
-    learning_rate = 0.04
+    learning_rate = 0.005
     steps = 20000
 
     # Initialize classifier instance

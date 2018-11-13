@@ -14,8 +14,8 @@ seed = 1234
 
 class Option(Enum):
     NN = 1
-    CNN = 2
-    HMM = 3
+    HMM = 2
+    CNN = 3
 
 
 cnn_image_width = 28
@@ -87,16 +87,19 @@ list_classes_classify = [
 def main():
     print('Initializing main function')
 
-    res = input('Press 1 to train NN - 2 to train CNN - 3 to train HMM - 4 to Train All: ')
+    res = input('Press 1 to train NN - 2 to train HMM - 3 to train CNN - 4 to Train All - 5 to train all without CNN ')
     if res == '1':
         load_and_train(Option.NN)
     elif res == '2':
-        load_and_train(Option.CNN)
-    elif res == '3':
         load_and_train(Option.HMM)
+    elif res == '3':
+        load_and_train(Option.CNN)
     elif res == '4':
         load_and_train(Option.NN)
         load_and_train(Option.CNN)
+        load_and_train(Option.HMM)
+    elif res == '5':
+        load_and_train(Option.NN)
         load_and_train(Option.HMM)
     else:
         raise Exception('Option not recognized: {0}'.format(res))
@@ -197,23 +200,29 @@ def load_and_train(option: Option):
 
         if option == Option.NN:
             print('Train nn for base data: {0}'.format(base_data))
-            train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
+            train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option, base_data)
         elif option == Option.CNN:
             print('Train cnn for base data: {0}'.format(base_data))
-            train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option)
+            train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option, base_data)
         elif option == Option.HMM:
             print('Train hmm for base data: {0}'.format(base_data))
             train_hmm(training_list_cls, training_cls_labels,
                       validate_list_cls, validate_cls_labels,
                       eval_list_poses, eval_labels,
-                      option)
+                      option, base_data)
         else:
             raise Exception('Option not recognized')
 
+        # CNN option only does one!
+        if option == Option.CNN:
+            break
+
         base_data += 1
 
+    print('Done!')
 
-def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option):
+
+def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_labels, option, base_data):
     print('Init NN Training')
 
     if option != Option.NN and option != option.CNN:
@@ -227,7 +236,7 @@ def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_lab
         if option == Option.NN:
             descriptor = get_nn_descriptor(list_poses)
         else:
-            descriptor = get_cnn_descriptor(list_poses)
+            descriptor = get_cnn_descriptor_pos(list_poses)
 
         list_descriptors.append(descriptor)
 
@@ -242,7 +251,7 @@ def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_lab
         if option == Option.NN:
             descriptor = get_nn_descriptor(list_poses)
         else:
-            descriptor = get_cnn_descriptor(list_poses)
+            descriptor = get_cnn_descriptor_pos(list_poses)
 
         list_descriptors.append(descriptor)
 
@@ -257,7 +266,7 @@ def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_lab
         instance_model = ClassNN(ClassNN.model_dir_action, classes, hidden_number)
     else:
         instance_model = ClassCNN(ClassCNN.model_dir_action, classes, cnn_image_height, cnn_image_height,
-                                  depth, batch_size=32)
+                                  depth, batch_size=32, train_steps=15000)
 
     print('Training nn model')
     instance_model.train_model(training_descriptors_np, training_labels_np)
@@ -271,7 +280,7 @@ def train_nn_cnn(training_list_poses, training_labels, eval_list_poses, eval_lab
         for root, _, files in os.walk(folder):
             for file in files:
                 full_path = os.path.join(root, file)
-                if '_partialdata' in full_path:
+                if '_{0}_partialdata'.format(base_data) in full_path:
                     process_file_action(full_path, option, instance_model=instance_model, accuracy=accuracy)
 
 
@@ -289,6 +298,7 @@ def get_nn_descriptor(list_poses):
     return descriptor
 
 
+# Descriptor based on poses list
 def get_cnn_descriptor(list_poses):
     samples_size = 28
 
@@ -309,6 +319,90 @@ def get_cnn_descriptor(list_poses):
 
     image_res = cv2.resize(image_np, (cnn_image_height, cnn_image_width))
     image_res = np.resize(image_res, (cnn_image_height, cnn_image_width, 1))
+
+    """
+    # Only for debugging purposes
+    cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)
+    cv2.imshow('main_window', image_res)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    """
+
+    return image_res
+
+
+# Descriptor based on position list
+def get_cnn_descriptor_pos(list_poses):
+    # For now
+    # Only consider transformed points
+
+    min_x = 0
+    max_x = 0
+    min_y = 0
+    max_y = 0
+
+    first = True
+
+    for index, pose in enumerate(list_poses):
+        points = pose['transformedPoints']
+
+        for point in points:
+            if first:
+                min_x = point[0]
+                min_y = point[1]
+                max_x = min_x
+                max_y = min_y
+                first = False
+
+            if point[0] < min_x:
+                min_x = point[0]
+            if point[1] < min_y:
+                min_y = point[1]
+            if point[0] > max_x:
+                max_x = point[0]
+            if point[1] > max_y:
+                max_y = point[1]
+
+    # Last item - movement vector
+    # Total elements: 27
+    image_height = cnn_image_height
+    image_width = len(list_poses)
+
+    image_np = np.zeros((image_height, image_width), dtype=np.uint8)
+
+    for index_pose, pose in enumerate(list_poses):
+        points = pose['transformedPoints']
+        vector_points = ClassUtils.get_flat_list(points)
+
+        for index, item in enumerate(vector_points):
+            if index % 2 == 0:
+                min_value = min_x
+                max_value = max_x
+            else:
+                min_value = min_y
+                max_value = max_y
+
+            delta = max_value - min_value
+            if delta != 0:
+                pixel_value = int((item - min_value) * 255 / delta)
+            else:
+                pixel_value = 0
+
+            image_np[index, index_pose] = pixel_value
+
+    # Resizing image
+    image_res = cv2.resize(image_np, (cnn_image_height, cnn_image_width))
+    image_res = np.resize(image_res, (cnn_image_height, cnn_image_width, 1))
+
+    """
+    # Only for debugging purposes
+    cv2.namedWindow('main_window', cv2.WINDOW_AUTOSIZE)
+    cv2.imshow('main_window', image_res)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    """
+
+    # Return created image
     return image_res
 
 
@@ -328,8 +422,12 @@ def process_file_action(full_path, option: Option, instance_model=None, hmm_mode
 
         # Descriptor not moving
         if not moving:
-            if option == Option.NN or option == Option.CNN:
+            if option == Option.NN:
                 descriptor = get_nn_descriptor(list_poses)
+                descriptor_nn = np.asanyarray(descriptor, dtype=np.float)
+                res = instance_model.predict_model_fast(descriptor_nn)
+            elif option == Option.CNN:
+                descriptor = get_cnn_descriptor_pos(list_poses)
                 descriptor_nn = np.asanyarray(descriptor, dtype=np.float)
                 res = instance_model.predict_model_fast(descriptor_nn)
             else:
@@ -403,7 +501,7 @@ def process_file_action(full_path, option: Option, instance_model=None, hmm_mode
 def train_hmm(training_list_cls, training_cls_labels,
               validate_list_cls, validate_cls_labels,
               eval_list_poses, eval_labels,
-              option):
+              option, base_data):
 
     print('Train HMM')
     # Iterating approach
@@ -465,7 +563,7 @@ def train_hmm(training_list_cls, training_cls_labels,
         for root, _, files in os.walk(folder):
             for file in files:
                 full_path = os.path.join(root, file)
-                if '_partialdata' in full_path:
+                if '_{0}_partialdata'.format(base_data) in full_path:
                     process_file_action(full_path, option, hmm_models=hmm_models, accuracy=real_precision)
 
 

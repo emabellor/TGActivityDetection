@@ -98,7 +98,6 @@ def calculate_poses(option: Option, nn_classifier: ClassNN, svm_classifier: Clas
 
                         # Using transformed points and angles
                         list_desc = list()
-                        list_desc += angles
                         list_desc += ClassUtils.get_flat_list(transformed_points)
 
                         # Convert to numpy

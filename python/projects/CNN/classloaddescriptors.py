@@ -36,6 +36,19 @@ class ClassLoadDescriptors:
         ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 9),
     ]
 
+    list_folder_data_angles = [
+        ('/home/mauricio/Pictures/PosesNew/Back', 0.05, 0),
+        ('/home/mauricio/Pictures/PosesNew/Hands_Left', 0.05, 1),
+        ('/home/mauricio/Pictures/PosesNew/Hands_Right', 0.05, 1),
+        ('/home/mauricio/Pictures/PosesNew/Front', 0.05, 0),
+        ('/home/mauricio/Pictures/PosesNew/Left', 0.05, 2),
+        ('/home/mauricio/Pictures/PosesNew/Right', 0.05, 2),
+        ('/home/mauricio/Pictures/PosesNew/Squat_Left', 0.05, 3),
+        ('/home/mauricio/Pictures/PosesNew/Squat_Right', 0.05, 3),
+        ('/home/mauricio/Pictures/PosesNew/Extend_Left', 0.05, 4),
+        ('/home/mauricio/Pictures/PosesNew/Extend_Right', 0.05, 4)
+    ]
+
     seed = 1234
 
     @classmethod
@@ -65,18 +78,23 @@ class ClassLoadDescriptors:
 
         classes_number = 0
 
+        if type_desc == EnumDesc.ANGLES or type_desc == EnumDesc.ANGLES_TRANSFORMED:
+            data_folder = cls.list_folder_data_angles
+        else:
+            data_folder = cls.list_folder_data
+
         cont = True
         while cont:
             cont = False
 
-            for folder_data in cls.list_folder_data:
+            for folder_data in data_folder:
                 if folder_data[2] == classes_number:
                     classes_number += 1
                     cont = True
                     break
 
         # Iterate folder
-        for index, item in enumerate(cls.list_folder_data):
+        for index, item in enumerate(data_folder):
             folder = item[0]
             min_score = item[1]
             label = item[2]
@@ -126,16 +144,18 @@ class ClassLoadDescriptors:
         # Convert data to numpy array
         training_data_np = np.asanyarray(training_data, dtype=np.float)
         training_labels_np = np.asanyarray(training_labels, dtype=int)
+        print(training_labels_np)
 
         eval_data_np = np.asanyarray(eval_data, dtype=np.float)
         eval_labels_np = np.asanyarray(eval_labels, dtype=int)
+        print(eval_labels_np)
 
         training_files_np = np.asanyarray(training_files, dtype=np.str)
         eval_files_np = np.asanyarray(eval_files, dtype=np.str)
 
         # Getting label_names
         label_names = []
-        for folder, _, label in cls.list_folder_data:
+        for folder, _, label in data_folder:
             names = folder.split('/')
             label_name = names[-1]
 
